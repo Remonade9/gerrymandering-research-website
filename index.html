@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detecting Gerrymandering with MCMC — Lucas</title>
+  <meta name="description" content="Research on detecting partisan gerrymandering using Markov Chain Monte Carlo simulation and the limits of geometric compactness metrics." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <p class="eyebrow">Applied Mathematics &amp; GIS Research</p>
+      <h1>Detecting Gerrymandering with Markov Chain Monte Carlo</h1>
+      <p class="subtitle">
+        Using statistical simulation to test whether electoral maps are partisan
+        outliers &mdash; and interrogating why shape alone cannot tell us.
+      </p>
+      <p class="byline">
+        Lucas &middot; Mentored by Prof. Bo Zhao, Humanistic GIS Lab, University of Washington
+      </p>
+    </div>
+  </header>
+
+  <nav class="site-nav">
+    <div class="container">
+      <a href="#abstract">Abstract</a>
+      <a href="#background">Background</a>
+      <a href="#methods">Methods</a>
+      <a href="#maps">Maps &amp; Results</a>
+      <a href="#findings">Findings</a>
+      <a href="#references">References</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <section id="abstract">
+      <h2>Abstract</h2>
+      <p>
+        <em>Placeholder.</em> This project investigates partisan gerrymandering
+        at the state legislative level using Markov Chain Monte Carlo (MCMC)
+        simulation to generate thousands of legally valid alternative district
+        maps. By comparing an enacted map's partisan distribution against this
+        ensemble, we can quantify whether a map is a statistical outlier. The
+        project also examines why geometric compactness metrics (e.g.
+        Polsby&ndash;Popper scores) are unreliable indicators on their own.
+      </p>
+    </section>
+
+    <section id="background">
+      <h2>Background</h2>
+      <p><em>Placeholder.</em> What gerrymandering is, why it matters for local
+        communities, and why state legislative maps deserve scrutiny.</p>
+      <ul>
+        <li>Single-member, winner-take-all districts as the environment where gerrymandering thrives.</li>
+        <li>Why state legislative gerrymandering can be more severe than congressional.</li>
+        <li>Washington's bipartisan redistricting commission as a natural comparison case.</li>
+      </ul>
+    </section>
+
+    <section id="methods">
+      <h2>Methods</h2>
+      <p><em>Placeholder.</em> Data sources, the MCMC ensemble approach, and the
+        compactness metrics evaluated.</p>
+      <ul>
+        <li>Precinct-level vote data and district population targets.</li>
+        <li>MCMC generation of valid alternative maps.</li>
+        <li>Partisan distribution comparison (percentile of the enacted map).</li>
+        <li>Critique of Polsby&ndash;Popper and perimeter-to-area ratios.</li>
+      </ul>
+    </section>
+
+    <section id="maps">
+      <h2>Maps &amp; Results</h2>
+      <p><em>Placeholder.</em> Visualizations will go here &mdash; enacted maps,
+        ensemble distributions, and outlier analysis.</p>
+      <div class="placeholder-figure">Figure placeholder</div>
+    </section>
+
+    <section id="findings">
+      <h2>Findings</h2>
+      <p><em>Placeholder.</em> Key results and what they mean for the broader
+        question of how we detect and define unfair maps.</p>
+    </section>
+
+    <section id="references">
+      <h2>References</h2>
+      <p>See the working <a href="https://github.com/">bibliography</a> in the research repository.</p>
+      <ol>
+        <li>Zhao, B. (2026). <em>Seven Seats, Five Maps.</em> HGIS Lab, Friday Harbor Column, Article 017.</li>
+      </ol>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; <span id="year"></span> Lucas. Research website &mdash; work in progress.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+.vscode/
+
+# Dependencies / build output (if a framework is added later)
+node_modules/
+dist/
+build/
+.cache/
