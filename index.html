@@ -6,6 +6,14 @@
   <title>Detecting Gerrymandering with MCMC — Lucas</title>
   <meta name="description" content="Research on detecting partisan gerrymandering using Markov Chain Monte Carlo simulation and the limits of geometric compactness metrics." />
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <style>
+    #map { width: 100%; height: 600px; border: 1px solid #ccc; border-radius: 6px; }
+    .map-toggles { margin: 0.75rem 0; display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: 0.95rem; }
+    .map-toggles label { display: inline-flex; align-items: center; gap: 0.35rem; cursor: pointer; }
+    .map-note { font-size: 0.85rem; color: #666; }
+  </style>
 </head>
 <body>
   <header class="site-header">
@@ -72,9 +80,16 @@
 
     <section id="maps">
       <h2>Maps &amp; Results</h2>
-      <p><em>Placeholder.</em> Visualizations will go here &mdash; enacted maps,
-        ensemble distributions, and outlier analysis.</p>
-      <div class="placeholder-figure">Figure placeholder</div>
+      <p>Washington's enacted districts overlaid on the state's water bodies and
+        county boundaries. Several districts hug coastlines and lakes &mdash;
+        irregular shapes driven by geography, not partisan intent.</p>
+      <div class="map-toggles">
+        <label><input type="checkbox" id="toggle-districts" checked /> Districts</label>
+        <label><input type="checkbox" id="toggle-counties" checked /> Counties</label>
+        <label><input type="checkbox" id="toggle-water" checked /> Water</label>
+      </div>
+      <div id="map"></div>
+      <p class="map-note">Data: WA Redistricting Commission, WA DNR, US Census. Drag to pan, scroll to zoom.</p>
     </section>
 
     <section id="findings">
@@ -100,6 +115,70 @@
 
   <script>
     document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+
+  <script>
+    // Blank-style map (no external basemap) centered on Washington.
+    const map = new maplibregl.Map({
+      container: "map",
+      style: {
+        version: 8,
+        sources: {},
+        layers: [
+          { id: "background", type: "background", paint: { "background-color": "#f4f1ea" } }
+        ]
+      },
+      center: [-120.5, 47.4],
+      zoom: 6
+    });
+    map.addControl(new maplibregl.NavigationControl(), "top-right");
+
+    // Load one GeoJSON file as a source + layer; warn (don't crash) if it's missing.
+    async function addGeoJSONLayer({ url, sourceId, layer }) {
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(res.status + " " + res.statusText);
+        map.addSource(sourceId, { type: "geojson", data: await res.json() });
+        map.addLayer(layer);
+      } catch (err) {
+        console.warn("Could not load " + url + " — " + err.message +
+          " (put a web-ready GeoJSON in data/ and serve over http).");
+      }
+    }
+
+    map.on("load", async () => {
+      // Draw order: water at the bottom, counties next, districts on top.
+      await addGeoJSONLayer({
+        url: "data/water.geojson", sourceId: "water",
+        layer: { id: "water-fill", type: "fill", source: "water",
+          paint: { "fill-color": "#9ec9e8", "fill-opacity": 0.8 } }
+      });
+      await addGeoJSONLayer({
+        url: "data/counties.geojson", sourceId: "counties",
+        layer: { id: "counties-line", type: "line", source: "counties",
+          paint: { "line-color": "#b0a99f", "line-width": 0.8 } }
+      });
+      await addGeoJSONLayer({
+        url: "data/districts.geojson", sourceId: "districts",
+        layer: { id: "districts-line", type: "line", source: "districts",
+          paint: { "line-color": "#33404d", "line-width": 2 } }
+      });
+
+      // Checkbox visibility toggles (only act if the layer actually loaded).
+      const toggles = {
+        "toggle-districts": "districts-line",
+        "toggle-counties": "counties-line",
+        "toggle-water": "water-fill"
+      };
+      for (const [boxId, layerId] of Object.entries(toggles)) {
+        const box = document.getElementById(boxId);
+        box.addEventListener("change", () => {
+          if (map.getLayer(layerId)) {
+            map.setLayoutProperty(layerId, "visibility", box.checked ? "visible" : "none");
+          }
+        });
+      }
+    });
   </script>
 </body>
 </html>
