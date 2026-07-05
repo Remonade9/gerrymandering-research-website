@@ -1,0 +1,425 @@
+{
+ "2018": {
+  "flows": [
+   {
+    "from": "Woodridge",
+    "to": "Wilburton",
+    "kids": 712,
+    "pop": 5575,
+    "area_km2": 7.11,
+    "from_xy": [
+     -122.172876,
+     47.591957
+    ],
+    "to_xy": [
+     -122.176426,
+     47.610678
+    ]
+   },
+   {
+    "from": "Enatai",
+    "to": "Wilburton",
+    "kids": 337,
+    "pop": 7442,
+    "area_km2": 1.1,
+    "from_xy": [
+     -122.198366,
+     47.589144
+    ],
+    "to_xy": [
+     -122.176426,
+     47.610678
+    ]
+   },
+   {
+    "from": "Lake Hills",
+    "to": "Phantom Lake",
+    "kids": 182,
+    "pop": 1289,
+    "area_km2": 0.64,
+    "from_xy": [
+     -122.148762,
+     47.601098
+    ],
+    "to_xy": [
+     -122.1256,
+     47.6003
+    ]
+   },
+   {
+    "from": "Clyde Hill",
+    "to": "Wilburton",
+    "kids": 157,
+    "pop": 3094,
+    "area_km2": 0.29,
+    "from_xy": [
+     -122.211361,
+     47.63083
+    ],
+    "to_xy": [
+     -122.176426,
+     47.610678
+    ]
+   }
+  ],
+  "totals": {
+   "pieces": 4,
+   "area_km2": 9.14,
+   "kids": 1388,
+   "pop": 17400
+  },
+  "program_moves": [],
+  "ghosts": [],
+  "opened": [
+   {
+    "name": "Wilburton Elementary",
+    "xy": [
+     -122.176426,
+     47.610678
+    ],
+    "note": "Opened fall 2018 to relieve elementary overcrowding; its zone was assembled from neighboring zones."
+   }
+  ]
+ },
+ "2023": {
+  "flows": [
+   {
+    "from": "Eastgate",
+    "to": "Spiritridge",
+    "kids": 1629,
+    "pop": 8730,
+    "area_km2": 5.11,
+    "from_xy": [
+     -122.1376,
+     47.5701
+    ],
+    "to_xy": [
+     -122.12011,
+     47.58799
+    ]
+   },
+   {
+    "from": "Wilburton",
+    "to": "Enatai",
+    "kids": 820,
+    "pop": 10734,
+    "area_km2": 4.9,
+    "from_xy": [
+     -122.176426,
+     47.610678
+    ],
+    "to_xy": [
+     -122.19869,
+     47.58944
+    ]
+   },
+   {
+    "from": "Wilburton",
+    "to": "Clyde Hill",
+    "kids": 386,
+    "pop": 5377,
+    "area_km2": 3.6,
+    "from_xy": [
+     -122.176426,
+     47.610678
+    ],
+    "to_xy": [
+     -122.21124,
+     47.63088
+    ]
+   }
+  ],
+  "totals": {
+   "pieces": 3,
+   "area_km2": 13.61,
+   "kids": 2835,
+   "pop": 24841
+  },
+  "program_moves": [
+   {
+    "label": "Advanced Learning",
+    "from": "Spiritridge",
+    "to": "Woodridge",
+    "from_xy": [
+     -122.1201,
+     47.5879
+    ],
+    "to_xy": [
+     -122.17285,
+     47.59216
+    ]
+   },
+   {
+    "label": "Olympic program",
+    "from": "Eastgate",
+    "to": "Spiritridge",
+    "from_xy": [
+     -122.1376,
+     47.5701
+    ],
+    "to_xy": [
+     -122.12011,
+     47.58799
+    ]
+   },
+   {
+    "label": "Jing Mei (school moved)",
+    "from": "Jing Mei",
+    "to": "Wilburton building",
+    "from_xy": [
+     -122.170921,
+     47.55217
+    ],
+    "to_xy": [
+     -122.176426,
+     47.610678
+    ]
+   }
+  ],
+  "ghosts": [
+   {
+    "name": "Wilburton Elementary",
+    "xy": [
+     -122.176426,
+     47.610678
+    ],
+    "note": "Opened fall 2018; closed June 2023 in the consolidation. Final-year enrollment 350 (2022-23), capacity 650. The building now houses Jing Mei Elementary."
+   },
+   {
+    "name": "Eastgate Elementary",
+    "xy": [
+     -122.1376,
+     47.5701
+    ],
+    "note": "Closed June 2023 in the consolidation. Final-year enrollment 316 (2022-23), capacity 529. Hosted the Olympic program, which moved to Spiritridge."
+   }
+  ]
+ },
+ "program_hosts": {
+  "b": {
+   "advanced_learning": [
+    {
+     "name": "Cherry Crest",
+     "xy": [
+      -122.1738,
+      47.6404
+     ]
+    },
+    {
+     "name": "Medina",
+     "xy": [
+      -122.2338,
+      47.6167
+     ]
+    },
+    {
+     "name": "Somerset",
+     "xy": [
+      -122.1518,
+      47.5632
+     ]
+    },
+    {
+     "name": "Spiritridge",
+     "xy": [
+      -122.1201,
+      47.5879
+     ]
+    }
+   ],
+   "language_immersion": [
+    {
+     "name": "Jing Mei",
+     "xy": [
+      -122.170921,
+      47.55217
+     ]
+    },
+    {
+     "name": "Puesta del Sol",
+     "xy": [
+      -122.1638,
+      47.5759
+     ]
+    },
+    {
+     "name": "Lake Hills",
+     "xy": [
+      -122.148762,
+      47.601098
+     ]
+    },
+    {
+     "name": "Sherwood Forest",
+     "xy": [
+      -122.1203,
+      47.6309
+     ]
+    },
+    {
+     "name": "Stevenson",
+     "xy": [
+      -122.150454,
+      47.618487
+     ]
+    }
+   ],
+   "special_education": [
+    {
+     "name": "Bennett",
+     "xy": [
+      -122.101963,
+      47.625
+     ]
+    },
+    {
+     "name": "Eastgate",
+     "xy": [
+      -122.1376,
+      47.5701
+     ]
+    },
+    {
+     "name": "Newport Heights",
+     "xy": [
+      -122.18044,
+      47.55569
+     ]
+    },
+    {
+     "name": "Sherwood Forest",
+     "xy": [
+      -122.1203,
+      47.6309
+     ]
+    },
+    {
+     "name": "Woodridge",
+     "xy": [
+      -122.1729,
+      47.592
+     ]
+    }
+   ]
+  },
+  "c": {
+   "advanced_learning": [
+    {
+     "name": "Cherry Crest",
+     "xy": [
+      -122.17426,
+      47.64044
+     ]
+    },
+    {
+     "name": "Medina",
+     "xy": [
+      -122.23397,
+      47.61676
+     ]
+    },
+    {
+     "name": "Somerset",
+     "xy": [
+      -122.15185,
+      47.5632
+     ]
+    },
+    {
+     "name": "Woodridge",
+     "xy": [
+      -122.17285,
+      47.59216
+     ]
+    }
+   ],
+   "language_immersion": [
+    {
+     "name": "Jing Mei",
+     "xy": [
+      -122.17631,
+      47.61104
+     ]
+    },
+    {
+     "name": "Puesta del Sol",
+     "xy": [
+      -122.13909,
+      47.61258
+     ]
+    },
+    {
+     "name": "Lake Hills",
+     "xy": [
+      -122.14899,
+      47.60122
+     ]
+    },
+    {
+     "name": "Sherwood Forest",
+     "xy": [
+      -122.12037,
+      47.63062
+     ]
+    },
+    {
+     "name": "Stevenson",
+     "xy": [
+      -122.15036,
+      47.61804
+     ]
+    },
+    {
+     "name": "Bennett",
+     "xy": [
+      -122.1019,
+      47.62458
+     ]
+    }
+   ],
+   "special_education": [
+    {
+     "name": "Bennett",
+     "xy": [
+      -122.1019,
+      47.62458
+     ]
+    },
+    {
+     "name": "Spiritridge",
+     "xy": [
+      -122.12011,
+      47.58799
+     ]
+    },
+    {
+     "name": "Newport Heights",
+     "xy": [
+      -122.18103,
+      47.55563
+     ]
+    },
+    {
+     "name": "Sherwood Forest",
+     "xy": [
+      -122.12037,
+      47.63062
+     ]
+    },
+    {
+     "name": "Woodridge",
+     "xy": [
+      -122.17285,
+      47.59216
+     ]
+    }
+   ]
+  }
+ },
+ "district_race": {
+  "w": 43.9,
+  "a": 40.2,
+  "h": 7.3,
+  "b": 2.6
+ }
+}

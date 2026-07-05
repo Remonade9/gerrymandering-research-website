@@ -1,21 +1,31 @@
 # Map data
 
-GeoJSON layers loaded by the map in `index.html`. The map fetches these files by
-name, so keep the filenames exactly as listed.
+Web-ready GeoJSON layers loaded by `index.html` (all EPSG:4326). The map fetches
+these by name, so keep the filenames exactly as listed.
 
-| File              | What it is                          | Source                         | Status |
-|-------------------|-------------------------------------|--------------------------------|--------|
-| `counties.geojson`| WA county boundaries (39 polygons)  | geo.wa.gov                     | ✅ in repo |
-| `districts.geojson`| Enacted 2022 districts (base layer)| WA Redistricting Commission    | ⬜ convert from shapefile |
-| `water.geojson`   | Water bodies (Puget Sound, lakes)   | WA DNR Hydrography             | ⬜ simplify before adding |
+> **Citations:** the complete, citation-ready inventory of every dataset the site uses
+> (source, vintage, pipeline) is in **`../../Main - Gerrymandering/Final_Data/DATA_SOURCES.md`** —
+> that file is the backbone of the future Methods & Sources tab. (This README's table below is
+> outdated; the build scripts now produce many more files than listed.)
 
-## Preparing files (use https://mapshaper.org)
+| File | What it is | Source |
+|------|------------|--------|
+| `bellevue_district.geojson` | Bellevue School District outline (1 polygon) | City of Bellevue Open Data |
+| `bellevue_elementary_zones.geojson` | 14 post-2023 elementary attendance zones (`name` + geometry) | City of Bellevue Open Data |
+| `bellevue_elementary_labels.geojson` | 1 point per zone, for school-name labels | derived (zone representative points) |
 
-- **Shapefiles → GeoJSON:** drag the unzipped `.shp` (+ `.dbf`, `.prj`, `.shx`)
-  into mapshaper, then Export → GeoJSON.
-- **Big files → simplify:** use the *Simplify* button (try 2–10%) before export so
-  the browser stays fast. The raw water file is ~200 MB and must be simplified
-  hard (aim for a few MB).
+## Regenerating
 
-Keep raw downloads and zips OUT of this folder — they live in
-`../../Main - Gerrymandering/Data/`. Only put web-ready GeoJSON here.
+```sh
+python data/build_bellevue_basics.py
+```
+
+Reads the authoritative boundaries from `../../Main - Gerrymandering/Final_Data/attendance zone boundaries/`,
+slims properties, rounds coordinates to 5 decimals (~1 m) to keep files small, title-cases the
+ALL-CAPS zone names, and writes the three files above.
+
+## Notes
+- Only web-ready GeoJSON belongs here. Raw downloads and the full data pipeline live under
+  `../../Main - Gerrymandering/Final_Data/`.
+- Older files from the project's earlier (WA redistricting / MCMC) direction were moved to
+  `../_archive/`. They are kept for reference and preserved in git history.

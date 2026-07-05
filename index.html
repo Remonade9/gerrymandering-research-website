@@ -3,181 +3,2118 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Detecting Gerrymandering with MCMC — Lucas</title>
-  <meta name="description" content="Research on detecting partisan gerrymandering using Markov Chain Monte Carlo simulation and the limits of geometric compactness metrics." />
-  <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
-  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
-  <style>
-    #map { width: 100%; height: 600px; border: 1px solid #ccc; border-radius: 6px; }
-    .map-toggles { margin: 0.75rem 0; display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: 0.95rem; }
-    .map-toggles label { display: inline-flex; align-items: center; gap: 0.35rem; cursor: pointer; }
-    .map-note { font-size: 0.85rem; color: #666; }
-  </style>
+  <title>The 2023 Bellevue Elementary Rezoning</title>
+  <meta name="description" content="An interactive map of how Bellevue School District's attendance-zone boundaries changed in 2023, and what changed with them." />
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=107" />
+  <link rel="stylesheet" href="styles.css?v=107" />
+  <script src="vendor/maplibre-gl.js?v=107"></script>
 </head>
 <body>
-  <header class="site-header">
-    <div class="container">
-      <p class="eyebrow">Applied Mathematics &amp; GIS Research</p>
-      <h1>Detecting Gerrymandering with Markov Chain Monte Carlo</h1>
-      <p class="subtitle">
-        Using statistical simulation to test whether electoral maps are partisan
-        outliers &mdash; and interrogating why shape alone cannot tell us.
-      </p>
-      <p class="byline">
-        Lucas &middot; Mentored by Prof. Bo Zhao, Humanistic GIS Lab, University of Washington
-      </p>
+  <div id="map"></div>
+
+  <!-- More-tabs launcher, top-left -->
+  <div class="tabs-launcher">
+    <button class="tabs-btn" id="tabs-btn" aria-expanded="false" aria-haspopup="true">More tabs <span class="tabs-caret">&#9662;</span></button>
+    <div class="tabs-menu" id="tabs-menu" hidden>
+      <a class="tabs-item tabs-link" href="changes.html">Boundary changes</a>
+      <a class="tabs-item tabs-link" href="analysis.html">Analysis</a>
+      <button class="tabs-item" data-tab="methods" disabled>Methods &amp; sources <span class="soon">coming soon</span></button>
+      <a class="tabs-item tabs-link" href="definitions.html">Definitions &amp; references</a>
     </div>
-  </header>
+  </div>
 
-  <nav class="site-nav">
-    <div class="container">
-      <a href="#abstract">Abstract</a>
-      <a href="#background">Background</a>
-      <a href="#methods">Methods</a>
-      <a href="#maps">Maps &amp; Results</a>
-      <a href="#findings">Findings</a>
-      <a href="#references">References</a>
+  <!-- Floating layers / legend card -->
+  <div class="panel panel-legend" id="legend-panel">
+    <button class="district-btn" id="district-btn">District overview</button>
+    <button class="district-btn" id="graph-btn">Graph mode</button>
+    <div class="level-tabs state-tabs" role="tablist" aria-label="District era">
+      <button class="level-tab state-tab" role="tab" aria-selected="false" data-state="a">pre-2018</button>
+      <button class="level-tab state-tab" role="tab" aria-selected="false" data-state="b">2018&ndash;2023</button>
+      <button class="level-tab state-tab is-active" role="tab" aria-selected="true" data-state="c">2023&ndash;now</button>
     </div>
-  </nav>
+    <div class="level-tabs" role="tablist" aria-label="School level">
+      <button class="level-tab is-active" role="tab" aria-selected="true" data-level="elementary">Elementary</button>
+      <button class="level-tab" role="tab" aria-selected="false" data-level="middle">Middle</button>
+      <button class="level-tab" role="tab" aria-selected="false" data-level="high">High</button>
+    </div>
+    <div class="legend-row">
+      <span class="swatch swatch-zone"></span>
+      <span id="zone-legend-label">Elementary attendance zone (2023&ndash;present)</span>
+    </div>
+    <div class="legend-row">
+      <span class="swatch swatch-district"></span>
+      <span>School district boundary</span>
+    </div>
+    <div class="legend-row">
+      <span class="pin-swatch pin-main"></span>
+      <span>Attendance-area school</span>
+    </div>
+    <div class="legend-row">
+      <span class="pin-swatch pin-choice"></span>
+      <span>Choice school</span>
+    </div>
+    <p class="map-hint">Click a zone for its metrics &middot; click a pin for the school</p>
 
-  <main class="container">
-    <section id="abstract">
-      <h2>Abstract</h2>
-      <p>
-        <em>Placeholder.</em> This project investigates partisan gerrymandering
-        at the state legislative level using Markov Chain Monte Carlo (MCMC)
-        simulation to generate thousands of legally valid alternative district
-        maps. By comparing an enacted map's partisan distribution against this
-        ensemble, we can quantify whether a map is a statistical outlier. The
-        project also examines why geometric compactness metrics (e.g.
-        Polsby&ndash;Popper scores) are unreliable indicators on their own.
-      </p>
-    </section>
+    <div class="choro-legend" id="choro-legend" hidden></div>
 
-    <section id="background">
-      <h2>Background</h2>
-      <p><em>Placeholder.</em> What gerrymandering is, why it matters for local
-        communities, and why state legislative maps deserve scrutiny.</p>
-      <ul>
-        <li>Single-member, winner-take-all districts as the environment where gerrymandering thrives.</li>
-        <li>Why state legislative gerrymandering can be more severe than congressional.</li>
-        <li>Washington's bipartisan redistricting commission as a natural comparison case.</li>
-      </ul>
-    </section>
-
-    <section id="methods">
-      <h2>Methods</h2>
-      <p><em>Placeholder.</em> Data sources, the MCMC ensemble approach, and the
-        compactness metrics evaluated.</p>
-      <ul>
-        <li>Precinct-level vote data and district population targets.</li>
-        <li>MCMC generation of valid alternative maps.</li>
-        <li>Partisan distribution comparison (percentile of the enacted map).</li>
-        <li>Critique of Polsby&ndash;Popper and perimeter-to-area ratios.</li>
-      </ul>
-    </section>
-
-    <section id="maps">
-      <h2>Maps &amp; Results</h2>
-      <p>Washington's enacted districts overlaid on the state's water bodies and
-        county boundaries. Several districts hug coastlines and lakes &mdash;
-        irregular shapes driven by geography, not partisan intent.</p>
-      <div class="map-toggles">
-        <label><input type="checkbox" id="toggle-districts" checked /> Districts</label>
-        <label><input type="checkbox" id="toggle-counties" checked /> Counties</label>
-        <label><input type="checkbox" id="toggle-water" checked /> Water</label>
+    <div class="panel-divider"></div>
+    <div class="basemap-controls">
+      <span class="control-label">Layers</span>
+      <label class="chk"><input type="checkbox" id="chk-neighborhoods" /> <span class="nbh-swatch"></span>Neighborhoods</label>
+      <label class="chk"><input type="checkbox" id="chk-racelayer" /> Racial composition (blocks)</label>
+      <div class="pin-mode race-opts" id="race-opts" hidden>
+        <button class="pin-mode-btn race-grp on" data-grp="w">White</button>
+        <button class="pin-mode-btn race-grp" data-grp="a">Asian</button>
+        <button class="pin-mode-btn race-grp" data-grp="h">Hispanic</button>
+        <button class="pin-mode-btn race-grp" data-grp="b">Black</button>
       </div>
-      <div id="map"></div>
-      <p class="map-note">Data: WA Redistricting Commission, WA DNR, US Census. Drag to pan, scroll to zoom.</p>
-    </section>
-
-    <section id="findings">
-      <h2>Findings</h2>
-      <p><em>Placeholder.</em> Key results and what they mean for the broader
-        question of how we detect and define unfair maps.</p>
-    </section>
-
-    <section id="references">
-      <h2>References</h2>
-      <p>See the working <a href="https://github.com/">bibliography</a> in the research repository.</p>
-      <ol>
-        <li>Zhao, B. (2026). <em>Seven Seats, Five Maps.</em> HGIS Lab, Friday Harbor Column, Article 017.</li>
-      </ol>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <div class="container">
-      <p>&copy; <span id="year"></span> Lucas. Research website &mdash; work in progress.</p>
+      <button class="info-btn" id="nbh-info-btn" aria-expanded="false" title="Why some areas have no neighborhood">i</button>
+      <div class="metric-defs layer-info" id="nbh-info" hidden>
+        These are the City of Bellevue's official neighborhoods, so they cover the city only. The school
+        district also reaches into Clyde Hill, Medina, Hunts Point, Yarrow Point, Beaux Arts, and parts of
+        Redmond, Kirkland &amp; Newcastle &mdash; separate towns with no Bellevue neighborhood. Likewise, some
+        neighborhoods (e.g. Cougar Mountain / Lakemont) are partly served by other school districts.
+        <br /><br />
+        <b>How the split count works:</b> each neighborhood is colored by how many of this level's
+        attendance zones its school-age children are divided across. Portions living <em>outside</em> the
+        district do <b>not</b> count as an extra school &mdash; they are listed separately in the popup.
+        Green = kept whole (1 school); red = split across the most schools.
+      </div>
     </div>
-  </footer>
+    <div class="panel-divider"></div>
+    <div class="basemap-controls">
+      <span class="control-label">Explore &mdash; what's my school?</span>
+      <div class="addr-row">
+        <input type="text" id="addr-input" placeholder="Add a pin: type an address&hellip;" />
+        <button id="addr-go" title="Search the address and add a pin">Add</button>
+      </div>
+      <button class="pin-btn ghost" id="add-pin-btn">&hellip;or click the map to place a pin</button>
+      <button class="pin-btn ghost" id="route-btn">Measure a route (two blue markers)</button>
+      <div class="route-info" id="route-info" hidden></div>
+    </div>
+    <div class="panel-divider"></div>
+    <div class="basemap-controls">
+      <span class="control-label">Travel mode</span>
+      <div class="pin-mode profile-mode">
+        <button class="pin-mode-btn profile-btn on" data-profile="drive">driving</button>
+        <button class="pin-mode-btn profile-btn" data-profile="walk">walking</button>
+      </div>
+    </div>
+    <div class="panel-divider"></div>
+    <div class="basemap-controls">
+      <span class="control-label">Base map</span>
+      <label class="chk"><input type="checkbox" id="chk-satellite" /> Satellite</label>
+      <label class="chk"><input type="checkbox" id="chk-terrain" /> Terrain</label>
+    </div>
+    <div class="panel-divider"></div>
+    <button class="lang-btn" id="panel-lang" title="Switch language">中文</button>
+  </div>
+
+  <!-- Zone detail side panel (opens on zone click) -->
+  <aside class="panel panel-detail" id="detail-panel" aria-live="polite">
+    <button class="detail-close" id="detail-close" aria-label="Close panel">&times;</button>
+    <div id="detail-body"></div>
+  </aside>
+
+  <!-- Graph mode: small-multiple era charts -->
+  <div id="graph-mode" hidden>
+    <div class="gm-head">
+      <div>
+        <h2>Graph mode</h2>
+        <p class="gm-note">Each chart tracks one measure for one school's zone across the three boundary eras.
+        Demographics use the fixed 2020 population snapshot, so changes reflect <b>boundary changes only</b>.
+        Distance measures follow the current travel mode. Descriptive only &mdash; no judgment implied.</p>
+      </div>
+      <button class="district-btn gm-close-btn" id="gm-close">&larr; Back to map</button>
+    </div>
+    <div class="gm-grid" id="gm-grid"></div>
+  </div>
+
+  <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
+  <script src="intro.js?v=108"></script>
 
   <script>
-    document.getElementById("year").textContent = new Date().getFullYear();
+    (function () {
+      const btn = document.getElementById("tabs-btn");
+      const menu = document.getElementById("tabs-menu");
+      const setOpen = (open) => {
+        menu.hidden = !open;
+        btn.setAttribute("aria-expanded", String(open));
+      };
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        setOpen(menu.hidden);
+      });
+      document.addEventListener("click", (e) => {
+        if (!menu.hidden && !menu.contains(e.target)) setOpen(false);
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && !menu.hidden) setOpen(false);
+      });
+    })();
   </script>
 
   <script>
-    // Blank-style map (no external basemap) centered on Washington.
+    const MAPTILER_KEY = "Lc38sZpTIbGGzM7ebDmS";
+    const DATA_VER = "107";   // cache-bust the data GeoJSON when it is regenerated
+
+    if (typeof maplibregl === "undefined") {
+      document.getElementById("map").innerHTML =
+        '<div class="map-error">Map library failed to load. Serve this folder over http ' +
+        '(<code>python -m http.server</code>) and confirm <code>vendor/maplibre-gl.js</code> exists.</div>';
+      throw new Error("maplibregl not loaded");
+    }
+
+    const STYLES = {
+      grayscale: `https://api.maptiler.com/maps/dataviz/style.json?key=${MAPTILER_KEY}`,
+      hybrid:    `https://api.maptiler.com/maps/hybrid/style.json?key=${MAPTILER_KEY}`,   // satellite + labels
+      outdoor:   `https://api.maptiler.com/maps/outdoor/style.json?key=${MAPTILER_KEY}`   // topographic
+    };
+    const DEM_URL = `https://api.maptiler.com/tiles/terrain-rgb-v2/tiles.json?key=${MAPTILER_KEY}`;
+
+    // Soft, low-saturation palette. Only to distinguish adjacent zones; no ordering implied.
+    const ZONE_COLORS = [
+      "#8fb3a6", "#c7b39a", "#9fb0cd", "#cbbf95", "#b6a3c1", "#94bcc0",
+      "#cfa99c", "#aec49a", "#b3aacf", "#9cb8c9", "#d0c1a4", "#a9c8bb",
+      "#c6adb4", "#a7c1a4"
+    ];
+    // Compactness metrics for the zone detail panel. Order = display order (2 per row).
+    const COMPACTNESS = [
+      { key: "polsby_popper",     label: "Polsby–Popper",            hint: "4πA ÷ P², where A = area, P = perimeter. 1 = a perfect circle; lower = more contorted outline." },
+      { key: "pp_percentile",     label: "Polsby–Popper percentile", pct: true, hint: "This zone's Polsby–Popper score ranked against the other zones at the same level." },
+      { key: "reock",             label: "Reock",                    hint: "Area ÷ area of the smallest circle that encloses the zone. 1 = a circle." },
+      { key: "reock_percentile",  label: "Reock percentile",         pct: true, hint: "This zone's Reock score ranked against the other zones at the same level." },
+      { key: "convex_hull",       label: "Convex hull ratio",        hint: "Area ÷ area of the zone's convex hull (the smallest convex shape containing it). Measures how much the outline caves in." },
+      { key: "convex_percentile", label: "Convex hull percentile",   pct: true, hint: "This zone's convex-hull ratio ranked against the other zones at the same level." },
+      { key: "bounding_rect",     label: "Min. rectangle ratio",     hint: "Area ÷ area of the smallest rotated rectangle that encloses the zone." },
+      { key: "moment_inertia",    label: "Moment of inertia",        hint: "A² ÷ (2π · polar second moment of area about the centroid). 1 = a circle; rewards mass held close to the center." },
+      { key: "area_km2",          label: "Area",                     unit: "km²", hint: "Zone area, computed in UTM zone 10N (metres)." },
+      { key: "perimeter_km",      label: "Perimeter",                unit: "km",  hint: "Length of the zone boundary, computed in UTM zone 10N." }
+    ];
+
+    const LEVELS = ["elementary", "middle", "high"];
+    const LEVEL_META = {
+      elementary: { legend: "Elementary attendance zone", suffix: "Elementary" },
+      middle:     { legend: "Middle school attendance zone", suffix: "Middle School" },
+      high:       { legend: "High school attendance zone", suffix: "High School" }
+    };
+    const STATE_META = {
+      a: { era: "pre-2018", note: "pre-2018 boundaries (federal SABS 2015-16 survey — approximate)" },
+      b: { era: "2018–2023", note: "2018–2023 boundaries" },
+      c: { era: "2023–present", note: "current (post-2023) boundaries" }
+    };
+    let activeState = "c";
+    const eraLabel = () => STATE_META[activeState].era;
+
+    let DATA = null;
+    let activeLevel = "elementary";
+    let hovered = null;              // { level, id }
+    let selected = null;             // { level, id } zone showing in the detail panel
+    let schoolMarkers = { elementary: [], middle: [], high: [] };  // per-level DOM pins (persist across style swaps)
+    const PIN_COLORS = { main: "#e03131", choice: "#f4b400" };
+    let wantHillshade = false;       // strong 2D shaded relief (when Terrain is on)
+    let want3D = false;              // elevation loaded so a manual tilt shows 3D
+    let neighborhoodsOn = false;     // red neighborhood-boundary overlay
+    let raceLayerOn = false;         // block-level racial-composition choropleth
+    let raceGroup = "w";             // w | a | h | b
+    let currentStyleUrl = STYLES.grayscale;
+    let styleToken = 0;             // guards against stale style swaps
+    let didInitialFit = false;
+    let interactionsAttached = false;
+
     const map = new maplibregl.Map({
       container: "map",
-      style: {
-        version: 8,
-        sources: {},
-        layers: [
-          { id: "background", type: "background", paint: { "background-color": "#f4f1ea" } }
-        ]
-      },
-      center: [-120.5, 47.4],
-      zoom: 6
+      style: STYLES.grayscale,
+      center: [-122.164, 47.6045],
+      zoom: 11.2,
+      maxPitch: 75,
+      attributionControl: true
     });
-    map.addControl(new maplibregl.NavigationControl(), "top-right");
+    map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right");
+    map.addControl(new maplibregl.FullscreenControl({ container: document.documentElement }), "bottom-right");
+    map.on("error", (e) => console.error("MapLibre error:", e && e.error ? e.error.message : e));
 
-    // Load one GeoJSON file as a source + layer; warn (don't crash) if it's missing.
-    async function addGeoJSONLayer({ url, sourceId, layer }) {
-      try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(res.status + " " + res.statusText);
-        map.addSource(sourceId, { type: "geojson", data: await res.json() });
-        map.addLayer(layer);
-      } catch (err) {
-        console.warn("Could not load " + url + " — " + err.message +
-          " (put a web-ready GeoJSON in data/ and serve over http).");
+    async function getJSON(url) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`${url}: ${res.status}`);
+      return res.json();
+    }
+    function colorExpr(labels) {
+      const names = labels.features.map(f => f.properties.name).sort();
+      const expr = ["match", ["get", "name"]];
+      names.forEach((n, i) => expr.push(n, ZONE_COLORS[i % ZONE_COLORS.length]));
+      expr.push("#b0b0b0");
+      return expr;
+    }
+
+    // Reliable: run cb once the current style is truly loaded (polls, no event-name guesswork).
+    function whenStyleReady(cb) {
+      if (map.isStyleLoaded()) cb();
+      else setTimeout(() => whenStyleReady(cb), 60);
+    }
+    // Swap basemap and re-add everything once the NEW style is fully loaded (token guards stale swaps).
+    function setBasemap(url) {
+      currentStyleUrl = url;
+      const my = ++styleToken;
+      map.setStyle(url);
+      const tryRebuild = () => {
+        if (my !== styleToken) return;             // a newer swap superseded this one
+        if (map.isStyleLoaded()) rebuildLayers();
+        else setTimeout(tryRebuild, 60);
+      };
+      setTimeout(tryRebuild, 60);                   // start next tick so setStyle takes effect first
+    }
+
+    function ensureDem() {
+      if (!map.getSource("dem")) map.addSource("dem", { type: "raster-dem", url: DEM_URL, tileSize: 256 });
+    }
+    function applyTerrainState() {
+      if (want3D) {
+        ensureDem();
+        map.setTerrain({ source: "dem", exaggeration: 1.6 });   // elevation loaded; stays flat until tilted
+      } else {
+        map.setTerrain(null);
+        if (map.getPitch() > 5) map.easeTo({ pitch: 0, duration: 500 });
+      }
+    }
+    function applyHillshadeState() {
+      const ids = ["hillshade", "hillshade-b"];
+      if (wantHillshade) {
+        ensureDem();
+        const under = map.getLayer("fill-elementary") ? "fill-elementary" : undefined;
+        // Primary relief, lit from the NW (standard cartographic convention).
+        if (!map.getLayer("hillshade")) map.addLayer({
+          id: "hillshade", type: "hillshade", source: "dem",
+          paint: {
+            "hillshade-exaggeration": 1,
+            "hillshade-illumination-direction": 315,
+            "hillshade-shadow-color": "#16232b",
+            "hillshade-highlight-color": "#ffffff",
+            "hillshade-accent-color": "#3d4852"
+          }
+        }, under);
+        // Cross-light from the opposite side to pull out more slope detail (multi-directional).
+        if (!map.getLayer("hillshade-b")) map.addLayer({
+          id: "hillshade-b", type: "hillshade", source: "dem",
+          paint: {
+            "hillshade-exaggeration": 0.65,
+            "hillshade-illumination-direction": 135,
+            "hillshade-shadow-color": "#23323c",
+            "hillshade-highlight-color": "rgba(255,255,255,0.4)",
+            "hillshade-accent-color": "rgba(0,0,0,0)"
+          }
+        }, under);
+      } else {
+        ids.forEach(id => { if (map.getLayer(id)) map.removeLayer(id); });
       }
     }
 
-    map.on("load", async () => {
-      // Draw order: water at the bottom, counties next, districts on top.
-      await addGeoJSONLayer({
-        url: "data/water.geojson", sourceId: "water",
-        layer: { id: "water-fill", type: "fill", source: "water",
-          paint: { "fill-color": "#9ec9e8", "fill-opacity": 0.8 } }
-      });
-      await addGeoJSONLayer({
-        url: "data/counties.geojson", sourceId: "counties",
-        layer: { id: "counties-line", type: "line", source: "counties",
-          paint: { "line-color": "#b0a99f", "line-width": 0.8 } }
-      });
-      await addGeoJSONLayer({
-        url: "data/districts.geojson", sourceId: "districts",
-        layer: { id: "districts-line", type: "line", source: "districts",
-          paint: { "line-color": "#33404d", "line-width": 2 } }
-      });
+    // (Re)build every custom layer + terrain state. Idempotent; runs after each style load.
+    function rebuildLayers() {
+      if (!DATA) return;
 
-      // Checkbox visibility toggles (only act if the layer actually loaded).
-      const toggles = {
-        "toggle-districts": "districts-line",
-        "toggle-counties": "counties-line",
-        "toggle-water": "water-fill"
-      };
-      for (const [boxId, layerId] of Object.entries(toggles)) {
-        const box = document.getElementById(boxId);
-        box.addEventListener("change", () => {
-          if (map.getLayer(layerId)) {
-            map.setLayoutProperty(layerId, "visibility", box.checked ? "visible" : "none");
+      // block race layer sits beneath the zone fills
+      if (DATA.blocksRace) {
+        if (!map.getSource("blocks-race")) map.addSource("blocks-race", { type: "geojson", data: DATA.blocksRace });
+        if (!map.getLayer("blocks-race-fill")) map.addLayer({
+          id: "blocks-race-fill", type: "fill", source: "blocks-race",
+          layout: { visibility: raceLayerOn ? "visible" : "none" },
+          paint: { "fill-color": "#cccccc", "fill-opacity": 0.6 }
+        });
+      }
+      for (const lvl of LEVELS) {
+        if (!map.getSource(`zones-${lvl}`)) map.addSource(`zones-${lvl}`, { type: "geojson", data: DATA.levels[lvl].zones, generateId: true });
+        if (!map.getSource(`labels-${lvl}`)) map.addSource(`labels-${lvl}`, { type: "geojson", data: DATA.levels[lvl].labels });
+      }
+      for (const lvl of LEVELS) {
+        const vis = lvl === activeLevel ? "visible" : "none";
+        if (!map.getLayer(`fill-${lvl}`)) map.addLayer({
+          id: `fill-${lvl}`, type: "fill", source: `zones-${lvl}`, layout: { visibility: vis },
+          paint: {
+            "fill-color": colorExpr(DATA.levels[lvl].labels),
+            "fill-opacity": [
+              "case",
+              ["boolean", ["feature-state", "hover"], false], 0.72,
+              ["boolean", ["feature-state", "selected"], false], 0.68,
+              0.42
+            ]
+          }
+        });
+        if (!map.getLayer(`line-${lvl}`)) map.addLayer({
+          id: `line-${lvl}`, type: "line", source: `zones-${lvl}`, layout: { visibility: vis },
+          paint: {
+            "line-color": "#242a2e",
+            "line-width": ["case", ["boolean", ["feature-state", "selected"], false], 5, 2.4],
+            "line-opacity": 0.95
           }
         });
       }
+      if (!map.getSource("district")) map.addSource("district", { type: "geojson", data: DATA.district });
+      if (!map.getLayer("district-line")) map.addLayer({
+        id: "district-line", type: "line", source: "district",
+        paint: { "line-color": "#242a2e", "line-width": 2.6 }
+      });
+      // Neighborhood overlay: red lines above the zone lines; invisible fill for click hit-testing.
+      if (DATA.neighborhoods) {
+        const nvis = neighborhoodsOn ? "visible" : "none";
+        if (!map.getSource("neighborhoods")) map.addSource("neighborhoods", { type: "geojson", data: DATA.neighborhoods, generateId: true });
+        if (!map.getLayer("nbh-fill")) map.addLayer({
+          id: "nbh-fill", type: "fill", source: "neighborhoods",
+          layout: { visibility: nvis }, paint: { "fill-color": "#000000", "fill-opacity": 0 }
+        });
+        if (!map.getLayer("nbh-line")) map.addLayer({
+          id: "nbh-line", type: "line", source: "neighborhoods",
+          layout: { visibility: nvis },
+          paint: {
+            "line-color": "#c0392b",
+            "line-width": ["case", ["boolean", ["feature-state", "selected"], false], 5, 2.4],
+            "line-opacity": 0.95
+          }
+        });
+      }
+      for (const lvl of LEVELS) {
+        if (!map.getLayer(`labels-${lvl}`)) map.addLayer({
+          id: `labels-${lvl}`, type: "symbol", source: `labels-${lvl}`,
+          layout: {
+            visibility: lvl === activeLevel ? "visible" : "none",
+            "text-field": ["get", "name"], "text-size": 12,
+            "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"], "text-max-width": 8
+          },
+          paint: { "text-color": "#2c3338", "text-halo-color": "#ffffff", "text-halo-width": 1.6 }
+        });
+      }
+
+      applyHillshadeState();
+      applyTerrainState();
+
+      if (!interactionsAttached) { LEVELS.forEach(attachInteractions); interactionsAttached = true; }
+      if (raceLayerOn) applyRaceLayer();          // restore block coloring after a basemap swap
+      else if (neighborhoodsOn) applyNbhMode();   // restore split-count coloring after a basemap swap
+      else if (activeMetric) applyChoropleth();   // restore metric coloring after a basemap swap
+      if (routeGeom) drawRoute();                 // restore the blue route line after a basemap swap
+
+      if (!didInitialFit) {
+        const b = new maplibregl.LngLatBounds();
+        const walk = (c) => Array.isArray(c[0]) ? c.forEach(walk) : b.extend(c);
+        DATA.district.features.forEach(f => walk(f.geometry.coordinates));
+        map.fitBounds(b, { padding: { top: 40, bottom: 90, left: 60, right: 60 }, duration: 0 });
+        didInitialFit = true;
+      }
+    }
+
+    // Initial data load, then build layers once the initial style is ready.
+    (async () => {
+      let schools = {};
+      try {
+        const district = await getJSON(`data/bellevue_district.geojson?v=${DATA_VER}`);
+        const levels = {};
+        for (const lvl of LEVELS) {
+          const [zones, labels, sch] = await Promise.all([
+            getJSON(`data/bellevue_${lvl}_zones.geojson?v=${DATA_VER}`),
+            getJSON(`data/bellevue_${lvl}_labels.geojson?v=${DATA_VER}`),
+            getJSON(`data/bellevue_${lvl}_schools.geojson?v=${DATA_VER}`)
+          ]);
+          levels[lvl] = { zones, labels };
+          schools[lvl] = sch;
+        }
+        const neighborhoods = await getJSON(`data/bellevue_neighborhoods.geojson?v=${DATA_VER}`);
+        const blocksRace = await getJSON(`data/bellevue_blocks_race.geojson?v=${DATA_VER}`);
+        const districtStats = await getJSON(`data/bellevue_district_stats.json?v=${DATA_VER}`);
+        const zhvi = await getJSON(`data/bellevue_zhvi.json?v=${DATA_VER}`);
+        // historical states: only elementary differs; middle/high reuse the current layers
+        const states = { c: { levels, schools } };
+        for (const S of ["b", "a"]) {
+          const [z, l, sc] = await Promise.all([
+            getJSON(`data/bellevue_${S}_elementary_zones.geojson?v=${DATA_VER}`),
+            getJSON(`data/bellevue_${S}_elementary_labels.geojson?v=${DATA_VER}`),
+            getJSON(`data/bellevue_${S}_elementary_schools.geojson?v=${DATA_VER}`)
+          ]);
+          states[S] = {
+            levels: { elementary: { zones: z, labels: l }, middle: levels.middle, high: levels.high },
+            schools: { elementary: sc, middle: schools.middle, high: schools.high }
+          };
+        }
+        DATA = { district, levels, schools, neighborhoods, districtStats, zhvi, states, blocksRace };
+      } catch (err) {
+        console.error("Data failed to load. Serve over http, not file://.", err);
+        return;
+      }
+      createAllSchoolMarkers(schools);
+      createStateMarkers();
+      setActiveMarkers(activeLevel);
+      restoreUserPins();   // bring back saved pins (silently - no popups)
+      whenStyleReady(() => { rebuildLayers(); applyUrlPreset(); });
+    })();
+
+    // URL presets, e.g. index.html?state=b&level=elementary&metric=utilization&zone=Woodridge
+    // Lets the Analysis tab (and the paper) link straight to a configured view.
+    function applyUrlPreset() {
+      const q = new URLSearchParams(location.search);
+      const st = q.get("state"), lvl = q.get("level"), met = q.get("metric"), zone = q.get("zone");
+      if (lvl && ["elementary", "middle", "high"].includes(lvl) && lvl !== activeLevel) switchLevel(lvl);
+      if (st && ["a", "b", "c"].includes(st) && st !== activeState) switchState(st);
+      if (met && CHORO_BY_ID[met]) {
+        activeMetric = met;
+        document.querySelectorAll(".choro-check").forEach(cb => { cb.checked = cb.dataset.metric === met; });
+        applyChoropleth();
+      }
+      if (q.get("nbh") === "1") {
+        const cb = document.getElementById("chk-neighborhoods");
+        if (cb && !cb.checked) { cb.checked = true; cb.dispatchEvent(new Event("change")); }
+      }
+      if (q.get("graph") === "1") {
+        const gb = document.getElementById("graph-btn");
+        if (gb) gb.click();
+      }
+      if (zone && DATA) {
+        const L = DATA.levels[activeLevel];
+        const ft = L && L.zones.features.find(f => (f.properties.name || "").toLowerCase() === zone.toLowerCase());
+        if (ft) {
+          openDetail(ft.properties, activeLevel);
+          const b = new maplibregl.LngLatBounds();
+          (function walk(c) { typeof c[0] === "number" ? b.extend(c) : c.forEach(walk); })(ft.geometry.coordinates);
+          map.fitBounds(b, { padding: 140, maxZoom: 13, duration: 800 });
+        }
+      }
+    }
+
+    // Google-style teardrop pin as an inline SVG element (color via currentColor).
+    function makePin(color, scale) {
+      const s = scale || 1;
+      const el = document.createElement("div");
+      el.className = "school-pin";
+      el.style.color = color;
+      // pin clicks are the pin's business only — don't bubble into the map's zone/neighborhood handlers
+      el.addEventListener("click", e => e.stopPropagation());
+      el.innerHTML =
+        `<svg width="${Math.round(26 * s)}" height="${Math.round(34 * s)}" viewBox="0 0 26 34" xmlns="http://www.w3.org/2000/svg">` +
+        '<path d="M13 0.8C6.2 0.8 0.8 6.2 0.8 13c0 9 12.2 20.2 12.2 20.2S25.2 22 25.2 13C25.2 6.2 19.8 0.8 13 0.8z" ' +
+        'fill="currentColor" stroke="#ffffff" stroke-width="1.6"/>' +
+        '<circle cx="13" cy="12.6" r="4.6" fill="#ffffff"/></svg>';
+      return el;
+    }
+
+    function cleanRole(r) {
+      const s = (r || "").toLowerCase();
+      if (s.startsWith("unchanged")) return "attendance boundaries unchanged";
+      if (s.startsWith("receiver")) return "received students" +
+        (s.includes("wilburton") ? " from Wilburton" : s.includes("eastgate") ? " from Eastgate" :
+         s.includes("advanced") ? " (and the Advanced Learning program)" : "");
+      if (s.startsWith("considered")) return "considered for consolidation";
+      if (s.startsWith("closed") || s.startsWith("converted")) return "converted to a program site";
+      return r;
+    }
+    function sparkline(trend) {
+      const pts = (trend || []).filter(t => t.n != null);
+      if (pts.length < 2) return "";
+      const ns = pts.map(t => t.n), mn = Math.min(...ns), mx = Math.max(...ns), sp = (mx - mn) || 1, w = 150, h = 30;
+      const xy = pts.map((t, i) => `${(i / (pts.length - 1) * (w - 6) + 3).toFixed(1)},${(h - 3 - ((t.n - mn) / sp) * (h - 8)).toFixed(1)}`).join(" ");
+      return `<svg class="sparkline" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polyline points="${xy}"/></svg>` +
+        `<div class="spark-lab">${pts[0].year} → ${pts[pts.length - 1].year} enrollment · ${mn.toLocaleString()}–${mx.toLocaleString()}</div>`;
+    }
+    function schoolPopupHTML(p) {
+      const i = p.info || {};
+      let h = `<div class="sch-pop"><strong>${p.display}</strong><div class="popup-sub">${p.type_label}</div>`;
+      if (i.enroll_current != null) {
+        h += `<div class="sch-stat"><b>${i.enroll_current.toLocaleString()}</b> students <span class="muted">(${i.enroll_year})</span>`;
+        if (i.capacity) h += ` &middot; cap ${i.capacity.toLocaleString()} &middot; <b>${i.utilization}%</b> full`;
+        h += `</div>`;
+      }
+      if (i.role) h += `<div class="sch-role"><span class="sch-tag">2023</span> ${cleanRole(i.role)}</div>`;
+      if (i.programs && i.programs.length) {
+        h += `<div class="sch-progs"><div class="sch-lab">Programs hosted</div>` +
+          i.programs.map(pr => `<div class="sch-prog">${pr.program}${pr.note ? `<span class="prog-note">${pr.note}</span>` : ""}</div>`).join("") + `</div>`;
+      }
+      return h + `</div>`;
+    }
+
+    function createAllSchoolMarkers(schools) {
+      for (const lvl of LEVELS) {
+        schools[lvl].features.forEach(f => {
+          const p = f.properties;
+          const popup = new maplibregl.Popup({ offset: 34, closeButton: true, maxWidth: "300px" })
+            .setHTML(schoolPopupHTML(p));
+          const marker = new maplibregl.Marker({ element: makePin(PIN_COLORS[p.kind] || PIN_COLORS.main), anchor: "bottom" })
+            .setLngLat(f.geometry.coordinates)
+            .setPopup(popup)
+            .addTo(map);
+          marker.getElement().style.display = "none";
+          marker._label = p.display;   // for route-endpoint snapping
+          // our stopPropagation blocks MapLibre's map-level popup toggle - do it ourselves
+          marker.getElement().addEventListener("click", () => marker.togglePopup());
+          schoolMarkers[lvl].push(marker);
+        });
+      }
+    }
+
+    // Historical-state elementary pins (era-accurate locations, e.g. Jing Mei's old site).
+    const stateMarkers = { a: [], b: [] };
+    function createStateMarkers() {
+      for (const S of ["a", "b"]) {
+        DATA.states[S].schools.elementary.features.forEach(f => {
+          const p = f.properties;
+          const popup = new maplibregl.Popup({ offset: 34, closeButton: true, maxWidth: "300px" })
+            .setHTML(schoolPopupHTML(p));
+          const marker = new maplibregl.Marker({ element: makePin(PIN_COLORS[p.kind] || PIN_COLORS.main), anchor: "bottom" })
+            .setLngLat(f.geometry.coordinates)
+            .setPopup(popup)
+            .addTo(map);
+          marker.getElement().style.display = "none";
+          marker._label = p.display;
+          marker.getElement().addEventListener("click", () => marker.togglePopup());
+          stateMarkers[S].push(marker);
+        });
+      }
+    }
+    // Show only the active era + level's pins.
+    function setActiveMarkers(level) {
+      for (const L of LEVELS) schoolMarkers[L].forEach(m => { m.getElement().style.display = "none"; });
+      ["a", "b"].forEach(S => stateMarkers[S].forEach(m => { m.getElement().style.display = "none"; }));
+      const arr = (activeState !== "c" && level === "elementary")
+        ? stateMarkers[activeState] : schoolMarkers[level];
+      arr.forEach(m => { m.getElement().style.display = ""; });
+    }
+
+    function attachInteractions(lvl) {
+      const fill = `fill-${lvl}`;
+      map.on("mousemove", fill, (e) => {
+        if (!e.features.length) return;
+        if (hovered) map.setFeatureState({ source: `zones-${hovered.level}`, id: hovered.id }, { hover: false });
+        hovered = { level: lvl, id: e.features[0].id };
+        map.setFeatureState({ source: `zones-${lvl}`, id: hovered.id }, { hover: true });
+        map.getCanvas().style.cursor = "pointer";
+      });
+      map.on("mouseleave", fill, () => {
+        if (hovered) map.setFeatureState({ source: `zones-${hovered.level}`, id: hovered.id }, { hover: false });
+        hovered = null;
+        map.getCanvas().style.cursor = "";
+      });
+      map.on("click", fill, (e) => {
+        if (addingPin) return;   // this click is placing a purple pin, not selecting a zone
+        const feat = e.features[0];
+        if (selected) map.setFeatureState({ source: `zones-${selected.level}`, id: selected.id }, { selected: false });
+        selected = { level: lvl, id: feat.id };
+        map.setFeatureState({ source: `zones-${lvl}`, id: feat.id }, { selected: true });
+        openDetail(parseProps(feat.properties), lvl);
+        if (neighborhoodsOn) showNeighborhoodPopup(e, lvl);
+      });
+    }
+
+    // Neighborhood-mode popup: which schools does the clicked neighborhood get split across?
+    let selectedNbh = null;       // feature id of the bolded neighborhood
+    let nbhClickSeq = 0;          // guards stale popup-close events
+    function clearNbhSelected() {
+      if (selectedNbh !== null) {
+        map.setFeatureState({ source: "neighborhoods", id: selectedNbh }, { selected: false });
+        selectedNbh = null;
+      }
+    }
+    function showNeighborhoodPopup(e, lvl) {
+      const hits = map.queryRenderedFeatures(e.point, { layers: ["nbh-fill"] });
+      clearNbhSelected();
+      if (!hits.length) return;
+      const feat = hits[0], p = feat.properties;
+      selectedNbh = feat.id;
+      map.setFeatureState({ source: "neighborhoods", id: feat.id }, { selected: true });
+      let splits = p.splits;
+      if (typeof splits === "string") { try { splits = JSON.parse(splits); } catch (_) { return; } }
+      const key = (activeState !== "c" && lvl === "elementary") ? "elementary_" + activeState : lvl;
+      const d = (splits && (splits[key] || splits[lvl])) || { zones: [], outside: 0, outside_n: 0 };
+      const list = d.zones || [], outside = d.outside || 0;
+      const label = LEVEL_META[lvl].suffix.toLowerCase() + (list.length === 1 ? "" : "s");
+      let mode = viewMode;   // popup starts in the panel's current view, then toggles independently
+      const fv = s => mode === "pct" ? `${s.pct}%` : fmtInt(s.n);
+      function bodyHTML() {
+        if (!list.length && !outside) return `<span class="popup-sub">No school-age residents recorded.</span>`;
+        if (list.length === 1 && !outside) return `Entirely within the <b>${list[0].school}</b> zone.`;
+        return `Split across <b>${list.length} ${label}</b>` + (outside ? ` (plus outside the district)` : "") + `:` +
+          `<div class="nbh-splits">` +
+          list.map(s => `<div class="nbh-split-row"><span>${s.school}</span><b>${fv(s)}</b></div>`).join("") +
+          (outside ? `<div class="nbh-split-row nbh-outside"><span>Outside Bellevue School District</span>` +
+            `<b>${mode === "pct" ? outside + "%" : fmtInt(d.outside_n)}</b></div>` : "") +
+          `</div>`;
+      }
+      const hasToggle = list.length > 1 || outside > 0;
+      const seq = ++nbhClickSeq;
+      const popup = new maplibregl.Popup({ closeButton: true, offset: 6, maxWidth: "270px" })
+        .setLngLat(e.lngLat)
+        .setHTML(`<div class="sch-pop"><strong>${p.name}</strong><div class="popup-sub">Neighborhood · ` +
+                 `${Number(splits && splits.kids || 0).toLocaleString()} school-age kids</div>` +
+                 `<div class="nbh-body">${bodyHTML()}</div>` +
+                 (hasToggle ? `<button class="view-toggle nbh-toggle">${mode === "pct" ? "Show counts" : "Show %"}</button>` : "") +
+                 `</div>`)
+        .addTo(map);
+      const btn = popup.getElement().querySelector(".nbh-toggle");
+      if (btn) btn.addEventListener("click", () => {
+        mode = mode === "pct" ? "pop" : "pct";
+        popup.getElement().querySelector(".nbh-body").innerHTML = bodyHTML();
+        btn.textContent = mode === "pct" ? "Show counts" : "Show %";
+      });
+      popup.on("close", () => { if (seq === nbhClickSeq) clearNbhSelected(); });
+    }
+
+    // Per-zone stability notes (impact 10, qualitative; curated from the 2023 consolidation record).
+    const STABILITY_B = {
+      elementary: {
+        "Wilburton": { hot: true, text: "Opened fall 2018, at the start of this era; closed in the 2023 consolidation at its end." },
+        "Eastgate": { hot: true, text: "Closed in the 2023 consolidation, at the end of this era." },
+        "Clyde Hill": { hot: true, text: "Gave up territory when Wilburton opened (2018); took much of it back when Wilburton closed (2023)." },
+        "Enatai": { hot: true, text: "Gave up territory when Wilburton opened (2018); took much of it back when Wilburton closed (2023)." },
+        "_default": { hot: false, text: "No boundary changes during this era (2018–2023)." }
+      },
+      middle: { "_default": { hot: false, text: "Middle-school boundaries did not change during this era." } },
+      high: { "_default": { hot: false, text: "High-school boundaries did not change during this era." } }
+    };
+    const STABILITY_A = {
+      elementary: {
+        "Eastgate": { hot: false, text: "Later closed in the 2023 consolidation." },
+        "Clyde Hill": { hot: false, text: "Later gave up territory when Wilburton opened (2018)." },
+        "Enatai": { hot: false, text: "Later gave up territory when Wilburton opened (2018)." },
+        "_default": { hot: false, text: "Boundaries as surveyed in the federal SABS 2015-16 snapshot (different source than the city layers — approximate)." }
+      },
+      middle: { "_default": { hot: false, text: "Middle-school boundaries unchanged across all three eras." } },
+      high: { "_default": { hot: false, text: "High-school boundaries unchanged across all three eras." } }
+    };
+    const STABILITY = {
+      elementary: {
+        "Clyde Hill": { hot: true, text: "Rezoned twice in five years: gave up territory when Wilburton opened (2018), then took much of it back when Wilburton closed (2023)." },
+        "Enatai": { hot: true, text: "Rezoned twice in five years: gave up territory when Wilburton opened (2018), then took much of it back when Wilburton closed (2023)." },
+        "Spiritridge": { hot: true, text: "Rezoned in 2023: absorbed most of the closed Eastgate zone." },
+        "Somerset": { hot: true, text: "Rezoned in 2023: absorbed part of the closed Eastgate zone." },
+        "Woodridge": { hot: false, text: "Boundaries stable in 2023; gained the Advanced Learning program (moved from Spiritridge)." },
+        "Ardmore": { hot: false, text: "Considered for consolidation in the 2023 process; kept open with no boundary change." },
+        "_default": { hot: false, text: "No boundary changes in the 2023 consolidation." }
+      },
+      middle: { "_default": { hot: false, text: "Middle-school boundaries did not change in the 2023 elementary consolidation; a later consolidation study did not lead to closures." } },
+      high: { "_default": { hot: false, text: "High-school boundaries did not change in the 2023 elementary consolidation." } }
+    };
+    function stabilityHTML(lvl, name) {
+      const SS = activeState === "b" ? STABILITY_B : activeState === "a" ? STABILITY_A : STABILITY;
+      const m = SS[lvl] || {};
+      const s = m[name] || m["_default"];
+      if (!s) return "";
+      return `<div class="stability-strip${s.hot ? " hot" : ""}"><span class="stab-tag">Rezoning history</span>${s.text}</div>`;
+    }
+
+    // Per-zone plain-language summary — STRICTLY neutral: rank-facts and measurements only,
+    // no evaluative language, no fairness implication. The reader interprets.
+    function ordinal(n) {
+      const s = ["th", "st", "nd", "rd"], v = n % 100;
+      return n + (s[(v - 20) % 10] || s[v] || s[0]);
+    }
+    function rankOf(vals, v, dir) {   // dir "desc": rank 1 = largest; "asc": rank 1 = smallest
+      const clean = vals.filter(x => x != null && !isNaN(x));
+      const higher = clean.filter(x => dir === "desc" ? x > v : x < v).length;
+      return { r: higher + 1, n: clean.length };
+    }
+    function summaryHTML(props, lvl) {
+      const feats = (DATA && DATA.levels[lvl].zones.features) || [];
+      const all = feats.map(f => f.properties);
+      const bits = [];
+      const lvlWord = LEVEL_META[lvl].suffix.toLowerCase().replace(" school", "") + " zones";
+      // size
+      if (props.kids_5_17 != null) {
+        const rk = rankOf(all.map(p => p.kids_5_17), props.kids_5_17, "desc");
+        bits.push(`Home to <b>${fmtInt(props.kids_5_17)}</b> school-age children, the ${ordinal(rk.r)}-largest of the ${rk.n} ${lvlWord}.`);
+      }
+      // commute (active profile's network distance)
+      const t = profOf(props.travel);
+      if (t && t.km && t.min) {
+        const rk = rankOf(all.map(p => { const q = profOf(p.travel); return q && q.km ? q.km.avg : null; }), t.km.avg, "asc");
+        const modeWord = travelProfile === "walk" ? "on foot" : "by road";
+        bits.push(`The average trip to the assigned school is <b>${t.km.avg} km</b> ${modeWord} (about ${Math.round(t.min.avg)} min), the ${ordinal(rk.r)}-shortest of ${rk.n}.`);
+      }
+      // demographics: plurality group + income rank
+      const s = props.seg;
+      if (s && s.total_pop) {
+        const groups = [["White", s.white], ["Asian", s.asian], ["Hispanic", s.hispanic], ["Black", s.black], ["residents of two or more races", s.twoplus]];
+        groups.sort((a, b) => (b[1] || 0) - (a[1] || 0));
+        let demo = `The largest resident group is <b>${groups[0][0]}</b> (${groups[0][1]}%).`;
+        if (props.housing && props.housing.income != null) {
+          const rk = rankOf(all.map(p => p.housing && p.housing.income), props.housing.income, "desc");
+          demo += ` Median household income is ${money(props.housing.income)}, the ${ordinal(rk.r)}-highest of ${rk.n}.`;
+        }
+        bits.push(demo);
+      }
+      // program access: which tracked program sits farthest, on average
+      const P = props.programs || {};
+      let far = null;
+      for (const c of Object.keys(P)) {
+        const q = profOf(P[c]);
+        if (q && q.km && (!far || q.km.avg > far.avg)) far = { c, avg: q.km.avg };
+      }
+      if (far) bits.push(`Of the tracked programs, <b>${(PROG_LABELS[far.c] || far.c).replace(" (IB)", "")}</b> is the farthest to reach on average (${far.avg} km).`);
+      if (!bits.length) return "";
+      return `<div class="zone-summary"><span class="zs-tag">At a glance</span>${bits.join(" ")}` +
+        `<div class="zs-note">Descriptive only — ${STATE_META[activeState].note}. Demographics use the fixed 2020 population snapshot for every era.</div></div>`;
+    }
+
+    // ----- Zone detail side panel -----
+    const detailPanel = document.getElementById("detail-panel");
+
+    // MapLibre returns nested-object feature properties as JSON strings; parse them back.
+    function parseProps(raw) {
+      const p = Object.assign({}, raw);
+      for (const k of ["seg", "housing", "language", "travel", "programs", "cap"]) {
+        if (typeof p[k] === "string") { try { p[k] = JSON.parse(p[k]); } catch (e) { p[k] = null; } }
+      }
+      return p;
+    }
+
+    const RACE_GROUPS = [
+      { key: "white",    label: "White",       color: "#b3ada0" },
+      { key: "asian",    label: "Asian",       color: "#6a9fb5" },
+      { key: "hispanic", label: "Hispanic",    color: "#d9a05b" },
+      { key: "black",    label: "Black",       color: "#8a7bb0" },
+      { key: "twoplus",  label: "Two or more", color: "#8fb08a" },
+      { key: "other",    label: "Other",       color: "#c4c0b4" }
+    ];
+    const PROG_LABELS = {
+      advanced_learning: "Advanced Learning",
+      language_immersion: "Dual-language immersion",
+      special_education: "Special-ed program",
+      ib: "International Baccalaureate (IB)"
+    };
+    const r1 = x => Math.round(x * 10) / 10;
+    const money = v => v == null ? "&mdash;" : v >= 1e6 ? "$" + (v / 1e6).toFixed(2) + "M" : v >= 1000 ? "$" + Math.round(v / 1000) + "k" : "$" + v;
+    const rent = v => v == null ? "&mdash;" : "$" + Number(v).toLocaleString();
+    let viewMode = "pct";          // "pct" | "pop" — percentages vs counts
+    let travelMode = "km";         // "km" | "min" — the travel section's own toggle
+    let progMode = "km";           // "km" | "min" — the program section's own toggle
+    let travelProfile = "drive";   // "drive" | "walk" — global travel mode (key, lower-left)
+    // profile-appropriate network stats for a travel/program entry (falls back walk -> drive -> air)
+    const profOf = d => d ? (travelProfile === "walk" ? (d.walk || d.road) : d.road) : null;
+    let currentZone = null;        // { props, lvl } for re-render on view toggle
+    const fmtInt = n => (n == null ? "&mdash;" : Math.round(n).toLocaleString());
+    const pctOrN = (pct, n) => viewMode === "pct" ? `${pct}<span class="metric-unit">%</span>` : fmtInt(n);
+
+    // ----- Choropleth: color the zones by a chosen metric (low = red, mid = yellow, high = green) -----
+    let activeMetric = null;
+    let rankingOpen = false;
+    const RYG = [[215, 48, 39], [254, 224, 80], [26, 152, 80]];
+    // diverging: blue (under) <- neutral -> red (over); t in [-1, 1]
+    function divColor(t) {
+      t = Math.max(-1, Math.min(1, t));
+      const NEU = [242, 237, 226], BLU = [43, 108, 176], RED = [192, 57, 43];
+      const from = NEU, to = t < 0 ? BLU : RED, f = Math.abs(t);
+      const c = from.map((v, i) => Math.round(v + (to[i] - v) * f));
+      return `rgb(${c[0]},${c[1]},${c[2]})`;
+    }
+    function rygColor(t) {
+      t = Math.max(0, Math.min(1, t));
+      const s = t < 0.5 ? 0 : 1, tt = t < 0.5 ? t / 0.5 : (t - 0.5) / 0.5;
+      const c = RYG[s].map((v, i) => Math.round(v + (RYG[s + 1][i] - v) * tt));
+      return `rgb(${c[0]},${c[1]},${c[2]})`;
+    }
+    const fmtPct = v => `${v}%`, fmtKm = v => `${v} km`, fmtRatio = v => Number(v).toFixed(3);
+    // choropleth accessors read the active profile's network km when routing exists, else straight-line
+    const cKm = d => { if (!d) return null; const p = profOf(d); return p ? p.km : d; };
+    const tKm = p => cKm(p.travel);
+    const pKm = (p, c) => cKm(p.programs && p.programs[c]);
+    const w3n = d => d ? Math.round(d.within3 / 100 * d.n) : null;   // count within 3 km
+    // district-wide share of a race group (%), from the fixed 2020 blocks (same in every era)
+    let _dShare = null;
+    function districtShare(g) {
+      if (!_dShare) {
+        _dShare = {};
+        const feats = DATA.states.c.levels.elementary.zones.features;
+        let tot = 0; const sums = {};
+        feats.forEach(f => {
+          const sg = f.properties.seg || {};
+          tot += sg.total_pop || 0;
+          ["white", "asian", "hispanic", "black", "twoplus"].forEach(k => {
+            sums[k] = (sums[k] || 0) + (sg[k + "_n"] || 0);
+          });
+        });
+        Object.keys(sums).forEach(k => { _dShare[k] = Math.round(sums[k] / tot * 1000) / 10; });
+      }
+      return _dShare[g];
+    }
+    const CHOROPLETH = [
+      { id: "polsby_popper", label: "Polsby–Popper", get: p => p.polsby_popper, fmt: fmtRatio },
+      { id: "reock", label: "Reock", get: p => p.reock, fmt: fmtRatio },
+      { id: "convex_hull", label: "Convex hull ratio", get: p => p.convex_hull, fmt: fmtRatio },
+      { id: "bounding_rect", label: "Min. rectangle ratio", get: p => p.bounding_rect, fmt: fmtRatio },
+      { id: "moment_inertia", label: "Moment of inertia", get: p => p.moment_inertia, fmt: fmtRatio },
+      { id: "white", label: "White %", get: p => p.seg && p.seg.white, getN: p => p.seg && p.seg.white_n, fmt: fmtPct, diverge: () => districtShare("white"), midNote: "district-wide" },
+      { id: "asian", label: "Asian %", get: p => p.seg && p.seg.asian, getN: p => p.seg && p.seg.asian_n, fmt: fmtPct, diverge: () => districtShare("asian"), midNote: "district-wide" },
+      { id: "hispanic", label: "Hispanic %", get: p => p.seg && p.seg.hispanic, getN: p => p.seg && p.seg.hispanic_n, fmt: fmtPct, diverge: () => districtShare("hispanic"), midNote: "district-wide" },
+      { id: "black", label: "Black %", get: p => p.seg && p.seg.black, getN: p => p.seg && p.seg.black_n, fmt: fmtPct, diverge: () => districtShare("black"), midNote: "district-wide" },
+      { id: "income", label: "Median household income", get: p => p.housing && p.housing.income, fmt: money },
+      { id: "home_value", label: "Median home value", get: p => p.housing && p.housing.home_value, fmt: money },
+      { id: "limited", label: "Limited-English households %", get: p => p.language && p.language.limited_pct, getN: p => p.language && p.language.limited_n, fmt: fmtPct, invert: true },
+      { id: "kids", label: "School-age population (5–17)", get: p => p.kids_5_17, fmt: fmtInt },
+      { id: "mix_gap", label: "Mix gap (difference from district mix)", get: p => p.mix_gap, fmt: fmtRatio, invert: true },
+      { id: "enroll", label: "School enrollment (actual headcount)", get: p => p.cap && p.cap.enroll, fmt: fmtInt, noColor: true },
+      { id: "capacity", label: "Building capacity (seats)", get: p => p.cap && p.cap.capacity, fmt: fmtInt, noColor: true },
+      { id: "utilization", label: "Utilization (% of capacity)", get: p => p.cap && p.cap.utilization, fmt: fmtPct, diverge: 100 },
+      { id: "travel_avg", label: "Avg. distance to assigned school", get: p => tKm(p) && tKm(p).avg, fmt: fmtKm, invert: true },
+      { id: "travel_w3", label: "Within 3 km of assigned school", get: p => tKm(p) && tKm(p).within3, getN: p => w3n(tKm(p)), fmt: fmtPct },
+      { id: "al_avg", label: "Avg. distance to Advanced Learning", get: p => pKm(p, "advanced_learning") && pKm(p, "advanced_learning").avg, fmt: fmtKm, invert: true },
+      { id: "al_w3", label: "Within 3 km of Advanced Learning", get: p => pKm(p, "advanced_learning") && pKm(p, "advanced_learning").within3, getN: p => w3n(pKm(p, "advanced_learning")), fmt: fmtPct },
+      { id: "imm_avg", label: "Avg. distance to dual-language", get: p => pKm(p, "language_immersion") && pKm(p, "language_immersion").avg, fmt: fmtKm, invert: true },
+      { id: "imm_w3", label: "Within 3 km of dual-language", get: p => pKm(p, "language_immersion") && pKm(p, "language_immersion").within3, getN: p => w3n(pKm(p, "language_immersion")), fmt: fmtPct },
+      { id: "sped_avg", label: "Avg. distance to special-ed", get: p => pKm(p, "special_education") && pKm(p, "special_education").avg, fmt: fmtKm, invert: true },
+      { id: "sped_w3", label: "Within 3 km of special-ed", get: p => pKm(p, "special_education") && pKm(p, "special_education").within3, getN: p => w3n(pKm(p, "special_education")), fmt: fmtPct },
+      { id: "ib_avg", label: "Avg. distance to IB (Interlake)", get: p => pKm(p, "ib") && pKm(p, "ib").avg, fmt: fmtKm, invert: true },
+      { id: "ib_w3", label: "Within 3 km of IB (Interlake)", get: p => pKm(p, "ib") && pKm(p, "ib").within3, getN: p => w3n(pKm(p, "ib")), fmt: fmtPct }
+    ];
+    const CHORO_BY_ID = Object.fromEntries(CHOROPLETH.map(m => [m.id, m]));
+    const CHORO_RACE = { white: 1, asian: 1, hispanic: 1, black: 1 };
+    const PROG_PREFIX = { advanced_learning: "al", language_immersion: "imm", special_education: "sped", ib: "ib" };
+    function choroBox(id) {
+      if (CHORO_BY_ID[id] && CHORO_BY_ID[id].noColor) return "";
+      return `<label class="choro" title="Color the map by this metric"><input type="checkbox" class="choro-check" data-metric="${id}"${activeMetric === id ? " checked" : ""}></label>`;
+    }
+
+    // Cumulative distribution chart (SVG). X = distance 0..max, Y = % of students within.
+    const CHART = { w: 264, h: 134, l: 30, r: 10, t: 12, b: 28 };
+    function chartGeom() {
+      const c = CHART;
+      return { x0: c.l, x1: c.w - c.r, y0: c.h - c.b, y1: c.t, pw: c.w - c.l - c.r, ph: c.h - c.b - c.t };
+    }
+    function buildChart(d, unit) {
+      if (!d || !d.cdf || d.cdf.max <= 0) return `<p class="dist-empty">Everyone is at essentially the same distance.</p>`;
+      const cdf = d.cdf, g = chartGeom(), N = cdf.y.length - 1;
+      const px = i => g.x0 + (i / N) * g.pw;
+      const py = v => g.y0 - (v / 100) * g.ph;
+      const pts = cdf.y.map((v, i) => `${px(i).toFixed(1)},${py(v).toFixed(1)}`).join(" ");
+      const area = `${g.x0.toFixed(1)},${g.y0.toFixed(1)} ${pts} ${g.x1.toFixed(1)},${g.y0.toFixed(1)}`;
+      const n = d.n || 0;
+      const yg = [0, 50, 100].map(v => {
+        const lab = viewMode === "pct" ? v : fmtInt(Math.round(v / 100 * n));
+        return `<line class="grid" x1="${g.x0}" y1="${py(v)}" x2="${g.x1}" y2="${py(v)}"/>` +
+          `<text class="ax" x="${g.x0 - 5}" y="${py(v) + 3}" text-anchor="end">${lab}</text>`;
+      }).join("");
+      const xt = [0, 0.5, 1].map(f =>
+        `<text class="ax" x="${g.x0 + f * g.pw}" y="${g.y0 + 16}" text-anchor="middle">${(cdf.max * f).toFixed(cdf.max < 10 ? 1 : 0)}</text>`).join("");
+      const capY = viewMode === "pct" ? "% of students within" : "students within";
+      return `<svg class="dist-chart" viewBox="0 0 ${CHART.w} ${CHART.h}" data-max="${cdf.max}" data-unit="${unit}" data-n="${n}" data-mode="${viewMode}" data-y="${cdf.y.join(",")}">` +
+        yg + xt +
+        `<polygon class="area" points="${area}"/><polyline class="line" points="${pts}"/>` +
+        `<line class="guide" y1="${g.y1}" y2="${g.y0}" style="display:none"/>` +
+        `<circle class="cmark" r="3.2" style="display:none"/>` +
+        `<rect class="hit" x="${g.x0}" y="${g.y1}" width="${g.pw}" height="${g.ph}" fill="transparent"/>` +
+        `<text class="ctip" text-anchor="middle" style="display:none"></text></svg>` +
+        `<div class="chart-cap">Y: ${capY} &nbsp;·&nbsp; X: distance (${unit})</div>`;
+    }
+    function wireCharts(root) {
+      root.querySelectorAll(".dist-chart:not(.time-chart)").forEach(svg => {
+        const max = +svg.dataset.max, unit = svg.dataset.unit, ys = svg.dataset.y.split(",").map(Number);
+        const nTot = +svg.dataset.n, mode = svg.dataset.mode;
+        const g = chartGeom(), N = ys.length - 1;
+        const hit = svg.querySelector(".hit"), guide = svg.querySelector(".guide"),
+              mark = svg.querySelector(".cmark"), tip = svg.querySelector(".ctip");
+        hit.addEventListener("mousemove", ev => {
+          const r = svg.getBoundingClientRect();
+          let f = ((ev.clientX - r.left) / r.width * CHART.w - g.x0) / g.pw;
+          f = Math.max(0, Math.min(1, f));
+          const fi = f * N, i0 = Math.floor(fi), i1 = Math.min(i0 + 1, N);
+          const yv = ys[i0] + (ys[i1] - ys[i0]) * (fi - i0);
+          const xp = g.x0 + f * g.pw, yp = g.y0 - (yv / 100) * g.ph;
+          guide.setAttribute("x1", xp); guide.setAttribute("x2", xp); guide.style.display = "";
+          mark.setAttribute("cx", xp); mark.setAttribute("cy", yp); mark.style.display = "";
+          const yLabel = mode === "pct" ? `${Math.round(yv)}%` : `${Math.round(yv / 100 * nTot).toLocaleString()}`;
+          tip.textContent = `${(max * f).toFixed(1)} ${unit} · ${yLabel}`;
+          tip.setAttribute("x", Math.min(Math.max(xp, 24), CHART.w - 24));
+          tip.setAttribute("y", Math.max(yp - 7, 10)); tip.style.display = "";
+        });
+        hit.addEventListener("mouseleave", () => {
+          guide.style.display = "none"; mark.style.display = "none"; tip.style.display = "none";
+        });
+      });
+    }
+    function renderDist(d, unit, kind) {
+      if (!d) return `<p class="dist-empty">No data.</p>`;
+      const note = kind === "road"
+        ? `Driving via roads, no traffic (OpenRouteService), weighted by school-age children. Estimated from block-level data (a very close approximation).`
+        : kind === "walk"
+        ? `Walking via streets &amp; paths (OpenRouteService), weighted by school-age children. Estimated from block-level data (a very close approximation).`
+        : `Estimated from block-level data (a very close approximation). Straight-line ${unit}, weighted by school-age children.`;
+      return buildChart(d, unit) +
+        `<p class="dist-stats">min ${d.min} · Q1 ${d.q1} · <b>median ${d.med}</b> · Q3 ${d.q3} · max ${d.max} ${unit}</p>` +
+        `<p class="dist-note">${note}</p>`;
+    }
+    const modeAltBtn = (scope, has, mode) => has
+      ? `<button class="view-toggle mode-alt" data-scope="${scope}">${mode === "km" ? "show time" : "show distance"}</button>`
+      : "";
+    function accessStats(d, mode, box1, box2) {   // headline pair for a travel/program entry
+      const prof = profOf(d);
+      const walk = !!prof && prof === d.walk;
+      const isMin = mode === "min" && prof;
+      const s = isMin ? prof.min : (prof ? prof.km : d);
+      if (!s) return "";
+      const unit = isMin ? " min" : " km";
+      const label1 = isMin ? (walk ? "Avg. walk time" : "Avg. drive time")
+        : prof ? (walk ? "Avg. walking distance" : "Avg. road distance") : "Avg. straight-line distance";
+      const thr = isMin
+        ? (walk ? { v: s.within20, lab: "Within 20 min walk" } : { v: s.within10, lab: "Within 10 min drive" })
+        : { v: s.within3, lab: "Within 3 km" };
+      return `<div class="stat">${box1 || ""}<div class="stat-val">${s.avg}<span class="metric-unit">${unit}</span></div><div class="stat-lab">${label1}</div></div>` +
+        `<div class="stat">${box2 || ""}<div class="stat-val">${pctOrN(thr.v, Math.round(thr.v / 100 * s.n))}</div><div class="stat-lab">${thr.lab}</div></div>`;
+    }
+
+    function sectionCompactness(props) {
+      const cards = COMPACTNESS.map(m => {
+        const raw = props[m.key];
+        const val = (raw == null || Number.isNaN(Number(raw))) ? "&mdash;"
+          : m.pct  ? `${Math.round(raw)}<span class="metric-unit">%</span>`
+          : m.unit ? `${raw}<span class="metric-unit"> ${m.unit}</span>`
+          : Number(raw).toFixed(3);
+        return `<div class="metric-card">${CHORO_BY_ID[m.key] ? choroBox(m.key) : ""}<div class="metric-val">${val}</div><div class="metric-label">${m.label}</div></div>`;
+      }).join("");
+      const defs = COMPACTNESS.map(m => `<dt>${m.label}</dt><dd>${m.hint || ""}</dd>`).join("");
+      return `<div class="section-head"><span class="detail-section-label">Compactness (shape only)</span>` +
+        `<button class="info-btn toggle-btn" data-target="metric-defs" aria-expanded="false" title="How these are calculated">i</button></div>` +
+        `<div class="metric-defs" id="metric-defs" hidden><dl>${defs}</dl></div>` +
+        `<div class="metric-grid">${cards}</div>`;
+    }
+
+    function sectionCapacity(props) {
+      const c = props.cap; if (!c) return "";
+      const defs = `<dl><dt>Enrollment</dt><dd>Actual students at this zone's school in the era's school year — a real headcount, so era-to-era changes mix boundary effects with enrollment drift (unlike the fixed-2020 demographics).</dd>` +
+        `<dt>Capacity</dt><dd>The district's own building-capacity figure for the era. Definitions and vintages differ by era and level (see Methods) — treat cross-era utilization comparisons as approximate.</dd></dl>`;
+      return `<div class="impact-section"><div class="section-head"><span class="detail-section-label">School capacity (${c.enroll_year || ""})</span>` +
+        `<button class="info-btn toggle-btn" data-target="cap-defs" aria-expanded="false" title="What these mean">i</button></div>` +
+        `<div class="metric-defs" id="cap-defs" hidden>${defs}</div>` +
+        `<div class="stat-row three">` +
+        `<div class="stat">${choroBox("enroll")}<div class="stat-val">${c.enroll != null ? fmtInt(c.enroll) : "&mdash;"}</div><div class="stat-lab">Enrollment</div></div>` +
+        `<div class="stat">${choroBox("capacity")}<div class="stat-val">${c.capacity != null ? fmtInt(c.capacity) : "&mdash;"}</div><div class="stat-lab">Building capacity</div></div>` +
+        `<div class="stat">${choroBox("utilization")}<div class="stat-val">${c.utilization != null ? c.utilization + '<span class="metric-unit">%</span>' : "&mdash;"}</div><div class="stat-lab">Utilization</div></div>` +
+        `</div></div>`;
+    }
+
+    function sectionSeg(props) {
+      const s = props.seg; if (!s || !s.total_pop) return "";
+      const groups = RACE_GROUPS.map(g => {
+        const val = g.key === "other" ? r1((s.aian || 0) + (s.nhpi || 0) + (s.other || 0)) : (s[g.key] || 0);
+        const n = g.key === "other" ? ((s.aian_n || 0) + (s.nhpi_n || 0) + (s.other_n || 0)) : (s[g.key + "_n"] || 0);
+        return { ...g, val, n };
+      }).filter(g => g.val > 0);
+      const bar = groups.map(g => `<span class="race-seg" style="width:${g.val}%;background:${g.color}" title="${g.label} ${g.val}%"></span>`).join("");
+      const list = groups.map(g => `<li>${CHORO_RACE[g.key] ? choroBox(g.key) : ""}<span class="dot" style="background:${g.color}"></span>${g.label} <b>${viewMode === "pct" ? g.val + "%" : fmtInt(g.n)}</b></li>`).join("");
+      const defs = `<dl><dt>Race &amp; ethnicity</dt><dd>2020 Census categories. Hispanic/Latino is an <em>ethnicity</em> (any race) counted separately; the other groups are non-Hispanic.</dd>` +
+        `<dt>Two or more</dt><dd>People who identify with two or more races (for example White and Asian).</dd>` +
+        `<dt>Other</dt><dd>Combines American Indian / Alaska Native, Native Hawaiian / Pacific Islander, and other single races.</dd>` +
+        `<dt>Mix gap</dt><dd>How different this zone's racial mix is from the district-wide mix (a divergence measure). 0 = the zone mirrors the district; larger = less alike. Population-weighted mix gaps sum to a district-wide segregation index, so this is the district overview's segregation number seen zone by zone. Residential (2020), not enrollment.</dd></dl>`;
+      const mg = props.mix_gap;
+      const mgCard = (mg != null)
+        ? `<div class="stat mixgap-stat">${choroBox("mix_gap")}<div class="stat-val">${Number(mg).toFixed(3)}</div>` +
+          `<div class="stat-lab">Mix gap — difference from the district-wide mix (0 = mirrors the district)</div></div>`
+        : "";
+      return `<div class="impact-section"><div class="section-head"><span class="detail-section-label">Who lives here · race (2020)</span>` +
+        `<button class="info-btn toggle-btn" data-target="seg-defs" aria-expanded="false" title="How these categories work">i</button></div>` +
+        `<div class="metric-defs" id="seg-defs" hidden>${defs}</div>` +
+        `<div class="race-bar">${bar}</div><ul class="race-list">${list}</ul>` +
+        mgCard +
+        `<p class="sub">${s.total_pop.toLocaleString()} residents. Residential composition, not confirmed school enrollment.</p></div>`;
+    }
+
+    // Time-series chart (Zillow ZHVI). Same look as the distribution chart; X = time, Y = $.
+    function buildTimeChart(z) {
+      if (!z || !z.points || z.points.length < 2) return "";
+      const pts0 = z.points, g = chartGeom(), N = pts0.length - 1;
+      const vs = pts0.map(p => p.v), mn = Math.min(...vs), mx = Math.max(...vs), span = (mx - mn) || 1;
+      const px = i => g.x0 + (i / N) * g.pw;
+      const py = v => g.y0 - ((v - mn) / span) * g.ph;
+      const line = pts0.map((p, i) => `${px(i).toFixed(1)},${py(p.v).toFixed(1)}`).join(" ");
+      const area = `${g.x0.toFixed(1)},${g.y0.toFixed(1)} ${line} ${g.x1.toFixed(1)},${g.y0.toFixed(1)}`;
+      const yg = [mn, (mn + mx) / 2, mx].map(v =>
+        `<line class="grid" x1="${g.x0}" y1="${py(v)}" x2="${g.x1}" y2="${py(v)}"/>` +
+        `<text class="ax" x="${g.x0 - 4}" y="${py(v) + 3}" text-anchor="end">${money(Math.round(v))}</text>`).join("");
+      const xt = [0, 0.5, 1].map(f =>
+        `<text class="ax" x="${g.x0 + f * g.pw}" y="${g.y0 + 16}" text-anchor="middle">${pts0[Math.round(f * N)].d.slice(0, 4)}</text>`).join("");
+      return `<svg class="dist-chart time-chart" viewBox="0 0 ${CHART.w} ${CHART.h}" ` +
+        `data-vals="${vs.join(",")}" data-dates="${pts0.map(p => p.d).join(",")}" data-min="${mn}" data-max="${mx}">` +
+        yg + xt +
+        `<polygon class="area" points="${area}"/><polyline class="line" points="${line}"/>` +
+        `<line class="guide" y1="${g.y1}" y2="${g.y0}" style="display:none"/>` +
+        `<circle class="cmark" r="3.2" style="display:none"/>` +
+        `<rect class="hit" x="${g.x0}" y="${g.y1}" width="${g.pw}" height="${g.ph}" fill="transparent"/>` +
+        `<text class="ctip" text-anchor="middle" style="display:none"></text></svg>` +
+        `<div class="chart-cap">Typical home value, City of Bellevue (Zillow ZHVI)</div>`;
+    }
+    function wireTimeCharts(root) {
+      root.querySelectorAll(".time-chart").forEach(svg => {
+        const vs = svg.dataset.vals.split(",").map(Number), ds = svg.dataset.dates.split(",");
+        const mn = +svg.dataset.min, mx = +svg.dataset.max, span = (mx - mn) || 1;
+        const g = chartGeom(), N = vs.length - 1;
+        const hit = svg.querySelector(".hit"), guide = svg.querySelector(".guide"),
+              mark = svg.querySelector(".cmark"), tip = svg.querySelector(".ctip");
+        hit.addEventListener("mousemove", ev => {
+          const r = svg.getBoundingClientRect();
+          let f = ((ev.clientX - r.left) / r.width * CHART.w - g.x0) / g.pw;
+          f = Math.max(0, Math.min(1, f));
+          const i = Math.round(f * N);
+          const xp = g.x0 + (i / N) * g.pw, yp = g.y0 - ((vs[i] - mn) / span) * g.ph;
+          guide.setAttribute("x1", xp); guide.setAttribute("x2", xp); guide.style.display = "";
+          mark.setAttribute("cx", xp); mark.setAttribute("cy", yp); mark.style.display = "";
+          tip.textContent = `${ds[i]} · $${vs[i].toLocaleString()}`;
+          tip.setAttribute("x", Math.min(Math.max(xp, 40), CHART.w - 40));
+          tip.setAttribute("y", Math.max(yp - 7, 10)); tip.style.display = "";
+        });
+        hit.addEventListener("mouseleave", () => {
+          guide.style.display = "none"; mark.style.display = "none"; tip.style.display = "none";
+        });
+      });
+    }
+
+    function sectionHousing(props) {
+      const h = props.housing; if (!h) return "";
+      return `<div class="impact-section"><div class="section-head"><span class="detail-section-label">Housing (ACS 2023)</span>` +
+        `<button class="toggle-btn mini" data-target="zhvi-box" aria-expanded="false">price history</button></div>` +
+        `<div class="dist-box" id="zhvi-box" hidden>${buildTimeChart(DATA && DATA.zhvi)}` +
+          `<p class="dist-note">District-wide market context, the same for every zone. Rising prices are the housing market at work, <b>not</b> an effect of the rezoning.</p></div>` +
+        `<div class="stat-row three">` +
+        `<div class="stat">${choroBox("income")}<div class="stat-val">${money(h.income)}</div><div class="stat-lab">Median household income</div></div>` +
+        `<div class="stat">${choroBox("home_value")}<div class="stat-val">${money(h.home_value)}</div><div class="stat-lab">Median home value</div></div>` +
+        `<div class="stat"><div class="stat-val">${rent(h.rent)}</div><div class="stat-lab">Median gross rent</div></div>` +
+        `</div><p class="sub">Population-weighted ACS block-group medians (approximate).</p></div>`;
+    }
+
+    function sectionLanguage(props) {
+      const L = props.language; if (!L || L.limited_pct == null) return "";
+      const cats = [
+        { pct: L.spanish_pct,  n: L.spanish_n,  label: "Spanish",                ex: "Spanish" },
+        { pct: L.other_ie_pct, n: L.other_ie_n, label: "Other Indo-European",    ex: "e.g. Russian, Hindi, Ukrainian, Persian" },
+        { pct: L.api_pct,      n: L.api_n,      label: "Asian &amp; Pacific Island", ex: "e.g. Chinese, Korean, Vietnamese, Japanese" },
+        { pct: L.other_pct,    n: L.other_n,    label: "Other",                  ex: "e.g. Arabic, Amharic, Somali" }
+      ];
+      const rows = cats.map(c =>
+        `<li><span class="lang-name">${c.label}</span><span class="lang-ex">${c.ex}</span><b>${viewMode === "pct" ? c.pct + "%" : fmtInt(c.n)}</b></li>`).join("");
+      const defs = `<dl><dt>Limited-English household</dt><dd>A household where no one aged 14 or older speaks only English, and no one aged 14+ speaks English "very well" (the Census measure of a linguistically isolated household).</dd>` +
+        `<dt>Language groups</dt><dd>ACS reports only these four broad buckets, not individual languages. The examples are common languages within each bucket, not this zone's specific mix.</dd></dl>`;
+      return `<div class="impact-section"><div class="section-head"><span class="detail-section-label">Language (ACS 2023)</span>` +
+        `<button class="info-btn toggle-btn" data-target="lang-defs" aria-expanded="false" title="What this means">i</button></div>` +
+        `<div class="metric-defs" id="lang-defs" hidden>${defs}</div>` +
+        `<div class="stat">${choroBox("limited")}<div class="stat-val">${pctOrN(L.limited_pct, L.limited_n)}</div><div class="stat-lab">Households with limited English</div></div>` +
+        `<ul class="lang-list">${rows}</ul></div>`;
+    }
+
+    function sectionTravel(props) {
+      const t = props.travel; if (!t) return "";
+      const prof = profOf(t);
+      const s = (travelMode === "min" && prof) ? prof.min : (prof ? prof.km : t);
+      const unit = (travelMode === "min" && prof) ? "min" : "km";
+      const kind = prof ? (prof === t.walk ? "walk" : "road") : "air";
+      const stats = accessStats(t, travelMode, choroBox("travel_avg"), choroBox("travel_w3"));
+      return `<div class="impact-section"><div class="section-head"><span class="detail-section-label">Travel to assigned school</span>` +
+        `<span class="head-btns">${modeAltBtn("travel", !!prof, travelMode)}` +
+        `<button class="toggle-btn mini" data-target="travel-dist" aria-expanded="false">distribution</button></span></div>` +
+        `<div class="stat-row">${stats}</div>` +
+        `<div class="dist-box" id="travel-dist" hidden>${renderDist(s, unit, kind)}</div></div>`;
+    }
+
+    function sectionPrograms(props) {
+      const P = props.programs || {}; const cats = Object.keys(P).filter(c => P[c]);
+      if (!cats.length) return "";
+      const anyProf = cats.some(c => profOf(P[c]));
+      const rows = cats.map(c => {
+        const d = P[c]; const id = "prog-" + c + "-dist";
+        const px = PROG_PREFIX[c] || "";
+        const prof = profOf(d);
+        const s = (progMode === "min" && prof) ? prof.min : (prof ? prof.km : d);
+        const unit = (progMode === "min" && prof) ? "min" : "km";
+        const kind = prof ? (prof === d.walk ? "walk" : "road") : "air";
+        const stats = accessStats(d, progMode, px ? choroBox(px + "_avg") : "", px ? choroBox(px + "_w3") : "");
+        return `<div class="prog-row"><div class="section-head sub-head"><span class="prog-name">${PROG_LABELS[c] || c}</span>` +
+          `<button class="toggle-btn mini" data-target="${id}" aria-expanded="false">distribution</button></div>` +
+          `<div class="stat-row">${stats}</div>` +
+          `<div class="dist-box" id="${id}" hidden>${renderDist(s, unit, kind)}</div></div>`;
+      }).join("");
+      return `<div class="impact-section"><div class="section-head"><span class="detail-section-label">Nearest program access</span>` +
+        `<span class="head-btns">${modeAltBtn("prog", anyProf, progMode)}</span></div>` + rows +
+        `<p class="sub">From homes to the nearest school hosting each program. "Reachable," not eligibility.</p></div>`;
+    }
+
+    function openDetail(props, lvl) {
+      currentZone = { props, lvl };
+      const kids = props.kids_5_17;
+      const header =
+        `<p class="detail-eyebrow">${LEVEL_META[lvl].legend} &middot; ${eraLabel()}</p>` +
+        `<h2 class="detail-title">${props.name} ${LEVEL_META[lvl].suffix}</h2>` +
+        stabilityHTML(lvl, props.name) +
+        `<div class="zone-meta">` +
+          (kids != null ? `<span class="zone-pop">${choroBox("kids")}<b>${fmtInt(kids)}</b> school-age (5–17)</span>` : `<span></span>`) +
+          `<button class="view-toggle" title="Switch between percentages and counts">${viewMode === "pct" ? "Show counts" : "Show %"}</button>` +
+        `</div>`;
+      document.getElementById("detail-body").innerHTML =
+        header + summaryHTML(props, lvl) +
+        sectionCompactness(props) + sectionCapacity(props) + sectionSeg(props) + sectionHousing(props) +
+        sectionLanguage(props) + sectionTravel(props) + sectionPrograms(props);
+      wireCharts(document.getElementById("detail-body"));
+      wireTimeCharts(document.getElementById("detail-body"));
+      detailPanel.classList.add("open");
+    }
+
+    // ----- District overview (the two district-wide impacts: segregation index + participation) -----
+    function openDistrict() {
+      const st = DATA && DATA.districtStats;
+      if (!st) return;
+      if (selected) { map.setFeatureState({ source: `zones-${selected.level}`, id: selected.id }, { selected: false }); selected = null; }
+      currentZone = null;
+      const table = (basis, label) => {
+        const rows = LEVELS.map(l => {
+          const s = st[basis][l];
+          return `<div class="idx-row"><span class="idx-level">${LEVEL_META[l].suffix.replace(" School", "")}</span>` +
+            `<span class="idx-val">${s.D.toFixed(3)}</span><span class="idx-val">${s.H.toFixed(3)}</span>` +
+            `<span class="idx-n">${s.n} schools</span></div>`;
+        }).join("");
+        return `<p class="idx-basis">${label}</p>` +
+          `<div class="idx-table"><div class="idx-row idx-head"><span class="idx-level"></span>` +
+          `<span class="idx-val">Dissimilarity</span><span class="idx-val">Theil's H</span><span class="idx-n"></span></div>${rows}</div>`;
+      };
+      const segDefs = `<dl>` +
+        `<dt>Dissimilarity index (D)</dt><dd>Compares White vs non-White. The share of one group that would have to change schools for a perfectly even spread. 0 = perfectly even, 1 = totally separate.</dd>` +
+        `<dt>Theil's H (entropy index)</dt><dd>Uses all six race groups at once. How much less diverse the average school is than the district overall. 0 = every school mirrors the district, 1 = total separation.</dd>` +
+        `<dt>Two bases</dt><dd><b>Actual enrollment</b> = who attends each zoned school (NCES 2023-24), the real outcome, including transfers and program placements. <b>Residential</b> = who lives inside each zone (2020 Census), what the boundary lines alone would produce. The gap between them is the effect of choice, transfers, and programs.</dd>` +
+        `<dt>Caveats</dt><dd>Choice schools excluded (not zone units). With few schools per level (4-5 at secondary), small differences are not meaningful. Current (post-2023) map only; the before/after comes with the pre-2023 boundaries.</dd></dl>`;
+      document.getElementById("detail-body").innerHTML =
+        `<p class="detail-eyebrow">Bellevue School District</p>` +
+        `<h2 class="detail-title">District overview</h2>` +
+        `<div class="section-head"><span class="detail-section-label">Segregation across schools</span>` +
+          `<button class="info-btn toggle-btn" data-target="seg-idx-defs" aria-expanded="false" title="What these indices mean">i</button></div>` +
+        `<div class="metric-defs" id="seg-idx-defs" hidden>${segDefs}</div>` +
+        table("enrollment", "Actual school enrollment (2023–24)") +
+        table("residential", "Residential (who lives in each zone, 2020)") +
+        `<p class="sub">One number per level for the whole district: how unevenly racial groups are spread across that level's schools. Enrollment runs higher than residential &mdash; choice, transfers, and programs re-sort students beyond what the lines do. Neither is a fairness verdict.</p>` +
+        `<div class="impact-section"><div class="section-head"><span class="detail-section-label">Participation (the process)</span></div>` +
+          `<p class="district-text">The 2023 closures came out of the district's <em>"Planning for the Future"</em> process: staff-built consolidation scenarios by region, board study sessions, and public meetings and comment periods through the 2022&ndash;23 winter, ending in the board's spring 2023 vote to close Wilburton and Eastgate.</p>` +
+          `<p class="district-text">The formal opportunity to participate was the same for everyone &mdash; the meetings and comment periods were open district-wide. The open question, raised in community pushback and local news coverage at the time, is whether <em>effective</em> voice was equal: whether well-organized or well-connected communities were heard more than quieter ones. We present the process facts and leave that judgment to the reader.</p>` +
+          `<p class="sub">A fuller procedural record (meeting counts, translation availability, public-comment records, and what changed in response) is still being compiled.</p></div>`;
+      detailPanel.classList.add("open");
+    }
+    document.getElementById("district-btn").addEventListener("click", openDistrict);
+
+    // One delegated handler for expandables (info + distribution toggles) and the % / count view switch.
+    detailPanel.addEventListener("click", (e) => {
+      const dm = e.target.closest(".mode-alt");   // must run BEFORE .view-toggle (shares that class for styling)
+      if (dm) {
+        if (dm.dataset.scope === "travel") travelMode = travelMode === "km" ? "min" : "km";
+        else progMode = progMode === "km" ? "min" : "km";
+        if (currentZone) openDetail(currentZone.props, currentZone.lvl);
+        return;
+      }
+      if (e.target.closest(".view-toggle")) {
+        viewMode = viewMode === "pct" ? "pop" : "pct";
+        applyChoropleth();   // count/percent metrics recolor + relabel the legend
+        if (currentZone) openDetail(currentZone.props, currentZone.lvl);
+        return;
+      }
+      const btn = e.target.closest(".toggle-btn"); if (!btn) return;
+      const box = document.getElementById(btn.dataset.target); if (!box) return;
+      const open = box.hasAttribute("hidden");
+      if (open) box.removeAttribute("hidden"); else box.setAttribute("hidden", "");
+      btn.classList.toggle("open", open);
+      btn.setAttribute("aria-expanded", String(open));
+    });
+
+    // Checking a metric's box colors the whole map by it (one at a time).
+    detailPanel.addEventListener("change", (e) => {
+      const cb = e.target.closest(".choro-check"); if (!cb) return;
+      activeMetric = cb.checked ? cb.dataset.metric : null;
+      applyChoropleth();
+      if (currentZone) openDetail(currentZone.props, currentZone.lvl);   // refresh other checkboxes
+    });
+    document.getElementById("legend-panel").addEventListener("click", (e) => {
+      if (e.target.closest(".choro-clear")) {
+        activeMetric = null; rankingOpen = false; applyChoropleth();
+        if (currentZone) openDetail(currentZone.props, currentZone.lvl);
+        return;
+      }
+      if (e.target.closest(".choro-rank-btn")) {
+        rankingOpen = !rankingOpen; applyChoropleth();   // re-render legend with the list shown/hidden
+      }
+    });
+
+    // Block race layer: zone fills go colorless; blocks colored by a group's share,
+    // diverging around the district-wide share (blue = below, red = above). Neutral by design.
+    const GRP_KEY = { w: "white", a: "asian", h: "hispanic", b: "black" };
+    const GRP_LABEL = { w: "White %", a: "Asian %", h: "Hispanic %", b: "Black %" };
+    const MIN_BLOCK_POP = 20;   // tiny blocks give noisy percentages - grey them out
+    function applyRaceLayer() {
+      if (!DATA || !map.getLayer("blocks-race-fill")) return;
+      if (!raceLayerOn) {
+        map.setLayoutProperty("blocks-race-fill", "visibility", "none");
+        applyChoropleth();   // restore zone fills + whatever legend was active
+        return;
+      }
+      for (const L of LEVELS) {
+        if (map.getLayer(`fill-${L}`)) map.setPaintProperty(`fill-${L}`, "fill-opacity", 0);
+      }
+      map.setLayoutProperty("blocks-race-fill", "visibility", "visible");
+      const mid = districtShare(GRP_KEY[raceGroup]);
+      // span: largest deviation among populated blocks (capped so one outlier block doesn't flatten the scale)
+      let span = 1;
+      DATA.blocksRace.features.forEach(f => {
+        const p = f.properties;
+        if ((p.pop || 0) >= MIN_BLOCK_POP && p[raceGroup] != null) {
+          span = Math.max(span, Math.abs(p[raceGroup] - mid));
+        }
+      });
+      span = Math.min(span, 60);
+      map.setPaintProperty("blocks-race-fill", "fill-color", [
+        "case",
+        ["<", ["coalesce", ["get", "pop"], 0], MIN_BLOCK_POP], "rgba(180,180,180,0.35)",
+        ["interpolate", ["linear"], ["coalesce", ["get", raceGroup], mid],
+          mid - span, "rgb(43,108,176)",
+          mid, "rgb(242,237,226)",
+          mid + span, "rgb(192,57,43)"]
+      ]);
+      updateRaceLegend(mid, span);
+    }
+    function updateRaceLegend(mid, span) {
+      const el = document.getElementById("choro-legend");
+      if (!el) return;
+      el.removeAttribute("hidden");
+      el.innerHTML = `<div class="choro-title">Blocks colored by <b>${GRP_LABEL[raceGroup]}</b> (residential, 2020)</div>` +
+        `<div class="choro-bar" style="background:linear-gradient(to right, rgb(43,108,176), rgb(242,237,226), rgb(192,57,43))"></div>` +
+        `<div class="choro-ends"><span>${Math.max(0, Math.round(mid - span))}%</span><span>${mid}% district-wide</span><span>${Math.min(100, Math.round(mid + span))}%</span></div>` +
+        `<p class="map-hint">Where people live, not school enrollment. Blocks under ${MIN_BLOCK_POP} residents are greyed (noisy).</p>`;
+    }
+
+    // Neighborhood mode: zone fills go colorless; neighborhoods are colored by split count.
+    function applyNbhMode() {
+      if (!DATA || !map.getLayer("nbh-fill")) return;
+      if (!neighborhoodsOn) {
+        map.setPaintProperty("nbh-fill", "fill-opacity", 0);
+        applyChoropleth();                       // restores zone fills + the metric legend
+        return;
+      }
+      for (const L of LEVELS) {
+        if (map.getLayer(`fill-${L}`)) map.setPaintProperty(`fill-${L}`, "fill-opacity", 0);
+      }
+      const counts = {}; let maxC = 1;
+      const nkey = (activeState !== "c" && activeLevel === "elementary") ? "elementary_" + activeState : activeLevel;
+      DATA.neighborhoods.features.forEach(f => {
+        const s = f.properties.splits || {};
+        const sl = s[nkey] || s[activeLevel];
+        const c = (sl && sl.zones) ? sl.zones.length : 0;
+        counts[f.properties.name] = c;
+        if (c > maxC) maxC = c;
+      });
+      const expr = ["match", ["get", "name"]];
+      Object.entries(counts).forEach(([n, c]) =>
+        expr.push(n, c === 0 ? "#cccccc" : rygColor(maxC > 1 ? 1 - (c - 1) / (maxC - 1) : 1)));
+      expr.push("#cccccc");
+      map.setPaintProperty("nbh-fill", "fill-color", expr);
+      map.setPaintProperty("nbh-fill", "fill-opacity", 0.55);
+      updateNbhLegend(maxC);
+    }
+    function updateNbhLegend(maxC) {
+      const el = document.getElementById("choro-legend");
+      if (!el) return;
+      el.removeAttribute("hidden");
+      el.innerHTML = `<div class="choro-title">Neighborhoods colored by <b>schools split across</b></div>` +
+        `<div class="choro-bar"></div>` +
+        `<div class="choro-ends"><span>${maxC} schools (most split)</span><span>1 school (whole)</span></div>`;
+    }
+
+    // Recolor the active level's zones by activeMetric (or revert to the categorical palette).
+    function applyChoropleth() {
+      if (raceLayerOn) { applyRaceLayer(); return; }
+      if (neighborhoodsOn) { applyNbhMode(); return; }
+      const lvl = activeLevel, fill = `fill-${lvl}`;
+      if (!map.getLayer(fill) || !DATA) return;
+      const OPACITY = on => ["case",
+        ["boolean", ["feature-state", "hover"], false], on ? 0.88 : 0.72,
+        ["boolean", ["feature-state", "selected"], false], on ? 0.82 : 0.68,
+        on ? 0.7 : 0.42];
+      if (!activeMetric) {
+        map.setPaintProperty(fill, "fill-color", colorExpr(DATA.levels[lvl].labels));
+        map.setPaintProperty(fill, "fill-opacity", OPACITY(false));
+        updateChoroLegend(null);
+        return;
+      }
+      const meta = CHORO_BY_ID[activeMetric], feats = DATA.levels[lvl].zones.features;
+      // In count view, colour percentage/count metrics by their count instead of their %.
+      const useN = viewMode === "pop" && meta.getN;
+      const getV = useN ? meta.getN : meta.get;
+      const fmtV = useN ? fmtInt : meta.fmt;
+      const vals = feats.map(f => getV(f.properties)).filter(v => v != null && !isNaN(v));
+      if (!vals.length) { updateChoroLegend(meta, null, null, fmtV); return; }
+      const mn = Math.min(...vals), mx = Math.max(...vals);
+      let mid = typeof meta.diverge === "function" ? meta.diverge() : meta.diverge;
+      if (useN) mid = null;   // counts have no meaningful midpoint - fall back to plain ramp
+      const dspan = mid != null ? (Math.max(Math.abs(mx - mid), Math.abs(mn - mid)) || 1) : null;
+      const span = (mx - mn) || 1;
+      const expr = ["match", ["get", "name"]];
+      const rank = [];
+      feats.forEach(f => {
+        const v = getV(f.properties);
+        const bad = (v == null || isNaN(v));
+        let t, color;
+        if (bad) { t = null; color = "#cccccc"; }
+        else if (mid != null) {
+          // diverging around the midpoint: direction + magnitude, no better/worse ranking
+          color = divColor((v - mid) / dspan);
+          t = 1 - Math.abs(v - mid) / dspan;   // for ranking: closest to the midpoint first
+        } else {
+          t = (v - mn) / span;
+          if (meta.invert) t = 1 - t;   // e.g. distance: shorter = greener
+          color = rygColor(t);
+        }
+        expr.push(f.properties.name, color);
+        rank.push({ name: f.properties.name, v: bad ? null : v, t, color });
+      });
+      expr.push("#cccccc");
+      map.setPaintProperty(fill, "fill-color", expr);
+      map.setPaintProperty(fill, "fill-opacity", OPACITY(true));
+      rank.sort((a, b) => (b.t == null ? -1 : b.t) - (a.t == null ? -1 : a.t));
+      updateChoroLegend(meta, mn, mx, fmtV, rank, dspan);
+    }
+    function updateChoroLegend(meta, mn, mx, fmt, rank, dspan) {
+      const el = document.getElementById("choro-legend");
+      if (!el) return;
+      if (!meta) { el.setAttribute("hidden", ""); el.innerHTML = ""; return; }
+      el.removeAttribute("hidden");
+      const f = fmt || meta.fmt;
+      let barHtml, ends;
+      if (dspan != null && mn != null) {
+        const mid = typeof meta.diverge === "function" ? meta.diverge() : meta.diverge;
+        const note = meta.midNote ? ` ${meta.midNote}` : "";
+        const r1v = Math.round((mid - dspan) * 10) / 10, r2v = Math.round((mid + dspan) * 10) / 10;
+        barHtml = `<div class="choro-bar" style="background:linear-gradient(to right, rgb(43,108,176), rgb(242,237,226), rgb(192,57,43))"></div>`;
+        ends = `<span>${f(r1v)}</span><span>${f(mid)}${note}</span><span>${f(r2v)}</span>`;
+      } else {
+        barHtml = `<div class="choro-bar"></div>`;
+        ends = (mn == null) ? `<span>no data at this level</span>`
+          : meta.invert ? `<span>${f(mx)}</span><span>${f(mn)}</span>`
+          : `<span>${f(mn)}</span><span>${f(mx)}</span>`;
+      }
+      let html = `<div class="choro-title">Zones colored by <b>${meta.label}</b>` +
+        `<button class="choro-clear" title="Clear coloring">&times;</button></div>` +
+        barHtml + `<div class="choro-ends">${ends}</div>`;
+      if (rank && rank.some(r => r.v != null)) {
+        const rows = rank.map((r, i) =>
+          `<div class="rank-row"><span class="rank-n">${i + 1}</span>` +
+          `<span class="rank-dot" style="background:${r.color}"></span>` +
+          `<span class="rank-name">${r.name}</span>` +
+          `<span class="rank-val">${r.v == null ? "&mdash;" : f(r.v)}</span></div>`).join("");
+        html += `<button class="choro-rank-btn">${rankingOpen ? "Hide ranking" : "Ranking"}</button>` +
+          `<div class="choro-rank"${rankingOpen ? "" : " hidden"}>${rows}</div>`;
+      }
+      el.innerHTML = html;
+    }
+    function closeDetail() {
+      detailPanel.classList.remove("open");
+      if (selected) { map.setFeatureState({ source: `zones-${selected.level}`, id: selected.id }, { selected: false }); selected = null; }
+    }
+    document.getElementById("detail-close").addEventListener("click", closeDetail);
+
+    // State (era) tabs.
+    document.querySelectorAll(".state-tab").forEach(tab => {
+      tab.addEventListener("click", () => switchState(tab.dataset.state));
+    });
+    function switchState(st) {
+      if (st === activeState || !DATA || !DATA.states || !DATA.states[st]) return;
+      if (hovered) { map.setFeatureState({ source: `zones-${hovered.level}`, id: hovered.id }, { hover: false }); hovered = null; }
+      closeDetail();
+      clearNbhSelected();
+      activeState = st;
+      DATA.levels = DATA.states[st].levels;
+      DATA.schools = DATA.states[st].schools;
+      _hosts = null;   // program hosts differ per era (historical eras: none shown)
+      // only elementary geometry differs across eras
+      if (map.getSource("zones-elementary")) map.getSource("zones-elementary").setData(DATA.levels.elementary.zones);
+      if (map.getSource("labels-elementary")) map.getSource("labels-elementary").setData(DATA.levels.elementary.labels);
+      if (map.getLayer("fill-elementary")) map.setPaintProperty("fill-elementary", "fill-color", colorExpr(DATA.levels.elementary.labels));
+      setActiveMarkers(activeLevel);
+      applyChoropleth();   // re-rank/recolor within the era's zone set (or nbh split counts)
+      document.getElementById("zone-legend-label").innerHTML = `${LEVEL_META[activeLevel].legend} (${eraLabel()})`;
+      document.querySelectorAll(".state-tab").forEach(t => {
+        const on = t.dataset.state === st;
+        t.classList.toggle("is-active", on);
+        t.setAttribute("aria-selected", String(on));
+      });
+      userPins.forEach(p => updateUserPin(p));   // assigned school changes with the era
+      if (routeMarkers) updateRoute();
+    }
+
+    // Level tabs.
+    document.querySelectorAll(".level-tab:not(.state-tab)").forEach(tab => {
+      tab.addEventListener("click", () => switchLevel(tab.dataset.level));
+    });
+    function switchLevel(lvl) {
+      if (lvl === activeLevel || !map.getLayer(`fill-${lvl}`)) return;
+      if (hovered) { map.setFeatureState({ source: `zones-${hovered.level}`, id: hovered.id }, { hover: false }); hovered = null; }
+      closeDetail();   // the selected zone belongs to the level we're leaving
+      for (const L of LEVELS) {
+        const vis = L === lvl ? "visible" : "none";
+        map.setLayoutProperty(`fill-${L}`, "visibility", vis);
+        map.setLayoutProperty(`line-${L}`, "visibility", vis);
+        map.setLayoutProperty(`labels-${L}`, "visibility", vis);
+      }
+      activeLevel = lvl;
+      setActiveMarkers(lvl);   // show this level's school pins
+      applyChoropleth();       // recolor for the new level if a metric is active
+      userPins.forEach(p => updateUserPin(p));   // pins' assigned schools change with the level
+      document.getElementById("zone-legend-label").innerHTML = `${LEVEL_META[lvl].legend} (${eraLabel()})`;
+      document.querySelectorAll(".level-tab:not(.state-tab)").forEach(t => {
+        const on = t.dataset.level === lvl;
+        t.classList.toggle("is-active", on);
+        t.setAttribute("aria-selected", String(on));
+      });
+    }
+
+    // ----- Location pins (assigned vs closest school + nearest programs) -----
+    const R_EARTH = 6371;
+    function havKm(a, b) {   // [lng,lat] pairs -> km
+      const toR = x => x * Math.PI / 180;
+      const dLat = toR(b[1] - a[1]), dLng = toR(b[0] - a[0]);
+      const s = Math.sin(dLat / 2) ** 2 + Math.cos(toR(a[1])) * Math.cos(toR(b[1])) * Math.sin(dLng / 2) ** 2;
+      return 2 * R_EARTH * Math.asin(Math.sqrt(s));
+    }
+    function inGeom(lng, lat, geom) {   // even-odd ray cast over all rings
+      const rings = geom.type === "Polygon" ? geom.coordinates
+                  : geom.type === "MultiPolygon" ? geom.coordinates.flat() : [];
+      let inside = false;
+      for (const ring of rings) {
+        for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+          const [xi, yi] = ring[i], [xj, yj] = ring[j];
+          if ((yi > lat) !== (yj > lat) && lng < (xj - xi) * (lat - yi) / (yj - yi) + xi) inside = !inside;
+        }
+      }
+      return inside;
+    }
+    function zoneAt(lng, lat, lvl) {
+      for (const f of DATA.levels[lvl].zones.features) {
+        if (inGeom(lng, lat, f.geometry)) return f.properties.name;
+      }
+      return null;
+    }
+    function mainSchools(lvl) {
+      return DATA.schools[lvl].features.filter(f => f.properties.kind === "main")
+        .map(f => ({ name: f.properties.name, c: f.geometry.coordinates }));
+    }
+    let _hosts = null;   // level -> program category -> [{name, c}] (site-based programs AT that level)
+    function programHosts(lvl) {
+      if (!_hosts) {
+        _hosts = {};
+        for (const L of LEVELS) {
+          const h = { advanced_learning: [], language_immersion: [], special_education: [], ib: [] };
+          const seen = {};
+          DATA.schools[L].features.forEach(f => {
+            (f.properties.info && f.properties.info.programs || []).forEach(pr => {
+              const cat = pr.category;
+              if (!h[cat] || seen[cat + "|" + f.properties.name]) return;
+              seen[cat + "|" + f.properties.name] = 1;
+              h[cat].push({ name: f.properties.name, c: f.geometry.coordinates });
+            });
+          });
+          _hosts[L] = h;
+        }
+      }
+      return _hosts[lvl];
+    }
+    function nearestOf(list, pt) {
+      let best = null;
+      for (const s of list) {
+        const d = havKm(pt, s.c);
+        if (!best || d < best.d) best = { name: s.name, d };
+      }
+      return best;
+    }
+    const kmf = d => d < 10 ? d.toFixed(2) + " km" : d.toFixed(1) + " km";
+    const ORS_KEY = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImZhMTgzODFmNWNhODQzYzc4ZjhmNjhjMGYxYWYxYWI2IiwiaCI6Im11cm11cjY0In0=";
+
+    const orsProfile = () => travelProfile === "walk" ? "foot-walking" : "driving-car";
+    // One ORS matrix call: pin -> every candidate school. Returns { name: {km, min} } or null.
+    async function roadMatrix(pt, dests) {
+      try {
+        const res = await fetch(`https://api.openrouteservice.org/v2/matrix/${orsProfile()}`, {
+          method: "POST",
+          headers: { "Authorization": ORS_KEY, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            locations: [pt, ...dests.map(d => d.c)],
+            sources: [0], destinations: dests.map((_, i) => i + 1),
+            metrics: ["distance", "duration"]
+          })
+        });
+        if (!res.ok) return null;
+        const j = await res.json();
+        const out = {};
+        dests.forEach((d, i) => {
+          const dist = j.distances && j.distances[0] && j.distances[0][i];
+          const dur = j.durations && j.durations[0] && j.durations[0][i];
+          if (dist != null && dur != null) out[d.name] = { km: dist / 1000, min: dur / 60 };
+        });
+        return out;
+      } catch (e) { return null; }
+    }
+    let pinMode = "km";        // "km" | "min" — what pin rows display (shared by all pins)
+
+    // Shared popup body for any location pin: zone line, assigned vs closest, nearest programs.
+    function locBody(pt, road) {
+      const lvl = activeLevel;
+      const zone = zoneAt(pt[0], pt[1], lvl);
+      const mains = mainSchools(lvl);
+      const fmt = (name, airKm) => {
+        if (road && road[name]) {
+          const r = road[name];
+          return pinMode === "min" ? `${Math.max(1, Math.round(r.min))} min` : kmf(r.km);
+        }
+        return pinMode === "min" ? "&hellip;" : kmf(airKm);
+      };
+      // closest school: by road distance when available, else straight-line
+      let nearest = null;
+      for (const s of mains) {
+        const d = road && road[s.name] ? road[s.name].km : havKm(pt, s.c);
+        if (!nearest || d < nearest.d) nearest = { name: s.name, d, c: s.c };
+      }
+      let rows = "";
+      if (zone) {
+        const sp = mains.find(s => s.name === zone);
+        rows += `<div class="pin-row"><span>Assigned school</span><b>${zone}${sp ? " · " + fmt(zone, havKm(pt, sp.c)) : ""}</b></div>`;
+        if (nearest && nearest.name !== zone) {
+          rows += `<div class="pin-row"><span>Closest school</span><b>${nearest.name} · ${fmt(nearest.name, nearest.d)}</b></div>`;
+        } else if (nearest) {
+          rows += `<div class="pin-row"><span>Closest school</span><b>same &mdash; ${nearest.name}</b></div>`;
+        }
+      } else {
+        rows += `<div class="pin-row pin-outside"><span>Outside Bellevue School District &mdash; no assigned school here</span></div>`;
+        if (nearest) rows += `<div class="pin-row"><span>Closest BSD school</span><b>${nearest.name} · ${fmt(nearest.name, nearest.d)}</b></div>`;
+      }
+      const H = programHosts(lvl);
+      const progRows = [
+        ["Advanced Learning", H.advanced_learning],
+        ["Dual-language immersion", H.language_immersion],
+        ["IB", H.ib],
+        ["Special-ed program", H.special_education]
+      ].map(([label, list]) => {
+        if (!list.length) return "";
+        let best = null;
+        for (const s of list) {
+          const d = road && road[s.name] ? road[s.name].km : havKm(pt, s.c);
+          if (!best || d < best.d) best = { name: s.name, d };
+        }
+        return `<div class="pin-row"><span>${label}</span><b>${best.name} · ${fmt(best.name, best.d)}</b></div>`;
+      }).join("");
+      const levelWord = LEVEL_META[lvl].suffix.toLowerCase().replace(" school", "");
+      const walkP = travelProfile === "walk";
+      const note = road
+        ? `${pinMode === "min" ? (walkP ? "Walk time" : "Drive time (no traffic)") : (walkP ? "Walking distance" : "Road distance (driving)")} &mdash; OpenRouteService.`
+        : `Straight-line for now &mdash; network distance &amp; time loading&hellip;`;
+      const modeToggle = road
+        ? `<div class="pin-mode"><button class="pin-mode-btn${pinMode === "km" ? " on" : ""}" data-mode="km">distance</button>` +
+          `<button class="pin-mode-btn${pinMode === "min" ? " on" : ""}" data-mode="min">time</button></div>`
+        : "";
+      return {
+        zoneText: zone ? zone + " " + LEVEL_META[lvl].suffix.toLowerCase() + " zone" : "outside the district",
+        html: modeToggle + `<div class="pin-rows">${rows}</div>` +
+          (progRows ? `<div class="sch-lab" style="margin-top:0.55rem">Nearest ${levelWord}-level program</div>` +
+          `<div class="pin-rows">${progRows}</div>` : "") +
+          `<p class="dist-note" style="margin-top:0.5rem">${note}</p>`
+      };
+    }
+    function destsFor(lvl) {   // matrix candidates: every main school + program host at this level
+      const dests = [], seen = {};
+      mainSchools(lvl).forEach(s => { if (!seen[s.name]) { seen[s.name] = 1; dests.push(s); } });
+      Object.values(programHosts(lvl)).forEach(list => list.forEach(s => {
+        if (!seen[s.name]) { seen[s.name] = 1; dests.push(s); }
+      }));
+      return dests;
+    }
+
+    // --- user pins (named; placed by map click or address search; lockable; removable) ---
+    const userPins = [];   // { marker, name, road, seq, locked }
+    let addingPin = false;
+    const PIN_STORE = "bsd_user_pins";
+    function persistPins() {
+      try {
+        localStorage.setItem(PIN_STORE, JSON.stringify(userPins.map(p => {
+          const ll = p.marker.getLngLat();
+          return { name: p.name, ll: [ll.lng, ll.lat], locked: p.locked };
+        })));
+      } catch (e) { /* storage unavailable — pins just won't persist */ }
+    }
+    function restoreUserPins() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(PIN_STORE) || "[]");
+        saved.forEach(s => addUserPin(s.ll, s.name, { locked: s.locked !== false, silent: true }));
+      } catch (e) { /* corrupt store — start fresh */ }
+    }
+    function renderUserPin(p, autoOpen) {
+      const ll = p.marker.getLngLat();
+      const b = locBody([ll.lng, ll.lat], p.road);
+      p.marker.getPopup().setHTML(
+        `<div class="sch-pop"><div class="upin-head">` +
+          `<input class="upin-name" value="${(p.name || "My pin").replace(/"/g, "&quot;")}" maxlength="40" title="Name this pin" />` +
+          `<button class="upin-lock" title="${p.locked ? "Locked — click to allow dragging" : "Unlocked — click to lock in place"}">${p.locked ? "&#128274;" : "&#128275;"}</button>` +
+        `</div>` +
+        `<div class="popup-sub">${b.zoneText}${p.locked ? "" : " &middot; drag me around"}</div>` + b.html +
+        `<button class="upin-remove">Remove this pin</button></div>`);
+      if (autoOpen !== false && !p.marker.getPopup().isOpen()) p.marker.togglePopup();
+      const el = p.marker.getPopup().getElement();
+      if (!el) return;
+      el.querySelectorAll(".pin-mode-btn").forEach(btn => btn.addEventListener("click", () => {
+        pinMode = btn.dataset.mode;
+        renderUserPin(p);
+      }));
+      const nameEl = el.querySelector(".upin-name");
+      if (nameEl) nameEl.addEventListener("input", () => { p.name = nameEl.value; persistPins(); });
+      const lockEl = el.querySelector(".upin-lock");
+      if (lockEl) lockEl.addEventListener("click", () => {
+        p.locked = !p.locked;
+        p.marker.setDraggable(!p.locked);
+        p.marker.getElement().style.cursor = p.locked ? "pointer" : "";
+        persistPins();
+        renderUserPin(p);
+      });
+      const rm = el.querySelector(".upin-remove");
+      if (rm) rm.addEventListener("click", () => {
+        p.marker.remove();
+        const i = userPins.indexOf(p);
+        if (i >= 0) userPins.splice(i, 1);
+        persistPins();
+      });
+    }
+    async function updateUserPin(p, open) {
+      const seq = ++p.seq;
+      p.road = null;
+      renderUserPin(p, open === true);
+      const ll = p.marker.getLngLat();
+      const road = await roadMatrix([ll.lng, ll.lat], destsFor(activeLevel));
+      if (road && seq === p.seq) { p.road = road; renderUserPin(p, false); }
+    }
+    function addUserPin(lngLat, name, opts) {
+      opts = opts || {};
+      const locked = opts.locked !== false;
+      const el = makePin("#0f6e66");
+      el.classList.add("user-pin");
+      const p = {
+        name: name || "My pin", road: null, seq: 0, locked,   // pins start locked in place
+        marker: new maplibregl.Marker({ element: el, anchor: "bottom", draggable: !locked })
+          .setLngLat(lngLat)
+          .setPopup(new maplibregl.Popup({ offset: 34, closeButton: true, maxWidth: "300px" }))
+          .addTo(map)
+      };
+      p.marker.getElement().style.cursor = locked ? "pointer" : "";
+      let dragging = false;
+      p.marker.on("dragstart", () => { dragging = true; });
+      p.marker.getElement().addEventListener("click", () => {
+        if (dragging) { dragging = false; return; }   // click fired by a drag release, not a tap
+        p.marker.togglePopup();
+      });
+      p.marker.on("dragend", () => { updateUserPin(p, true); persistPins(); setTimeout(() => { dragging = false; }, 0); });
+      // restored pins open silently later — populate the popup on first open
+      p.marker.getPopup().on("open", () => { if (!p.road) updateUserPin(p); });
+      userPins.push(p);
+      if (!opts.silent) updateUserPin(p, true);
+      persistPins();
+      return p;
+    }
+
+    // place-by-click mode
+    const addPinBtn = document.getElementById("add-pin-btn");
+    addPinBtn.addEventListener("click", () => {
+      addingPin = !addingPin;
+      addPinBtn.textContent = addingPin ? "Click anywhere on the map… (cancel)" : "…or click the map to place a pin";
+      addPinBtn.classList.toggle("active", addingPin);
+      map.getCanvas().style.cursor = addingPin ? "crosshair" : "";
+    });
+    map.on("click", (e) => {
+      if (!addingPin || !DATA) return;
+      addingPin = false;
+      addPinBtn.textContent = "…or click the map to place a pin";
+      addPinBtn.classList.remove("active");
+      map.getCanvas().style.cursor = "";
+      addUserPin([e.lngLat.lng, e.lngLat.lat]);
+    });
+
+    // place-by-address (MapTiler geocoder). proximity ranks the closest match first, and bbox
+    // HARD-restricts results to the greater Bellevue area, so an address that only exists
+    // elsewhere returns nothing instead of flying the user to another state.
+    const GEO_BBOX = "-122.35,47.45,-121.98,47.73";   // Eastside box around the district, with margin
+    async function geocodeAdd() {
+      const inp = document.getElementById("addr-input");
+      const q = inp.value.trim();
+      if (!q || !DATA) return;
+      try {
+        const r = await fetch(`https://api.maptiler.com/geocoding/${encodeURIComponent(q)}.json` +
+          `?key=${MAPTILER_KEY}&proximity=-122.164,47.6045&bbox=${GEO_BBOX}&limit=1`);
+        const j = await r.json();
+        let f = j.features && j.features[0];
+        // bbox lets huge intersecting features through (e.g. "Washington" the state); require the
+        // match's own point to actually be inside our area
+        const [bx0, by0, bx1, by1] = GEO_BBOX.split(",").map(Number);
+        if (f && !(f.center[0] >= bx0 && f.center[0] <= bx1 && f.center[1] >= by0 && f.center[1] <= by1)) f = null;
+        if (!f) { inp.value = ""; inp.placeholder = "No match near Bellevue — try a fuller address…"; return; }
+        // name the pin with what was actually MATCHED, so a wrong guess is visible and fixable
+        const matched = (f.place_name || q).split(",")[0];
+        addUserPin(f.center, matched);
+        map.flyTo({ center: f.center, zoom: Math.max(map.getZoom(), 13), duration: 900 });
+        inp.value = ""; inp.placeholder = "Add a pin: type an address…";
+      } catch (err) { console.error("geocode failed", err); }
+    }
+    document.getElementById("addr-go").addEventListener("click", geocodeAdd);
+    document.getElementById("addr-input").addEventListener("keydown", (e) => { if (e.key === "Enter") geocodeAdd(); });
+
+    // --- route tool: two blue endpoint markers, driving distance + time between them ---
+    let routeOn = false, routeMarkers = null, routeGeom = null, routeSeq = 0;
+    const routeInfoEl = document.getElementById("route-info");
+    function ensureRouteLayer() {
+      if (!map.getSource("route")) map.addSource("route", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+      if (!map.getLayer("route-line")) map.addLayer({
+        id: "route-line", type: "line", source: "route",
+        paint: { "line-color": "#2b6cb0", "line-width": 4, "line-opacity": 0.85 }
+      });
+    }
+    function drawRoute() {
+      ensureRouteLayer();
+      map.getSource("route").setData(routeGeom || { type: "FeatureCollection", features: [] });
+    }
+    // Snap an endpoint to any nearby info marker (school pins of the active level + user pins),
+    // never to the other blue endpoint.
+    function trySnap(mk) {
+      const ll = mk.getLngLat();
+      const p = map.project(ll);
+      const cands = [];
+      (schoolMarkers[activeLevel] || []).forEach(m => {
+        if (m.getElement().style.display !== "none") cands.push({ ll: m.getLngLat(), label: m._label || "school" });
+      });
+      userPins.forEach(up => cands.push({ ll: up.marker.getLngLat(), label: up.name || "My pin" }));
+      let best = null;
+      for (const c of cands) {
+        const q = map.project(c.ll);
+        const dpx = Math.hypot(p.x - q.x, p.y - q.y);
+        if (dpx < 22 && (!best || dpx < best.dpx)) best = { ll: c.ll, label: c.label, dpx };
+      }
+      if (best) { mk.setLngLat(best.ll); mk._snap = best.label; }
+      else mk._snap = null;
+    }
+    async function updateRoute() {
+      if (!routeMarkers) return;
+      const seq = ++routeSeq;
+      const a = routeMarkers[0].getLngLat(), b = routeMarkers[1].getLngLat();
+      const la = routeMarkers[0]._snap || "Point A", lb = routeMarkers[1]._snap || "Point B";
+      routeInfoEl.removeAttribute("hidden");
+      routeInfoEl.innerHTML = `<b>${la}</b> &rarr; <b>${lb}</b><br><span class="muted">routing&hellip;</span>`;
+      try {
+        const r = await fetch(`https://api.openrouteservice.org/v2/directions/${orsProfile()}` +
+          `?api_key=${ORS_KEY}&start=${a.lng},${a.lat}&end=${b.lng},${b.lat}`);
+        const j = await r.json();
+        const f = j.features && j.features[0];
+        if (!f || seq !== routeSeq) return;
+        routeGeom = f;
+        drawRoute();
+        const s = f.properties.summary;
+        const walkP = travelProfile === "walk";
+        routeInfoEl.innerHTML = `<b>${la}</b> &rarr; <b>${lb}</b><br>` +
+          `<span class="route-nums">${kmf(s.distance / 1000)} &middot; ${Math.max(1, Math.round(s.duration / 60))} min ${walkP ? "walk" : "drive"}</span>` +
+          (walkP ? "" : `<span class="muted"> (no traffic)</span>`);
+      } catch (err) {
+        if (seq === routeSeq) routeInfoEl.innerHTML = `<b>${la}</b> &rarr; <b>${lb}</b><br><span class="muted">routing failed &mdash; try again</span>`;
+      }
+    }
+    const routeBtn = document.getElementById("route-btn");
+    routeBtn.addEventListener("click", () => {
+      routeOn = !routeOn;
+      routeBtn.classList.toggle("active", routeOn);
+      if (routeOn) {
+        routeBtn.textContent = "Remove the route markers";
+        const c = map.getCenter();
+        routeMarkers = [-0.012, 0.012].map(dx => {
+          const el = makePin("#2b6cb0", 0.72);
+          el.classList.add("user-pin", "route-pin");   // route-pin: always stacked above info pins
+          const mk = new maplibregl.Marker({ element: el, anchor: "bottom", draggable: true })
+            .setLngLat([c.lng + dx, c.lat]).addTo(map);
+          mk._snap = null;
+          mk.on("drag", () => trySnap(mk));   // live magnet: sticks to a nearby pin BEFORE release
+          mk.on("dragend", () => { trySnap(mk); updateRoute(); });
+          return mk;
+        });
+        updateRoute();
+      } else {
+        routeBtn.textContent = "Measure a route (two blue markers)";
+        if (routeMarkers) routeMarkers.forEach(m => m.remove());
+        routeMarkers = null; routeGeom = null;
+        if (map.getSource("route")) drawRoute();
+        routeInfoEl.setAttribute("hidden", "");
+      }
+    });
+
+    // Travel-mode switch (driving | walking) — flips the panel stats, pins, and route tool.
+    document.querySelectorAll(".profile-btn").forEach(b => b.addEventListener("click", () => {
+      if (b.dataset.profile === travelProfile) return;
+      travelProfile = b.dataset.profile;
+      document.querySelectorAll(".profile-btn").forEach(x => x.classList.toggle("on", x.dataset.profile === travelProfile));
+      if (currentZone) openDetail(currentZone.props, currentZone.lvl);
+      applyChoropleth();
+      userPins.forEach(p => updateUserPin(p));
+      if (routeMarkers) updateRoute();
+    }));
+
+    // Neighborhoods info button.
+    const nbhInfoBtn = document.getElementById("nbh-info-btn");
+    const nbhInfoBox = document.getElementById("nbh-info");
+    nbhInfoBtn.addEventListener("click", () => {
+      const open = nbhInfoBox.hasAttribute("hidden");
+      if (open) nbhInfoBox.removeAttribute("hidden"); else nbhInfoBox.setAttribute("hidden", "");
+      nbhInfoBtn.classList.toggle("open", open);
+      nbhInfoBtn.setAttribute("aria-expanded", String(open));
+    });
+
+    // Neighborhoods overlay checkbox.
+    const chkNbh = document.getElementById("chk-neighborhoods");
+    const chkRace = document.getElementById("chk-racelayer");
+    const raceOpts = document.getElementById("race-opts");
+    chkNbh.addEventListener("change", () => {
+      neighborhoodsOn = chkNbh.checked;
+      if (neighborhoodsOn && raceLayerOn) {   // mutually exclusive with the race layer
+        raceLayerOn = false; chkRace.checked = false; raceOpts.setAttribute("hidden", "");
+        if (map.getLayer("blocks-race-fill")) map.setLayoutProperty("blocks-race-fill", "visibility", "none");
+      }
+      if (!neighborhoodsOn) clearNbhSelected();
+      for (const id of ["nbh-fill", "nbh-line"]) {
+        if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", neighborhoodsOn ? "visible" : "none");
+      }
+      applyNbhMode();   // zones colorless + split-count coloring (or restore on uncheck)
+    });
+    chkRace.addEventListener("change", () => {
+      raceLayerOn = chkRace.checked;
+      if (raceLayerOn && neighborhoodsOn) {   // mutually exclusive with neighborhoods
+        neighborhoodsOn = false; chkNbh.checked = false; clearNbhSelected();
+        for (const id of ["nbh-fill", "nbh-line"]) {
+          if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", "none");
+        }
+      }
+      if (raceLayerOn) raceOpts.removeAttribute("hidden"); else raceOpts.setAttribute("hidden", "");
+      applyRaceLayer();
+    });
+    document.querySelectorAll(".race-grp").forEach(b => b.addEventListener("click", () => {
+      raceGroup = b.dataset.grp;
+      document.querySelectorAll(".race-grp").forEach(x => x.classList.toggle("on", x.dataset.grp === raceGroup));
+      if (raceLayerOn) applyRaceLayer();
+    }));
+
+    // Base-map checkboxes.
+    const chkSat = document.getElementById("chk-satellite");
+    const chkTer = document.getElementById("chk-terrain");
+    // Satellite and Terrain are mutually exclusive (like Google Maps); either, or neither (grayscale).
+    chkSat.addEventListener("change", () => { if (chkSat.checked) chkTer.checked = false; applyBasemap(); });
+    chkTer.addEventListener("change", () => { if (chkTer.checked) chkSat.checked = false; applyBasemap(); });
+
+    function applyBasemap() {
+      const sat = chkSat.checked, ter = chkTer.checked;
+      const style = sat ? STYLES.hybrid : (ter ? STYLES.outdoor : STYLES.grayscale);
+      want3D = ter;
+      wantHillshade = ter;   // strong 2D relief whenever Terrain is on
+
+      if (style !== currentStyleUrl) {
+        setBasemap(style);                 // re-adds zones/district/labels + terrain after the swap
+      } else {
+        applyHillshadeState();             // same basemap (e.g. toggling Terrain while Satellite on)
+        applyTerrainState();
+      }
+    }
+
+    // ----- Graph mode: small-multiple charts + all-zones delta scatter -----
+    const GM_STATES = ["a", "b", "c"];
+    const GM_XLAB = { a: "pre-'18", b: "'18–'23", c: "'23–now" };
+    const GM_COLORS = ["#0f6e66", "#b0763a", "#5d7fb2", "#a05a94"];
+    const GM_STORE = "bsd_gm_graphs";
+    let gmGraphs = [];
+    try { gmGraphs = JSON.parse(localStorage.getItem(GM_STORE) || "[]"); } catch (e) { gmGraphs = []; }
+    function gmSave() { try { localStorage.setItem(GM_STORE, JSON.stringify(gmGraphs)); } catch (e) {} }
+    const gmEl = document.getElementById("graph-mode");
+    const gmGrid = document.getElementById("gm-grid");
+    document.getElementById("graph-btn").addEventListener("click", () => {
+      if (!DATA || !DATA.states) return;
+      gmEl.removeAttribute("hidden");
+      gmRender();
+    });
+    document.getElementById("gm-close").addEventListener("click", () => gmEl.setAttribute("hidden", ""));
+
+    function gmZoneNames(lvl) {
+      const set = new Set();
+      GM_STATES.forEach(S => DATA.states[S].levels[lvl].zones.features.forEach(f => set.add(f.properties.name)));
+      return [...set].sort();
+    }
+    function gmValue(S, lvl, name, mid) {
+      const meta = CHORO_BY_ID[mid];
+      const f = DATA.states[S].levels[lvl].zones.features.find(x => x.properties.name === name);
+      if (!f) return null;
+      const v = meta.get(f.properties);
+      return (v == null || isNaN(v)) ? null : Number(v);
+    }
+    const fmtDelta = (meta, v) =>
+      (v > 0 ? "+" : v < 0 ? "−" : "±") + meta.fmt(Math.round(Math.abs(v) * 1000) / 1000);
+
+    // --- single/multi-zone era line chart ---
+    function gmLineSVG(cfg) {
+      const meta = CHORO_BY_ID[cfg.metric];
+      const series = cfg.names.map(nm => GM_STATES.map(S => gmValue(S, cfg.lvl, nm, cfg.metric)));
+      const vals = series.flat().filter(v => v != null);
+      if (!vals.length) return { svg: `<p class="dist-empty">No data for this combination.</p>`, notes: [] };
+      let mn = Math.min(...vals), mx = Math.max(...vals);
+      if (mn === mx) { const pad = Math.abs(mn) * 0.1 || 1; mn -= pad; mx += pad; }
+      else { const pad = (mx - mn) * 0.15; mn -= pad; mx += pad; }
+      const W = 270, H = 150, L = 56, R = 14, T = 12, B = 26;
+      const px = i => L + i * (W - L - R) / 2;
+      const py = v => H - B - (v - mn) / (mx - mn) * (H - T - B);
+      let svg = "";
+      [mn, (mn + mx) / 2, mx].forEach(v => {
+        svg += `<line class="grid" x1="${L}" y1="${py(v).toFixed(1)}" x2="${W - R}" y2="${py(v).toFixed(1)}"/>` +
+          `<text class="ax" x="${L - 5}" y="${(py(v) + 3).toFixed(1)}" text-anchor="end">${meta.fmt(Math.round(v * 1000) / 1000)}</text>`;
+      });
+      GM_STATES.forEach((S, i) => {
+        svg += `<text class="ax" x="${px(i)}" y="${H - B + 15}" text-anchor="middle">${GM_XLAB[S]}</text>`;
+      });
+      series.forEach((pts, si) => {
+        const col = GM_COLORS[si % GM_COLORS.length];
+        for (let i = 0; i < 2; i++) {
+          if (pts[i] != null && pts[i + 1] != null) {
+            svg += `<line class="gm-line" style="stroke:${col}" x1="${px(i)}" y1="${py(pts[i]).toFixed(1)}" x2="${px(i + 1)}" y2="${py(pts[i + 1]).toFixed(1)}"/>`;
+          }
+        }
+        pts.forEach((v, i) => {
+          if (v == null) {
+            if (series.length === 1) svg += `<text class="ax gm-na" x="${px(i)}" y="${H - B - 6}" text-anchor="middle">n/a</text>`;
+          } else {
+            svg += `<circle class="gm-dot" style="fill:${col}" cx="${px(i)}" cy="${py(v).toFixed(1)}" r="3.4">` +
+              `<title>${cfg.names[si]} · ${GM_XLAB[GM_STATES[i]]}: ${meta.fmt(v)}</title></circle>`;
+            if (series.length === 1) svg += `<text class="gm-val" x="${px(i)}" y="${(py(v) - 8).toFixed(1)}" text-anchor="middle">${meta.fmt(v)}</text>`;
+          }
+        });
+      });
+      const notes = [];
+      if (series.length === 1) {
+        const p = series[0], d = [];
+        if (p[0] != null && p[1] != null) d.push(`2018 rezoning: <b>${fmtDelta(meta, p[1] - p[0])}</b>`);
+        if (p[1] != null && p[2] != null) d.push(`2023 rezoning: <b>${fmtDelta(meta, p[2] - p[1])}</b>`);
+        if (d.length) notes.push(`<span class="gm-delta">${d.join(" · ")}</span>`);
+        if (p.every(v => v != null) && p[0] === p[1] && p[1] === p[2]) notes.push("Unchanged across all three eras.");
+      }
+      const legend = series.length > 1
+        ? `<div class="gm-legend">` + cfg.names.map((nm, i) =>
+            `<span class="gm-chip"><span class="gm-chip-dot" style="background:${GM_COLORS[i % GM_COLORS.length]}"></span>${nm}</span>`).join("") + `</div>`
+        : "";
+      if (cfg.lvl === "elementary" && series.some(pts => pts[0] != null)) {
+        notes.push(`pre-'18 point from the federal SABS survey — different source, approximate.`);
+      }
+      return { svg: `<svg class="gm-svg" viewBox="0 0 ${W} ${H}">${svg}</svg>` + legend, notes };
+    }
+
+    // --- all-zones delta scatter: does a change in X track a change in Y? ---
+    function gmScatterSVG(cfg) {
+      const mx_ = CHORO_BY_ID[cfg.mx], my_ = CHORO_BY_ID[cfg.my];
+      const pair = cfg.event === "2018" ? ["a", "b"] : ["b", "c"];
+      const S1 = pair[0], S2 = pair[1];
+      const dots = [];
+      gmZoneNames(cfg.lvl).forEach(nm => {
+        const x1 = gmValue(S1, cfg.lvl, nm, cfg.mx), x2 = gmValue(S2, cfg.lvl, nm, cfg.mx);
+        const y1 = gmValue(S1, cfg.lvl, nm, cfg.my), y2 = gmValue(S2, cfg.lvl, nm, cfg.my);
+        if (x1 != null && x2 != null && y1 != null && y2 != null) dots.push({ nm, dx: x2 - x1, dy: y2 - y1 });
+      });
+      if (!dots.length) return { svg: `<p class="dist-empty">No zones have data for both eras here.</p>`, notes: [] };
+      const pad = a => { let lo = Math.min(...a, 0), hi = Math.max(...a, 0); const p = (hi - lo) * 0.12 || 1; return [lo - p, hi + p]; };
+      const xr = pad(dots.map(d => d.dx)), yr = pad(dots.map(d => d.dy));
+      const xlo = xr[0], xhi = xr[1], ylo = yr[0], yhi = yr[1];
+      const W = 270, H = 190, L = 56, R = 12, T = 10, B = 26;
+      const px = v => L + (v - xlo) / (xhi - xlo) * (W - L - R);
+      const py = v => H - B - (v - ylo) / (yhi - ylo) * (H - T - B);
+      let svg = `<line class="grid gm-zero" x1="${px(0).toFixed(1)}" y1="${T}" x2="${px(0).toFixed(1)}" y2="${H - B}"/>` +
+                `<line class="grid gm-zero" x1="${L}" y1="${py(0).toFixed(1)}" x2="${W - R}" y2="${py(0).toFixed(1)}"/>`;
+      svg += `<text class="ax" x="${L - 5}" y="${(py(ylo) + 3).toFixed(1)}" text-anchor="end">${fmtDelta(my_, Math.round(ylo * 1000) / 1000)}</text>` +
+             `<text class="ax" x="${L - 5}" y="${(py(yhi) + 3).toFixed(1)}" text-anchor="end">${fmtDelta(my_, Math.round(yhi * 1000) / 1000)}</text>` +
+             `<text class="ax" x="${px(xlo).toFixed(1)}" y="${H - B + 15}" text-anchor="start">${fmtDelta(mx_, Math.round(xlo * 1000) / 1000)}</text>` +
+             `<text class="ax" x="${px(xhi).toFixed(1)}" y="${H - B + 15}" text-anchor="end">${fmtDelta(mx_, Math.round(xhi * 1000) / 1000)}</text>`;
+      dots.forEach(d => {
+        svg += `<circle class="gm-dot" cx="${px(d.dx).toFixed(1)}" cy="${py(d.dy).toFixed(1)}" r="3.6">` +
+          `<title>${d.nm}: Δ ${mx_.label} ${fmtDelta(mx_, d.dx)}, Δ ${my_.label} ${fmtDelta(my_, d.dy)}</title></circle>`;
+      });
+      const notes = [`${dots.length} zones. Each dot = one zone's change across the ${cfg.event} rezoning. A shapeless cloud means no relationship — that is a finding too.`];
+      if (dots.every(d => d.dx === 0 && d.dy === 0)) notes.push("All zeros — boundaries at this level did not change in this event.");
+      if (cfg.event === "2018" && cfg.lvl === "elementary") notes.push("pre-'18 values from the federal SABS survey — different source, approximate.");
+      return {
+        svg: `<svg class="gm-svg" viewBox="0 0 ${W} ${H}">${svg}</svg>` +
+             `<div class="chart-cap">x: Δ ${mx_.label} · y: Δ ${my_.label}</div>`,
+        notes: notes
+      };
+    }
+
+    function gmLevelWord(lvl) { return LEVEL_META[lvl].suffix; }
+    function gmRender() {
+      let html = gmGraphs.map((cfg, gi) => {
+        let head, body;
+        if (cfg.type === "scatter") {
+          const r = gmScatterSVG(cfg);
+          head = `<div><b>All zones — Δ scatter</b> <span class="muted">${gmLevelWord(cfg.lvl)} · ${cfg.event} rezoning</span>` +
+                 `<div class="gm-metric">Δ ${CHORO_BY_ID[cfg.mx].label} vs Δ ${CHORO_BY_ID[cfg.my].label}</div></div>`;
+          body = r.svg + r.notes.map(n => `<div class="gm-caveat">${n}</div>`).join("");
+        } else {
+          const r = gmLineSVG(cfg);
+          const nm = cfg.names.length > 2 ? `${cfg.names[0]} +${cfg.names.length - 1} more` : cfg.names.join(" · ");
+          head = `<div><b>${nm}</b> <span class="muted">${gmLevelWord(cfg.lvl)}</span>` +
+                 `<div class="gm-metric">${CHORO_BY_ID[cfg.metric].label}</div></div>`;
+          body = r.svg + r.notes.map(n => `<div class="gm-caveat">${n}</div>`).join("");
+        }
+        return `<div class="gm-tile gm-card"><div class="gm-card-head">${head}` +
+          `<button class="gm-remove" data-gi="${gi}" title="Remove this graph">&times;</button></div>${body}</div>`;
+      }).join("");
+      html += `<div class="gm-tile gm-addtile"><div class="gm-addwrap">` +
+        `<button class="gm-add" data-type="line">+ Zone chart</button>` +
+        `<button class="gm-add" data-type="scatter">+ All-zones scatter</button></div></div>`;
+      const total = gmGraphs.length + 1;
+      for (let i = total; i < 4; i++) html += `<div class="gm-tile gm-empty"></div>`;
+      gmGrid.innerHTML = html;
+    }
+    function gmPickerHTML(type) {
+      const lvls = LEVELS.map(l => `<option value="${l}">${gmLevelWord(l)}</option>`).join("");
+      const mets = CHOROPLETH.map(m => `<option value="${m.id}">${m.label}</option>`).join("");
+      if (type === "scatter") {
+        return `<div class="gm-form" data-type="scatter">` +
+          `<label>Level<select class="gm-level">${lvls}</select></label>` +
+          `<label>Event<select class="gm-event"><option value="2023">2023 rezoning ('18–'23 → now)</option>` +
+          `<option value="2018">2018 rezoning (pre-'18 → '18–'23)</option></select></label>` +
+          `<label>Measure X<select class="gm-mx">${mets}</select></label>` +
+          `<label>Measure Y<select class="gm-my">${mets}</select></label>` +
+          `<div class="gm-form-btns"><button class="gm-ok">Add</button><button class="gm-cancel">Cancel</button></div></div>`;
+      }
+      const zones = gmZoneNames("elementary").map(n => `<option>${n}</option>`).join("");
+      return `<div class="gm-form" data-type="line">` +
+        `<label>Level<select class="gm-level">${lvls}</select></label>` +
+        `<label>School zones <span class="gm-hint">(Ctrl-click for up to 4)</span>` +
+        `<select class="gm-zone" multiple size="5">${zones}</select></label>` +
+        `<label>Measure<select class="gm-metric">${mets}</select></label>` +
+        `<div class="gm-form-btns"><button class="gm-ok">Add</button><button class="gm-cancel">Cancel</button></div></div>`;
+    }
+    gmGrid.addEventListener("click", (e) => {
+      const add = e.target.closest(".gm-add");
+      if (add) { add.closest(".gm-tile").innerHTML = gmPickerHTML(add.dataset.type); return; }
+      const rm = e.target.closest(".gm-remove");
+      if (rm) { gmGraphs.splice(+rm.dataset.gi, 1); gmSave(); gmRender(); return; }
+      const ok = e.target.closest(".gm-ok");
+      if (ok) {
+        const form = ok.closest(".gm-form");
+        if (form.dataset.type === "scatter") {
+          gmGraphs.push({
+            type: "scatter",
+            lvl: form.querySelector(".gm-level").value,
+            event: form.querySelector(".gm-event").value,
+            mx: form.querySelector(".gm-mx").value,
+            my: form.querySelector(".gm-my").value
+          });
+        } else {
+          const names = [...form.querySelector(".gm-zone").selectedOptions].map(o => o.value).slice(0, 4);
+          if (!names.length) return;
+          gmGraphs.push({
+            type: "line",
+            lvl: form.querySelector(".gm-level").value,
+            names: names,
+            metric: form.querySelector(".gm-metric").value
+          });
+        }
+        gmSave(); gmRender(); return;
+      }
+      if (e.target.closest(".gm-cancel")) { gmRender(); return; }
+    });
+    gmGrid.addEventListener("change", (e) => {
+      const lv = e.target.closest(".gm-level");
+      if (!lv) return;
+      const zoneSel = lv.closest(".gm-form").querySelector(".gm-zone");
+      if (zoneSel) zoneSel.innerHTML = gmZoneNames(lv.value).map(n => `<option>${n}</option>`).join("");
     });
   </script>
 </body>

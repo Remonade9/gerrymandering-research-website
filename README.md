@@ -1,20 +1,25 @@
-# Gerrymandering Research — Website
+# The 2023 Bellevue Elementary Rezoning — Website
 
-Companion website presenting the findings of Lucas's applied mathematics / GIS
-research on detecting partisan gerrymandering using Markov Chain Monte Carlo
-(MCMC) simulation. Mentored by Prof. Bo Zhao, Humanistic GIS Lab, University of
-Washington.
+Interactive companion site for Lucas's applied mathematics / GIS research on Bellevue School
+District's 2023 elementary school closures and attendance-zone rezoning. It presents what the
+boundary changes were and, layer by layer, what changed with them (travel, capacity, who lives
+where) for the communities affected. Mentored by Prof. Bo Zhao, Humanistic GIS Lab, University
+of Washington.
+
+The design goal is to *present information, not to judge*: the map shows what the rezoning did
+and leaves the fairness question to the reader.
 
 ## Structure
 
-- `index.html` — single-page site (abstract, background, methods, maps, findings)
-- `styles.css` — styling
+- `index.html` — single-page site; MapLibre GL JS map with a grayscale MapTiler basemap,
+  the district boundary, and the 14 elementary attendance zones.
+- `styles.css` — styling.
+- `data/` — web-ready GeoJSON layers + `build_bellevue_basics.py` to regenerate them.
+- `_archive/` — files from the project's earlier (WA redistricting / MCMC) direction, kept for reference.
 
 ## Viewing locally
 
-Just open `index.html` in a browser. No build step required.
-
-To serve it with live reload (optional), from this folder run:
+The map fetches GeoJSON, so it must be served over http (not opened as `file://`). From this folder:
 
 ```sh
 python -m http.server 8000
@@ -22,8 +27,12 @@ python -m http.server 8000
 
 then visit <http://localhost:8000>.
 
+## Notes
+
+- The MapTiler basemap uses a free-tier API key inlined in `index.html`. It is a low-sensitivity
+  key for a public base map; keep this repository private (or restrict the key by domain before
+  making it public).
+
 ## Publishing
 
-This is a static site. When ready to publish, it can be deployed for free via
-**GitHub Pages** (requires the repository to be public, or a paid plan for
-private repos): Settings → Pages → Deploy from branch → `main` / root.
+Static site. Deployable free via **GitHub Pages** (Settings → Pages → Deploy from branch → `main` / root).

@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Boundary Changes — Bellevue School District</title>
+  <meta name="description" content="Which territory switched elementary schools in Bellevue's 2018 and 2023 rezonings, and what changed for the people living there." />
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=107" />
+  <link rel="stylesheet" href="styles.css?v=107" />
+  <script src="vendor/maplibre-gl.js?v=107"></script>
+</head>
+<body class="chg-page">
+  <div id="map"></div>
+
+  <!-- top-left: back + tabs -->
+  <div class="tabs-launcher">
+    <button class="tabs-btn" id="tabs-btn" aria-expanded="false" aria-haspopup="true">More tabs <span class="tabs-caret">&#9662;</span></button>
+    <div class="tabs-menu" id="tabs-menu" hidden>
+      <a class="tabs-item tabs-link" href="index.html">Map tool</a>
+      <a class="tabs-item tabs-link" href="analysis.html">Analysis</a>
+      <button class="tabs-item" disabled>Methods &amp; sources <span class="soon">coming soon</span></button>
+      <a class="tabs-item tabs-link" href="definitions.html">Definitions &amp; references</a>
+    </div>
+  </div>
+  <div class="chg-title">Boundary changes</div>
+
+  <!-- bottom-center: era slider -->
+  <div class="chg-slider-wrap panel">
+    <div class="chg-gap-labels">
+      <button class="chg-gap" id="gap-2018">2018 rezoning</button>
+      <button class="chg-gap" id="gap-2023">2023 consolidation</button>
+    </div>
+    <input type="range" id="era-slider" min="0" max="200" step="1" value="200" aria-label="Boundary era" />
+    <div class="chg-stops">
+      <span>pre-2018</span><span>2018&ndash;2023</span><span>2023&ndash;now</span>
+    </div>
+    <div class="chg-slider-foot">
+      <label class="chk chg-chk"><input type="checkbox" id="chk-nbhsplit" /> Neighborhood splits (before &rarr; after)</label>
+      <button class="chg-replay" id="replay-btn" title="Replay the change animation">&#8635; Replay</button>
+    </div>
+  </div>
+
+  <!-- right: summary / detail panel -->
+  <aside class="panel panel-detail chg-panel" id="detail-panel">
+    <div id="detail-body"></div>
+  </aside>
+
+  <!-- lower-left stack: personal pin controls above the map key -->
+  <div class="chg-left-stack">
+    <div class="chg-pin-panel panel">
+      <span class="control-label">What changed for my address?</span>
+      <div class="addr-row">
+        <input type="text" id="pin-addr" placeholder="Type an address&hellip;" />
+        <button id="pin-addr-go" title="Find the address and drop the pin">Go</button>
+      </div>
+      <button class="pin-btn ghost" id="pin-btn">&hellip;or click the map to place a pin</button>
+    </div>
+    <div class="chg-key panel">
+      <div id="chg-key-flows"></div>
+      <div class="chg-key-row"><span class="ghost-pin ghost-open chg-key-pin">✦</span> school opened</div>
+      <div class="chg-key-row"><span class="ghost-pin chg-key-pin">×</span> school closed</div>
+    </div>
+  </div>
+
+  <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
+  <script src="intro.js?v=108"></script>
+
+  <script>
+    const MAPTILER_KEY = "Lc38sZpTIbGGzM7ebDmS";
+    const DATA_VER = "107";
+
+    if (typeof maplibregl === "undefined") {
+      document.getElementById("map").innerHTML =
+        '<div class="map-error">Map library failed to load. Serve this folder over http and confirm <code>vendor/maplibre-gl.js</code> exists.</div>';
+      throw new Error("maplibregl not loaded");
+    }
+
+    /* ---------- tabs menu ---------- */
+    (function () {
+      const btn = document.getElementById("tabs-btn");
+      const menu = document.getElementById("tabs-menu");
+      const setOpen = (open) => { menu.hidden = !open; btn.setAttribute("aria-expanded", String(open)); };
+      btn.addEventListener("click", (e) => { e.stopPropagation(); setOpen(menu.hidden); });
+      document.addEventListener("click", (e) => { if (!menu.hidden && !menu.contains(e.target)) setOpen(false); });
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !menu.hidden) setOpen(false); });
+    })();
+
+    /* ---------- constants ---------- */
+    // categorical receiving-school palette (no good/bad valence intended or implied)
+    const RECEIVER_COLORS = {
+      "Enatai": "#4c78a8", "Clyde Hill": "#e28743", "Spiritridge": "#8e6bb3",
+      "Wilburton": "#548f9e", "Phantom Lake": "#b06994"
+    };
+    const FALLBACK_COLORS = ["#4c78a8", "#e28743", "#8e6bb3", "#548f9e", "#b06994", "#7f8c5a"];
+    const GHOST_GREY = "#7d848a";
+
+    const TIMELINES = {
+      "2023": [
+        ["Oct 2022", "District publishes its consolidation analysis (the “Planning for the Future” report)."],
+        ["Early 2023", "School board votes to close Wilburton and Eastgate elementaries."],
+        ["June 2023", "Final school day at both schools."],
+        ["Fall 2023", "New elementary attendance zones take effect."]
+      ],
+      "2018": [
+        ["2016–2018", "Wilburton Elementary is built to relieve elementary overcrowding."],
+        ["Sep 2018", "Wilburton opens; a new zone for it is assembled from neighboring zones."]
+      ]
+    };
+
+    const fmt1 = (v) => v == null ? "—" : (Math.round(v * 10) / 10).toLocaleString();
+    const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+
+    /* ---------- map ---------- */
+    const map = new maplibregl.Map({
+      container: "map",
+      style: `https://api.maptiler.com/maps/dataviz/style.json?key=${MAPTILER_KEY}`,
+      center: [-122.155, 47.585], zoom: 11.4, attributionControl: { compact: true }
+    });
+    map.addControl(new maplibregl.NavigationControl({ visualizePitch: false }), "top-left");
+
+    const getJSON = (u) => fetch(u).then(r => { if (!r.ok) throw new Error(u); return r.json(); });
+
+    let DATA = null;              // { zones:{a,b,c}, district, changes:{ "2018","2023" }, flows, neighborhoods }
+    let activeEvent = "2023";
+    let selectedPiece = null;     // "from|to"
+    let ghostMarkers = [];
+    let revealTimer = null;
+
+    /* curved arrow helpers */
+    function arrowCurve(a, b, bend) {
+      const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
+      const dx = b[0] - a[0], dy = b[1] - a[1];
+      const cx = mx - dy * bend, cy = my + dx * bend;
+      const pts = [];
+      for (let i = 0; i <= 32; i++) {
+        const t = i / 32, u = 1 - t;
+        pts.push([u * u * a[0] + 2 * u * t * cx + t * t * b[0],
+                  u * u * a[1] + 2 * u * t * cy + t * t * b[1]]);
+      }
+      return pts;
+    }
+    function withMidBarbs(pts) {
+      // V arrowhead at the MIDDLE of the curve (an end arrowhead reads as a
+      // directionless curve when several arrows converge on one school)
+      const mid = pts[16];
+      const scale = Math.cos(mid[1] * Math.PI / 180);
+      let dx = (pts[17][0] - pts[15][0]) * scale, dy = pts[17][1] - pts[15][1];
+      const n = Math.hypot(dx, dy) || 1e-9;
+      dx /= n; dy /= n;
+      const L = Math.hypot((pts[0][0] - pts[32][0]) * scale, pts[0][1] - pts[32][1]) * 0.10;
+      const barb = (ang) => {
+        const c = Math.cos(ang), s = Math.sin(ang);
+        const bx = -(dx * c - dy * s), by = -(dx * s + dy * c);
+        return [mid[0] + bx * L / scale, mid[1] + by * L];
+      };
+      return pts.slice(0, 17).concat([barb(0.6), mid, barb(-0.6), mid], pts.slice(17));
+    }
+    // stagger label anchors along the curve so nearby arrows' labels don't stack
+    // (endpoints carry school names, midpoint 16 carries the arrowhead)
+    const LABEL_AT = [10, 20, 14, 12, 22];
+    // per-event tweaks: 2018's Enatai→Wilburton label (idx 1) anchors early on the
+    // curve, toward Enatai, so it clears the "Wilburton" school-name label
+    const LABEL_AT_OVERRIDE = { "2018": { 1: 7 } };
+    const labelAt = (ev, idx) => (LABEL_AT_OVERRIDE[ev] && LABEL_AT_OVERRIDE[ev][idx] != null)
+      ? LABEL_AT_OVERRIDE[ev][idx] : LABEL_AT[idx % LABEL_AT.length];
+    // float the label OFF the curve: push it perpendicular, on the outside of
+    // the bend, by 12% of the chord — clear of both the line and the barbs
+    function labelAnchor(pts, i) {
+      const a = pts[0], b = pts[32], p = pts[i];
+      const scale = Math.cos(p[1] * Math.PI / 180);
+      let cx = (b[0] - a[0]) * scale, cy = b[1] - a[1];
+      const cl = Math.hypot(cx, cy) || 1e-9; cx /= cl; cy /= cl;
+      let vx = (p[0] - a[0]) * scale, vy = p[1] - a[1];
+      const t = vx * cx + vy * cy;
+      let nx = vx - t * cx, ny = vy - t * cy;
+      const nl = Math.hypot(nx, ny);
+      if (nl < 1e-12) { nx = -cy; ny = cx; } else { nx /= nl; ny /= nl; }
+      const d = cl * 0.12;
+      return [p[0] + nx * d / scale, p[1] + ny * d];
+    }
+
+    function receiverColor(name, i) {
+      return RECEIVER_COLORS[name] || FALLBACK_COLORS[i % FALLBACK_COLORS.length];
+    }
+
+    function buildArrowData(ev) {
+      const info = DATA.flows[ev];
+      const lines = [], labels = [];
+      let idx = 0;
+      info.flows.forEach((f, i) => {
+        if (!f.from_xy || !f.to_xy) return;
+        const pts = arrowCurve(f.from_xy, f.to_xy, 0.18);
+        const col = receiverColor(f.to, i);
+        lines.push({ type: "Feature", properties: { idx, kind: "flow", color: col }, geometry: { type: "LineString", coordinates: withMidBarbs(pts) } });
+        labels.push({ type: "Feature", properties: { idx, kind: "flow", color: col, label: `≈ ${f.kids.toLocaleString()}` }, geometry: { type: "Point", coordinates: labelAnchor(pts, labelAt(ev, idx)) } });
+        idx++;
+      });
+      (info.program_moves || []).forEach((m) => {
+        if (!m.from_xy || !m.to_xy) return;
+        const pts = arrowCurve(m.from_xy, m.to_xy, -0.22);
+        lines.push({ type: "Feature", properties: { idx, kind: "prog", color: GHOST_GREY }, geometry: { type: "LineString", coordinates: withMidBarbs(pts) } });
+        labels.push({ type: "Feature", properties: { idx, kind: "prog", color: GHOST_GREY, label: m.label }, geometry: { type: "Point", coordinates: labelAnchor(pts, labelAt(ev, idx)) } });
+        idx++;
+      });
+      return { lines: fc(lines), labels: fc(labels), count: idx };
+    }
+
+    function buildSchoolLabels(ev) {
+      // name every school involved in this event (endpoints, closures, openings)
+      const info = DATA.flows[ev];
+      const seen = {};
+      info.flows.forEach(f => {
+        if (f.from_xy) seen[f.from] = f.from_xy;
+        if (f.to_xy) seen[f.to] = f.to_xy;
+      });
+      (info.ghosts || []).forEach(g => { seen[g.name.replace(" Elementary", "")] = g.xy; });
+      (info.opened || []).forEach(g => { seen[g.name.replace(" Elementary", "")] = g.xy; });
+      return fc(Object.entries(seen).map(([name, xy]) =>
+        ({ type: "Feature", properties: { name }, geometry: { type: "Point", coordinates: xy } })));
+    }
+    const fc = (features) => ({ type: "FeatureCollection", features });
+
+    /* ---------- layer setup ---------- */
+    function addLayers() {
+      map.addSource("district", { type: "geojson", data: DATA.district });
+      map.addLayer({ id: "district-line", type: "line", source: "district",
+        paint: { "line-color": "#21262b", "line-width": 2.2 } });
+
+      for (const st of ["a", "b", "c"]) {
+        map.addSource(`zones-${st}`, { type: "geojson", data: DATA.zones[st] });
+        map.addLayer({ id: `zones-${st}-line`, type: "line", source: `zones-${st}`,
+          paint: { "line-color": "#21262b", "line-width": 1.1, "line-opacity": st === "c" ? 1 : 0 } });
+        // invisible hit layer so the personal pin can ask "which zone am I in?"
+        map.addLayer({ id: `zones-${st}-qfill`, type: "fill", source: `zones-${st}`,
+          paint: { "fill-opacity": 0 } }, `zones-${st}-line`);
+      }
+
+      for (const ev of ["2018", "2023"]) {
+        const src = `pieces-${ev}`;
+        map.addSource(src, { type: "geojson", data: DATA.changes[ev] });
+        const colorExpr = ["match", ["get", "to"]];
+        const seen = new Set();
+        DATA.changes[ev].features.forEach((f, i) => {
+          const to = f.properties.to;
+          if (!seen.has(to)) { seen.add(to); colorExpr.push(to, receiverColor(to, seen.size - 1)); }
+        });
+        colorExpr.push("#888888");
+        map.addLayer({ id: `${src}-fill`, type: "fill", source: src,
+          paint: { "fill-color": colorExpr, "fill-opacity": 0 } }, "district-line");
+        map.addLayer({ id: `${src}-outline`, type: "line", source: src,
+          paint: { "line-color": colorExpr, "line-width": 2, "line-opacity": 0 } });
+        map.on("click", `${src}-fill`, (e) => {
+          if (ev !== activeEvent || placingPin) return;
+          const p = e.features[0].properties;
+          openPieceDetail(p);
+          e.preventDefault && e.preventDefault();
+        });
+        map.on("mouseenter", `${src}-fill`, () => { if (ev === activeEvent) map.getCanvas().style.cursor = "pointer"; });
+        map.on("mouseleave", `${src}-fill`, () => { map.getCanvas().style.cursor = ""; });
+      }
+
+      /* arrows (one set of sources, refilled per event) */
+      map.addSource("arrow-lines", { type: "geojson", data: fc([]) });
+      map.addSource("arrow-labels", { type: "geojson", data: fc([]) });
+      map.addLayer({ id: "arrow-line-flow", type: "line", source: "arrow-lines",
+        filter: ["==", ["get", "kind"], "flow"],
+        paint: { "line-color": ["get", "color"], "line-width": 3.2, "line-opacity": 0.9 } });
+      map.addLayer({ id: "arrow-line-prog", type: "line", source: "arrow-lines",
+        filter: ["==", ["get", "kind"], "prog"],
+        paint: { "line-color": ["get", "color"], "line-width": 2, "line-opacity": 0.85, "line-dasharray": [2.2, 1.8] } });
+      map.addLayer({ id: "arrow-label", type: "symbol", source: "arrow-labels",
+        layout: { "text-field": ["get", "label"], "text-size": 11.5,
+                  "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+                  "text-allow-overlap": true, "text-ignore-placement": true },
+        paint: { "text-color": ["get", "color"], "text-halo-color": "#ffffff", "text-halo-width": 1.6 } });
+
+      /* names of the schools involved in the active event */
+      map.addSource("school-labels", { type: "geojson", data: fc([]) });
+      map.addLayer({ id: "school-name", type: "symbol", source: "school-labels",
+        layout: { "text-field": ["get", "name"], "text-size": 12,
+                  "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+                  "text-offset": [0, 1.15], "text-anchor": "top",
+                  "text-allow-overlap": true, "text-ignore-placement": true },
+        paint: { "text-color": "#21262b", "text-halo-color": "#ffffff", "text-halo-width": 1.8 } });
+
+      /* neighborhood-splits layer (hidden until checked) */
+      map.addSource("nbh-split", { type: "geojson", data: fc([]) });
+      map.addLayer({ id: "nbh-split-fill", type: "fill", source: "nbh-split",
+        paint: { "fill-color": "#0f6e66",
+                 "fill-opacity": ["interpolate", ["linear"], ["abs", ["get", "delta"]], 0, 0, 1, 0.35, 3, 0.55] },
+        layout: { visibility: "none" } }, "district-line");
+      map.addLayer({ id: "nbh-split-line", type: "line", source: "nbh-split",
+        paint: { "line-color": "#0f6e66", "line-width": 1, "line-opacity": 0.6 },
+        layout: { visibility: "none" } });
+      map.on("click", "nbh-split-fill", (e) => {
+        const p = e.features[0].properties;
+        new maplibregl.Popup({ closeButton: true, maxWidth: "280px" })
+          .setLngLat(e.lngLat)
+          .setHTML(`<div class="chg-pop"><b>${esc(p.name)}</b><br/>Elementary schools its children are divided across:<br/><b>${p.before}</b> before &rarr; <b>${p.after}</b> after${p.delta === 0 ? " (no change)" : ""}</div>`)
+          .addTo(map);
+      });
+    }
+
+    /* ---------- slider / era state ---------- */
+    const slider = document.getElementById("era-slider");
+
+    function applySlider(t) {
+      const oa = Math.max(0, 1 - t / 100);
+      const ob = 1 - Math.abs(t - 100) / 100;
+      const oc = Math.max(0, (t - 100) / 100);
+      map.setPaintProperty("zones-a-line", "line-opacity", oa);
+      map.setPaintProperty("zones-b-line", "line-opacity", ob);
+      map.setPaintProperty("zones-c-line", "line-opacity", oc);
+      const ev = t < 100 ? "2018" : t > 100 ? "2023" : activeEvent;
+      if (ev !== activeEvent) setEvent(ev, { keepSlider: true });
+    }
+    slider.addEventListener("input", () => applySlider(+slider.value));
+
+    document.getElementById("gap-2018").addEventListener("click", () => { setEvent("2018"); glideTo(100, 40); });
+    document.getElementById("gap-2023").addEventListener("click", () => { setEvent("2023"); glideTo(200, 140); });
+
+    function glideTo(target, from) {
+      const start = from != null ? from : +slider.value;
+      const t0 = performance.now(), dur = 900;
+      function step(now) {
+        const k = Math.min(1, (now - t0) / dur);
+        const v = start + (target - start) * (k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2);
+        slider.value = v; applySlider(v);
+        if (k < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    function setEvent(ev, opts = {}) {
+      activeEvent = ev;
+      selectedPiece = null;
+      for (const e2 of ["2018", "2023"]) {
+        const on = e2 === ev;
+        map.setPaintProperty(`pieces-${e2}-fill`, "fill-opacity", on ? 0.42 : 0);
+        map.setPaintProperty(`pieces-${e2}-outline`, "line-opacity", on ? 0.9 : 0);
+      }
+      showArrows(ev, /*instant*/ true);
+      map.getSource("school-labels").setData(buildSchoolLabels(ev));
+      renderKey(ev);
+      placeGhosts(ev);
+      if (typeof userPin !== "undefined" && userPin) updatePinPopup(false);
+      renderSummary(ev);
+      refreshSplitLayer();
+      document.getElementById("gap-2018").classList.toggle("on", ev === "2018");
+      document.getElementById("gap-2023").classList.toggle("on", ev === "2023");
+      if (!opts.keepSlider) { /* caller moves the slider */ }
+    }
+
+    function showArrows(ev, instant) {
+      if (revealTimer) { clearInterval(revealTimer); revealTimer = null; }
+      const d = buildArrowData(ev);
+      map.getSource("arrow-lines").setData(d.lines);
+      map.getSource("arrow-labels").setData(d.labels);
+      const layers = ["arrow-line-flow", "arrow-line-prog", "arrow-label"];
+      if (instant) {
+        layers.forEach(l => map.setFilter(l, baseFilter(l)));
+        return d.count;
+      }
+      layers.forEach(l => map.setFilter(l, ["all", baseFilter(l), ["<", ["get", "idx"], 0]]));
+      let n = 0;
+      revealTimer = setInterval(() => {
+        n++;
+        layers.forEach(l => map.setFilter(l, ["all", baseFilter(l), ["<", ["get", "idx"], n]]));
+        if (n >= d.count) { clearInterval(revealTimer); revealTimer = null; }
+      }, 550);
+      return d.count;
+    }
+    function baseFilter(layer) {
+      if (layer === "arrow-line-flow") return ["==", ["get", "kind"], "flow"];
+      if (layer === "arrow-line-prog") return ["==", ["get", "kind"], "prog"];
+      return ["boolean", true];
+    }
+
+    /* ---------- map key (lower left) ---------- */
+    function renderKey(ev) {
+      const info = DATA.flows[ev];
+      const seen = new Set();
+      const rows = [];
+      info.flows.forEach((f, i) => {
+        if (seen.has(f.to)) return;
+        seen.add(f.to);
+        rows.push(`<div class="chg-key-row"><span class="chg-swatch" style="background:${receiverColor(f.to, i)}"></span> moved to ${esc(f.to)}</div>`);
+      });
+      rows.push(`<div class="chg-key-note">≈ numbers = children (5–17) living in the moved area</div>`);
+      document.getElementById("chg-key-flows").innerHTML = rows.join("");
+    }
+
+    /* ---------- ghost pins ---------- */
+    function ghostEl(opened) {
+      const el = document.createElement("div");
+      el.className = "ghost-pin" + (opened ? " ghost-open" : "");
+      el.innerHTML = opened ? "✦" : "×";
+      return el;
+    }
+    function placeGhosts(ev) {
+      ghostMarkers.forEach(m => m.remove());
+      ghostMarkers = [];
+      const info = DATA.flows[ev];
+      (info.ghosts || []).forEach(g => {
+        const mk = new maplibregl.Marker({ element: ghostEl(false), anchor: "center" })
+          .setLngLat(g.xy)
+          .setPopup(new maplibregl.Popup({ offset: 14, maxWidth: "300px" })
+            .setHTML(`<div class="chg-pop"><b>${esc(g.name)}</b> <span class="chg-closed-tag">closed</span><br/>${esc(g.note)}</div>`))
+          .addTo(map);
+        mk.getElement().addEventListener("click", () => mk.togglePopup());
+        ghostMarkers.push(mk);
+      });
+      (info.opened || []).forEach(g => {
+        const mk = new maplibregl.Marker({ element: ghostEl(true), anchor: "center" })
+          .setLngLat(g.xy)
+          .setPopup(new maplibregl.Popup({ offset: 14, maxWidth: "300px" })
+            .setHTML(`<div class="chg-pop"><b>${esc(g.name)}</b> <span class="chg-open-tag">opened</span><br/>${esc(g.note)}</div>`))
+          .addTo(map);
+        mk.getElement().addEventListener("click", () => mk.togglePopup());
+        ghostMarkers.push(mk);
+      });
+    }
+
+    /* ---------- neighborhood splits ---------- */
+    function splitCount(splits, key) {
+      const lv = splits[key];
+      return lv && lv.zones ? lv.zones.length : null;
+    }
+    function refreshSplitLayer() {
+      if (!DATA.neighborhoods) return;
+      const beforeKey = activeEvent === "2023" ? "elementary_b" : "elementary_a";
+      const afterKey = activeEvent === "2023" ? "elementary" : "elementary_b";
+      const feats = DATA.neighborhoods.features.map(f => {
+        let s = f.properties.splits;
+        if (typeof s === "string") s = JSON.parse(s);
+        const b = splitCount(s, beforeKey), a = splitCount(s, afterKey);
+        if (b == null || a == null) return null;
+        return { type: "Feature", geometry: f.geometry,
+                 properties: { name: f.properties.name, before: b, after: a, delta: a - b } };
+      }).filter(Boolean).filter(f => f.properties.delta !== 0);
+      map.getSource("nbh-split").setData(fc(feats));
+    }
+    document.getElementById("chk-nbhsplit").addEventListener("change", (e) => {
+      const vis = e.target.checked ? "visible" : "none";
+      map.setLayoutProperty("nbh-split-fill", "visibility", vis);
+      map.setLayoutProperty("nbh-split-line", "visibility", vis);
+    });
+
+    /* ---------- affected-zone metrics (curated before/after set) ---------- */
+    const EVENT_ERAS = { "2018": ["a", "b"], "2023": ["b", "c"] };
+    let azSelected = null;
+
+    function zoneProps(state, name) {
+      const ft = DATA.zones[state].features.find(f => f.properties.name === name);
+      return ft ? ft.properties : null;
+    }
+    function zoneMetrics(p) {
+      return {
+        pp: p.polsby_popper,
+        util: p.cap && p.cap.utilization != null ? p.cap.utilization : null,
+        mix: p.mix_gap,
+        drive: p.travel && p.travel.road && p.travel.road.min ? p.travel.road.min.avg : null
+      };
+    }
+    function affectedZones(ev) {
+      const names = [];
+      DATA.flows[ev].flows.forEach(f => [f.from, f.to].forEach(n => { if (!names.includes(n)) names.push(n); }));
+      return names;
+    }
+    const fmt3 = (v) => v == null ? "—" : (+v).toFixed(3);
+    const AZ_ROWS = [
+      ["Polsby-Popper (shape)", (m) => fmt3(m.pp)],
+      ["Utilization", (m) => m.util == null ? "—" : Math.round(m.util) + "%"],
+      ["Mix gap", (m) => fmt3(m.mix)],
+      ["Avg drive to school", (m) => m.drive == null ? "—" : fmt1(m.drive) + " min"]
+    ];
+
+    function renderAZBody(ev, name) {
+      const [bs, as] = EVENT_ERAS[ev];
+      const pb = zoneProps(bs, name), pa = zoneProps(as, name);
+      const el = document.getElementById("chg-az-body");
+      if (!el) return;
+      if (pb && !pa) {
+        const m = zoneMetrics(pb);
+        el.innerHTML = `<p class="chg-az-note">This zone <b>closed</b> in the change. Its last-era numbers:</p>` +
+          AZ_ROWS.map(([lbl, fn]) => `<div class="chg-pair"><span>${lbl}</span><b>${fn(m)}</b></div>`).join("");
+      } else if (!pb && pa) {
+        const m = zoneMetrics(pa);
+        el.innerHTML = `<p class="chg-az-note">This zone was <b>newly created</b> by the change. Its first-era numbers:</p>` +
+          AZ_ROWS.map(([lbl, fn]) => `<div class="chg-pair"><span>${lbl}</span><b>${fn(m)}</b></div>`).join("");
+      } else if (pb && pa) {
+        const mb = zoneMetrics(pb), ma = zoneMetrics(pa);
+        el.innerHTML = AZ_ROWS.map(([lbl, fn]) =>
+          `<div class="chg-pair"><span>${lbl}</span><b>${fn(mb)} <span class="chg-arrow">&rarr;</span> ${fn(ma)}</b></div>`).join("");
+      } else {
+        el.innerHTML = "";
+      }
+    }
+
+    function azSection(ev) {
+      const names = affectedZones(ev);
+      if (!names.length) return "";
+      if (!azSelected || !names.includes(azSelected)) azSelected = DATA.flows[ev].flows[0].to;
+      const chips = names.map(n =>
+        `<button class="chg-az-chip${n === azSelected ? " on" : ""}" data-zone="${esc(n)}">${esc(n)}</button>`).join("");
+      return `
+        <h3 class="chg-h3">Affected zones <span class="chg-hint">(before &rarr; after)</span></h3>
+        <div class="chg-az-chips">${chips}</div>
+        <div id="chg-az-body"></div>
+        <p class="chg-az-links">One number per impact family; utilization uses each era's own enrollment.
+        Every metric for every zone lives in the <a class="tabs-link" href="index.html">Map tool</a>
+        (and its Graph mode, for your own comparisons).</p>`;
+    }
+
+    /* ---------- panel rendering ---------- */
+    const body = document.getElementById("detail-body");
+
+    function pairRow(label, before, after, unit) {
+      return `<div class="chg-pair"><span>${label}</span>
+        <b>${fmt1(before)}${unit} <span class="chg-arrow">&rarr;</span> ${fmt1(after)}${unit}</b></div>`;
+    }
+
+    function renderSummary(ev) {
+      const info = DATA.flows[ev];
+      const tl = TIMELINES[ev].map(([d, t]) =>
+        `<div class="chg-tl-row"><span class="chg-tl-date">${d}</span><span>${t}</span></div>`).join("");
+      const flows = info.flows.map((f, i) =>
+        `<button class="chg-flow-row" data-i="${i}">
+           <span class="chg-dot" style="background:${receiverColor(f.to, i)}"></span>
+           <span class="chg-flow-names">${esc(f.from)} &rarr; ${esc(f.to)}</span>
+           <span class="chg-flow-kids">≈ ${f.kids.toLocaleString()} children</span>
+         </button>`).join("");
+      const progs = (info.program_moves || []).map(m =>
+        `<div class="chg-prog-row">${esc(m.label)}: ${esc(m.from)} &rarr; ${esc(m.to)}</div>`).join("");
+      const caveat2018 = ev === "2018"
+        ? `<p class="chg-caveat">Pre-2018 boundaries come from a different (federal) source, so exact edges are approximate; very small slivers were filtered out. Treat these pieces as close estimates.</p>` : "";
+      body.innerHTML = `
+        <h2 class="chg-h2">${ev === "2023" ? "The 2023 consolidation" : "The 2018 rezoning"}</h2>
+        <p class="chg-lede">${ev === "2023"
+          ? "Wilburton and Eastgate elementaries closed, and their territory was reassigned to three neighboring schools. Colored areas switched schools; everything pale kept its school."
+          : "Wilburton Elementary opened, and a zone for it was assembled from neighboring zones. Colored areas switched schools; everything pale kept its school."}</p>
+        <div class="chg-totals">
+          <div><b>${info.totals.area_km2}</b> km&sup2; moved</div>
+          <div><b>≈ ${info.totals.kids.toLocaleString()}</b> children (5–17)</div>
+          <div><b>${info.totals.pieces}</b> pieces</div>
+        </div>
+        <h3 class="chg-h3">Territory that switched schools <span class="chg-hint">(counts = children 5–17 living there; click a row or the map)</span></h3>
+        <div class="chg-flows">${flows}</div>
+        ${progs ? `<h3 class="chg-h3">Program &amp; school moves</h3>${progs}` : ""}
+        ${azSection(ev)}
+        <h3 class="chg-h3">Timeline</h3>
+        <div class="chg-tl">${tl}</div>
+        ${caveat2018}
+        <p class="chg-note">Population figures use the fixed 2020 census snapshot: they estimate who lives in the moved territory, not enrollment counts. Descriptive only &mdash; no judgment implied.</p>`;
+      body.querySelectorAll(".chg-flow-row").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const f = info.flows[+btn.dataset.i];
+          const ft = DATA.changes[ev].features.find(x => x.properties.from === f.from && x.properties.to === f.to);
+          if (ft) openPieceDetail(ft.properties, true);
+        });
+      });
+      body.querySelectorAll(".chg-az-chip").forEach(btn => {
+        btn.addEventListener("click", () => {
+          azSelected = btn.dataset.zone;
+          body.querySelectorAll(".chg-az-chip").forEach(b => b.classList.toggle("on", b === btn));
+          renderAZBody(ev, azSelected);
+        });
+      });
+      renderAZBody(ev, azSelected);
+    }
+
+    function raceBars(race, districtRace) {
+      const G = [["w", "White"], ["a", "Asian"], ["h", "Hispanic"], ["b", "Black"]];
+      return G.map(([k, lbl]) => {
+        const v = typeof race === "string" ? JSON.parse(race)[k] : race[k];
+        const d = districtRace[k];
+        if (v == null) return "";
+        return `<div class="chg-race-row"><span class="chg-race-lbl">${lbl}</span>
+          <div class="chg-race-track"><div class="chg-race-bar" style="width:${Math.min(100, v)}%"></div>
+          <div class="chg-race-tick" style="left:${Math.min(100, d)}%" title="district: ${d}%"></div></div>
+          <b>${v}%</b></div>`;
+      }).join("");
+    }
+
+    function openPieceDetail(p, fromList) {
+      const race = typeof p.race === "string" ? JSON.parse(p.race) : p.race;
+      const tb = typeof p.travel_before === "string" ? JSON.parse(p.travel_before) : p.travel_before;
+      const ta = typeof p.travel_after === "string" ? JSON.parse(p.travel_after) : p.travel_after;
+      const nbhs = typeof p.neighborhoods === "string" ? JSON.parse(p.neighborhoods) : p.neighborhoods;
+      let progHTML = "";
+      if (p.event === "2023" && p.programs_before) {
+        const pb = typeof p.programs_before === "string" ? JSON.parse(p.programs_before) : p.programs_before;
+        const pa = typeof p.programs_after === "string" ? JSON.parse(p.programs_after) : p.programs_after;
+        const CATS = [["advanced_learning", "Advanced Learning"], ["language_immersion", "Dual-language immersion"], ["special_education", "Site-based special ed"]];
+        progHTML = `<h3 class="chg-h3">Nearest program (road km, average)</h3>` + CATS.map(([k, lbl]) => {
+          if (!pb[k] || pb[k].road_km == null) return "";
+          return pairRow(lbl, pb[k].road_km, pa[k].road_km, " km");
+        }).join("");
+      }
+      body.innerHTML = `
+        <button class="chg-back" id="chg-back">&larr; back to ${p.event === "2023" ? "2023" : "2018"} overview</button>
+        <h2 class="chg-h2">${esc(p.from)} &rarr; ${esc(p.to)}</h2>
+        <p class="chg-lede">Homes in this area were zoned to <b>${esc(p.from)}</b> before and <b>${esc(p.to)}</b> after the change.</p>
+        <div class="chg-totals">
+          <div><b>${p.area_km2}</b> km&sup2;</div>
+          <div><b>≈ ${(+p.kids).toLocaleString()}</b> children (5–17)</div>
+          <div><b>${(+p.pop).toLocaleString()}</b> residents</div>
+        </div>
+        <h3 class="chg-h3">Travel to the assigned school (average)</h3>
+        ${pairRow("Road distance", tb.road_km, ta.road_km, " km")}
+        ${pairRow("Driving time", tb.drive_min, ta.drive_min, " min")}
+        ${pairRow("Walking time", tb.walk_min, ta.walk_min, " min")}
+        ${progHTML}
+        <h3 class="chg-h3">Who lives here <span class="chg-hint">(2020 census; tick = district share)</span></h3>
+        ${raceBars(race, DATA.flows.district_race)}
+        ${nbhs && nbhs.length ? `<h3 class="chg-h3">Neighborhoods</h3><p class="chg-nbhs">${nbhs.map(esc).join(" &middot; ")}</p>` : ""}
+        ${p.cross_source === true || p.cross_source === "true" ? `<p class="chg-caveat">Pre-2018 edges are approximate (cross-source geometry); figures are close estimates.</p>` : ""}
+        <p class="chg-note">Averages are weighted by where school-age children live (2020 census blocks). Descriptive only &mdash; no judgment implied.</p>`;
+      document.getElementById("chg-back").addEventListener("click", () => renderSummary(activeEvent));
+      if (fromList) {
+        const ft = DATA.changes[activeEvent].features.find(x => x.properties.from === p.from && x.properties.to === p.to);
+        if (ft) {
+          const b = new maplibregl.LngLatBounds();
+          (function walk(c) { typeof c[0] === "number" ? b.extend(c) : c.forEach(walk); })(ft.geometry.coordinates);
+          map.fitBounds(b, { padding: 120, maxZoom: 13.5, duration: 700 });
+        }
+      }
+    }
+
+    /* ---------- personal pin: your own before/after ---------- */
+    const ORS_KEY = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImZhMTgzODFmNWNhODQzYzc4ZjhmNjhjMGYxYWYxYWI2IiwiaCI6Im11cm11cjY0In0=";
+    let userPin = null, pinResults = null, placingPin = false;
+    const pinBtn = document.getElementById("pin-btn");
+
+    const destKey = (xy) => xy[0].toFixed(4) + "," + xy[1].toFixed(4);
+    function allDests() {
+      const seen = {};
+      for (const st of ["a", "b", "c"]) {
+        for (const name in DATA.schoolXY[st]) {
+          const k = destKey(DATA.schoolXY[st][name]);
+          if (!seen[k]) seen[k] = { name: k, c: DATA.schoolXY[st][name] };
+        }
+      }
+      return Object.values(seen);
+    }
+    async function orsMatrix(profile, pt, dests) {
+      try {
+        const res = await fetch(`https://api.openrouteservice.org/v2/matrix/${profile}`, {
+          method: "POST",
+          headers: { "Authorization": ORS_KEY, "Content-Type": "application/json" },
+          body: JSON.stringify({
+            locations: [pt, ...dests.map(d => d.c)],
+            sources: [0], destinations: dests.map((_, i) => i + 1),
+            metrics: ["distance", "duration"]
+          })
+        });
+        if (!res.ok) return null;
+        const j = await res.json();
+        const out = {};
+        dests.forEach((d, i) => {
+          const dist = j.distances && j.distances[0] && j.distances[0][i];
+          const dur = j.durations && j.durations[0] && j.durations[0][i];
+          if (dist != null && dur != null) out[d.name] = { km: dist / 1000, min: dur / 60 };
+        });
+        return out;
+      } catch (e) { return null; }
+    }
+    async function computePin() {
+      const ll = userPin.getLngLat();
+      const dests = allDests();
+      const [drv, wlk] = await Promise.all([
+        orsMatrix("driving-car", [ll.lng, ll.lat], dests),
+        orsMatrix("foot-walking", [ll.lng, ll.lat], dests)
+      ]);
+      pinResults = { drive: drv, walk: wlk };
+      updatePinPopup(true);
+    }
+    const pinLookup = (profile, st, name) => {
+      const xy = DATA.schoolXY[st][name];
+      return xy && pinResults && pinResults[profile] ? pinResults[profile][destKey(xy)] : null;
+    };
+    function zoneAt(st, ll) {
+      const hits = map.queryRenderedFeatures(map.project(ll), { layers: [`zones-${st}-qfill`] });
+      return hits.length ? hits[0].properties.name : null;
+    }
+    function travelLine(st, name) {
+      const d = pinLookup("drive", st, name), w = pinLookup("walk", st, name);
+      if (!d) return "routing unavailable";
+      return `drive ${fmt1(d.min)} min &middot; walk ${w ? fmt1(w.min) : "—"} min (${fmt1(d.km)} km road)`;
+    }
+    function nearestHostMin(st, cat) {
+      const hosts = (DATA.flows.program_hosts[st] || {})[cat] || [];
+      let best = null;
+      hosts.forEach(h => {
+        const r = pinResults && pinResults.drive ? pinResults.drive[destKey(h.xy)] : null;
+        if (r && (best == null || r.min < best)) best = r.min;
+      });
+      return best;
+    }
+    function pinBody() {
+      const ev = activeEvent;
+      const [bs, as] = EVENT_ERAS[ev];
+      const ll = userPin.getLngLat();
+      const zb = zoneAt(bs, ll), za = zoneAt(as, ll);
+      const evName = ev === "2023" ? "2023 consolidation" : "2018 rezoning";
+      let html = `<div class="chg-pop"><b>This location &mdash; ${evName}</b><div class="chg-pin-rows">`;
+      if (!zb && !za) {
+        return html + `<div>Outside the district's elementary zones in both eras.</div></div></div>`;
+      }
+      if (zb === za) {
+        html += `<div class="chg-pin-row"><span>Assigned school</span><b>${esc(zb || "—")} (unchanged)</b></div>`;
+        if (zb) html += `<div class="chg-pin-sub">${travelLine(as, zb)}</div>`;
+      } else {
+        html += `<div class="chg-pin-row"><span>Assigned school</span><b>${esc(zb || "outside district")} &rarr; ${esc(za || "outside district")}</b></div>`;
+        if (zb) html += `<div class="chg-pin-sub">before: ${travelLine(bs, zb)}</div>`;
+        if (za) html += `<div class="chg-pin-sub">after: ${travelLine(as, za)}</div>`;
+      }
+      if (ev === "2023" && DATA.flows.program_hosts) {
+        const CATS = [["advanced_learning", "Advanced Learning"], ["language_immersion", "Immersion"], ["special_education", "Site-based SPED"]];
+        const rows = CATS.map(([k, lbl]) => {
+          const b = nearestHostMin("b", k), a = nearestHostMin("c", k);
+          if (b == null || a == null) return "";
+          return `<div class="chg-pin-row"><span>${lbl} (drive)</span><b>${fmt1(b)} &rarr; ${fmt1(a)} min</b></div>`;
+        }).join("");
+        if (rows) html += `<div class="chg-pin-head">Nearest program, before &rarr; after</div>` + rows;
+      } else if (ev === "2018") {
+        html += `<div class="chg-pin-note">Program locations before 2018 aren't documented well enough to compare.</div>`;
+      }
+      html += `</div><div class="chg-pin-note">Times are typical, traffic-free estimates. Drag the pin to move it.</div></div>`;
+      return html;
+    }
+    function updatePinPopup(open) {
+      if (!userPin) return;
+      const pop = userPin.getPopup();
+      pop.setHTML(pinBody());
+      if (open && !pop.isOpen()) userPin.togglePopup();
+    }
+    function placePinAt(lngLat) {
+      if (userPin) { userPin.remove(); userPin = null; pinResults = null; }
+      const el = document.createElement("div");
+      el.className = "chg-user-pin";
+      userPin = new maplibregl.Marker({ element: el, anchor: "center", draggable: true })
+        .setLngLat(lngLat)
+        .setPopup(new maplibregl.Popup({ offset: 16, closeButton: true, maxWidth: "320px" }).setHTML("<div class='chg-pop'>Calculating&hellip;</div>"))
+        .addTo(map);
+      userPin.togglePopup();
+      el.addEventListener("click", (ev2) => { ev2.stopPropagation(); userPin.togglePopup(); });
+      userPin.on("dragend", () => { userPin.getPopup().setHTML("<div class='chg-pop'>Calculating&hellip;</div>"); computePin(); });
+      pinBtn.textContent = "Remove pin";
+      pinBtn.classList.add("active");
+      computePin();
+    }
+    pinBtn.addEventListener("click", () => {
+      if (userPin) {
+        userPin.remove(); userPin = null; pinResults = null;
+        pinBtn.innerHTML = "&hellip;or click the map to place a pin";
+        pinBtn.classList.remove("active");
+        return;
+      }
+      placingPin = true;
+      pinBtn.textContent = "click the map…";
+      map.getCanvas().style.cursor = "crosshair";
+      map.once("click", (e) => {
+        placingPin = false;
+        map.getCanvas().style.cursor = "";
+        placePinAt(e.lngLat);
+      });
+    });
+
+    /* address search -> pin (same geocoder + guards as the map tool) */
+    const GEO_BBOX = "-122.35,47.45,-121.98,47.73";
+    async function geocodePin() {
+      const inp = document.getElementById("pin-addr");
+      const q = inp.value.trim();
+      if (!q || !DATA) return;
+      try {
+        const r = await fetch(`https://api.maptiler.com/geocoding/${encodeURIComponent(q)}.json` +
+          `?key=${MAPTILER_KEY}&proximity=-122.164,47.6045&bbox=${GEO_BBOX}&limit=1`);
+        const j = await r.json();
+        let f = j.features && j.features[0];
+        // bbox lets huge intersecting features through; require the match's own
+        // point to actually be inside our area
+        const [bx0, by0, bx1, by1] = GEO_BBOX.split(",").map(Number);
+        if (f && !(f.center[0] >= bx0 && f.center[0] <= bx1 && f.center[1] >= by0 && f.center[1] <= by1)) f = null;
+        if (!f) { inp.value = ""; inp.placeholder = "No match near Bellevue — try a fuller address…"; return; }
+        placePinAt({ lng: f.center[0], lat: f.center[1] });
+        map.flyTo({ center: f.center, zoom: Math.max(map.getZoom(), 13), duration: 900 });
+        inp.value = ""; inp.placeholder = "Type an address…";
+      } catch (err) { console.error("geocode failed", err); }
+    }
+    document.getElementById("pin-addr-go").addEventListener("click", geocodePin);
+    document.getElementById("pin-addr").addEventListener("keydown", (e) => { if (e.key === "Enter") geocodePin(); });
+
+    /* ---------- entrance animation ---------- */
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function playAnimation(ev) {
+      const from = ev === "2023" ? 100 : 0;
+      const to = ev === "2023" ? 200 : 100;
+      // hide pieces + arrows, set slider to "before"
+      map.setPaintProperty(`pieces-${ev}-fill`, "fill-opacity", 0);
+      map.setPaintProperty(`pieces-${ev}-outline`, "line-opacity", 0);
+      ["arrow-line-flow", "arrow-line-prog", "arrow-label"].forEach(l =>
+        map.setFilter(l, ["all", baseFilter(l), ["<", ["get", "idx"], 0]]));
+      slider.value = from; applySlider(from);
+      setTimeout(() => {
+        glideTo(to, from);                                   // boundaries crossfade (~0.9 s)
+        setTimeout(() => {                                   // then territory fades in
+          map.setPaintProperty(`pieces-${ev}-fill`, "fill-opacity", 0.42);
+          map.setPaintProperty(`pieces-${ev}-outline`, "line-opacity", 0.9);
+          setTimeout(() => showArrows(ev, false), 500);      // then arrows, one by one
+        }, 1000);
+      }, 600);
+    }
+
+    document.getElementById("replay-btn").addEventListener("click", () => playAnimation(activeEvent));
+
+    /* ---------- boot ---------- */
+    async function boot() {
+      const V = `?v=${DATA_VER}`;
+      const [district, za, zb, zc, c18, c23, flows, nbh, sa, sb, sc] = await Promise.all([
+        getJSON(`data/bellevue_district.geojson${V}`),
+        getJSON(`data/bellevue_a_elementary_zones.geojson${V}`),
+        getJSON(`data/bellevue_b_elementary_zones.geojson${V}`),
+        getJSON(`data/bellevue_elementary_zones.geojson${V}`),
+        getJSON(`data/changes_2018.geojson${V}`),
+        getJSON(`data/changes_2023.geojson${V}`),
+        getJSON(`data/changes_flows.json${V}`),
+        getJSON(`data/bellevue_neighborhoods.geojson${V}`),
+        getJSON(`data/bellevue_a_elementary_schools.geojson${V}`),
+        getJSON(`data/bellevue_b_elementary_schools.geojson${V}`),
+        getJSON(`data/bellevue_elementary_schools.geojson${V}`)
+      ]);
+      const xyOf = (fcSchools) => {
+        const m = {};
+        fcSchools.features.forEach(f => { m[f.properties.name] = f.geometry.coordinates; });
+        return m;
+      };
+      DATA = { district, zones: { a: za, b: zb, c: zc }, changes: { "2018": c18, "2023": c23 },
+               flows, neighborhoods: nbh, schoolXY: { a: xyOf(sa), b: xyOf(sb), c: xyOf(sc) } };
+      addLayers();
+
+      const b = new maplibregl.LngLatBounds();
+      district.features.forEach(f => (function walk(c) { typeof c[0] === "number" ? b.extend(c) : c.forEach(walk); })(f.geometry.coordinates));
+      map.fitBounds(b, { padding: { top: 60, right: 380, bottom: 120, left: 60 }, duration: 0 });
+
+      setEvent("2023");
+      slider.value = 200; applySlider(200);
+
+      const played = sessionStorage.getItem("bsd_changes_played");
+      if (!played && !reduceMotion) {
+        sessionStorage.setItem("bsd_changes_played", "1");
+        whenIntroGone(() => setTimeout(() => playAnimation("2023"), 500));
+      }
+    }
+    // if the entry screens are up (direct entry to this page), hold the
+    // animation until the visitor dismisses them
+    function whenIntroGone(cb) {
+      if (!document.getElementById("intro")) return cb();
+      const obs = new MutationObserver(() => {
+        if (!document.getElementById("intro")) { obs.disconnect(); cb(); }
+      });
+      obs.observe(document.body, { childList: true });
+    }
+    map.on("load", () => boot().catch(err => {
+      body.innerHTML = `<p class="chg-caveat">Failed to load change data: ${esc(err.message)}. Run <code>python data/build_changes.py</code>.</p>`;
+      console.error(err);
+    }));
+  </script>
+</body>
+</html>

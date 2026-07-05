@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analysis — Bellevue School District Boundaries</title>
+  <meta name="description" content="A guided reading of what Bellevue's 2018 and 2023 school boundary changes did — impact by impact, with every claim linked to the interactive maps." />
+  <link rel="stylesheet" href="styles.css?v=107" />
+</head>
+<body class="an-page">
+
+  <!-- top-left tabs launcher (same as the map pages) -->
+  <div class="tabs-launcher">
+    <button class="tabs-btn" id="tabs-btn" aria-expanded="false" aria-haspopup="true">More tabs <span class="tabs-caret">&#9662;</span></button>
+    <div class="tabs-menu" id="tabs-menu" hidden>
+      <a class="tabs-item tabs-link" href="index.html">Map tool</a>
+      <a class="tabs-item tabs-link" href="changes.html">Boundary changes</a>
+      <button class="tabs-item" disabled>Methods &amp; sources <span class="soon">coming soon</span></button>
+      <a class="tabs-item tabs-link" href="definitions.html">Definitions &amp; references</a>
+    </div>
+  </div>
+
+  <!-- left rail: section navigation -->
+  <nav class="an-nav" aria-label="Sections">
+    <a href="#s1" data-sec="s1">1 &middot; How to read</a>
+    <a href="#s2" data-sec="s2">2 &middot; What happened</a>
+    <a href="#s3" data-sec="s3">3 &middot; The impacts</a>
+    <a href="#s4" data-sec="s4">4 &middot; Shape's limits</a>
+    <a href="#s5" data-sec="s5">5 &middot; Who absorbed it</a>
+    <a href="#s6" data-sec="s6">6 &middot; Beyond numbers</a>
+    <a href="#s7" data-sec="s7">7 &middot; Sources</a>
+  </nav>
+
+  <main class="an-wrap">
+    <header class="an-header">
+      <p class="an-kicker">Analysis</p>
+      <h1>What the 2023 rezoning did &mdash; a guided reading</h1>
+      <p class="an-lede">This page walks through the evidence in order. Every claim links to the
+      interactive view where you can check it yourself. Numbers describe; the judging is yours.</p>
+    </header>
+
+    <!-- §1 -->
+    <section class="an-section" id="s1">
+      <p class="an-secnum">Section 1</p>
+      <h2>How to read this page</h2>
+      <p>There are three ways to look at one boundary change, and this page uses all three:</p>
+      <ul class="an-list">
+        <li><b>The shape of the zones.</b> Did the lines themselves get more or less regular?
+        This is the lens the public reaches for first &mdash; and the one we examine most
+        carefully in <a href="#s4">Section 4</a>.</li>
+        <li><b>The flows.</b> Which territory, students, and programs moved where?
+        This is the <a class="tabs-link" href="changes.html">Boundary changes</a> page's job.</li>
+        <li><b>The human effects.</b> What changed about travel, capacity, demographics, and
+        access to programs, for the district and for each zone? This is
+        <a href="#s3">Section 3</a>, using the <a class="tabs-link" href="index.html">Map tool</a>'s
+        measurements.</li>
+      </ul>
+      <p>One promise, repeated from the front door: <b>no number on this site is a fairness
+      score.</b> We measured what can be measured and describe what cannot. Whether any of it
+      was fair is a judgment that belongs to the people affected &mdash; this page just makes sure
+      that judgment can be an informed one.</p>
+      <div class="an-btnrow">
+        <a class="an-btn tabs-link" href="index.html">Open the map tool</a>
+        <a class="an-btn tabs-link" href="changes.html">See the boundary changes</a>
+      </div>
+    </section>
+
+    <!-- §2 -->
+    <section class="an-section" id="s2">
+      <p class="an-secnum">Section 2</p>
+      <h2>What happened</h2>
+      <p>In <b>2018</b>, the district opened Wilburton Elementary &mdash; a new school built to
+      relieve elementary overcrowding &mdash; and assembled a zone for it from pieces of
+      neighboring zones. Five years later the picture had reversed: elementary enrollment was
+      falling, and the district projected a budget shortfall. By 2022&ndash;23, Wilburton's
+      650-seat building held about 350 students; Eastgate's 529 seats held about 316.</p>
+      <p>In <b>2023</b>, the school board voted to close both schools. Their territory was
+      reassigned to three neighbors &mdash; Spiritridge, Enatai, and Clyde Hill &mdash; and
+      programs moved with the students: Advanced Learning left Spiritridge for Woodridge, and
+      Eastgate's Olympic program moved to Spiritridge. In total, about
+      <b>13.6&nbsp;km&sup2;</b> of the district &mdash; home to roughly
+      <b><span class="u" data-n="2,835 children (ages 5&ndash;17)" data-pct="12% of the district's school-age children"></span></b>
+      &mdash; switched elementary schools.</p>
+      <p class="an-note">Enrollment figures are the district's own counts; the falling-enrollment
+      and budget rationale is the district's stated reason for the consolidation, reported here
+      as their statement. Population estimates use the fixed 2020 census snapshot.</p>
+      <div class="an-btnrow">
+        <a class="an-btn tabs-link" href="changes.html">Watch the boundaries change</a>
+      </div>
+    </section>
+
+    <!-- §3 -->
+    <section class="an-section" id="s3">
+      <p class="an-secnum">Section 3</p>
+      <h2>The impacts, one by one</h2>
+      <p>Each card below starts with the question a family would actually ask, then answers with
+      before/after measurements. The small tag on each card says how far the numbers go:
+      <span class="an-chip">measured</span> means the answer is a computation,
+      <span class="an-chip an-chip-mid">partly measured</span> means numbers cover only part of
+      the question, and <span class="an-chip an-chip-desc">described</span> means honest words
+      are all the data allows.</p>
+
+      <!-- Impact: travel -->
+      <details class="an-impact" id="i-travel">
+        <summary class="an-impact-head">
+          <h3>Travel &mdash; did school get harder to reach?</h3>
+          <span class="an-chip">measured</span>
+        </summary>
+        <p>We routed the real road network from every home to its assigned school &mdash; driving
+        and walking &mdash; and averaged by where school-age children live. For most of the
+        district the answer is simply <i>no change</i>: 11 of the 16 zones kept identical
+        boundaries in 2023. For the reassigned areas, the answer is a real cost:</p>
+        <ul class="an-list">
+          <li>The old <b>Eastgate</b> area's average trip
+            <span class="u" data-km="went from 2.0 to 4.9 road-km" data-min="went from about 4.6 to 10.6 driving minutes &mdash; and from 18 to 59 minutes on foot"></span>.</li>
+          <li>The old <b>Wilburton</b> area's trips
+            <span class="u" data-km="went from 2.2&ndash;2.6 to about 4.0&ndash;4.4 road-km" data-min="went from 5&ndash;6 to about 8 driving minutes &mdash; and from 20&ndash;25 to roughly 44 minutes on foot"></span>.</li>
+        </ul>
+        <p>The two units tell different stories, which is why the toggle exists: by car these
+        changes look modest; on foot they are the difference between a school you can walk to
+        and one you cannot. Zone-wide, <b>Spiritridge</b> &mdash; which absorbed the Eastgate
+        territory &mdash; saw its average drive rise from 4.0 to 7.5 minutes. That sounds small
+        until you say it in walking terms: the same average trip went from a <b>19-minute walk
+        to a 41-minute walk</b> &mdash; from "kids can walk" to "somebody drives, twice a day,
+        every day."</p>
+        <figure class="an-fig">
+          <div class="an-map-wrap">
+            <img src="img/analysis-travel-c.png" alt="Map: average distance to assigned school, 2023–now"
+               onerror="this.closest('figure').classList.add('missing')" />
+            <img class="an-scale" src="img/analysis-travel-c-gradient.png" alt="color scale" onerror="this.remove()" />
+          </div>
+          <figcaption>Average distance to the assigned school under the 2023&ndash;now boundaries.</figcaption>
+        </figure>
+        <p class="an-note">Times are typical, traffic-free estimates; averages are weighted by
+        where children live (2020 census). Judging whether the added minutes were worth the
+        district's stated goals is not a math question.</p>
+        <div class="an-btnrow">
+          <a class="an-btn tabs-link" href="index.html?state=c&metric=travel_avg">Color the map by travel</a>
+          <a class="an-btn tabs-link" href="changes.html">See the moved territory</a>
+        </div>
+      </details>
+
+      <!-- Impact: capacity -->
+      <details class="an-impact" id="i-capacity">
+        <summary class="an-impact-head">
+          <h3>Capacity &mdash; were buildings too empty or too full?</h3>
+          <span class="an-chip">measured</span>
+        </summary>
+        <p>This is the impact the district itself cited. In 2022&ndash;23, Wilburton had
+        <span class="u" data-n="350 of its 650 seats filled" data-pct="54% of its capacity in use"></span>
+        and Eastgate <span class="u" data-n="316 of 529" data-pct="60%"></span> &mdash; while
+        Spiritridge ran at <span class="u" data-n="582 students in a 529-seat building" data-pct="110% of capacity"></span>.</p>
+        <p>For scale: 110% means more students than the building has seats; 54% means nearly
+        half the building empty. After the consolidation, the extremes narrowed: Spiritridge
+        came down to <b><span class="u" data-pct="95%" data-n="546 students in 576 seats"></span></b>,
+        Enatai rose from <span class="u" data-pct="75 to 86%" data-n="433 of 575 seats to 518 of 600"></span>,
+        Clyde Hill from <span class="u" data-pct="71 to 92%" data-n="459 of 650 seats to 594 of 648"></span>
+        &mdash; and <b>Woodridge jumped from
+        <span class="u" data-pct="56% to 100%" data-n="297 students in its 529 seats to 554 in 552"></span></b>
+        without its boundary moving at all, because the Advanced Learning program (and its
+        students) moved in. Keep that last one in mind: it returns in <a href="#s4">Section 4</a>
+        as the change no shape metric can see.</p>
+        <p>The 2018 side of the story runs the other direction: Wilburton was <i>built</i>
+        because elementary buildings were over capacity, and its opening relieved its neighbors.
+        We tell that part in words rather than a percent-by-percent map because the pre-2018
+        capacity figures are proxies (mostly 2019 facility assessments applied backward), too
+        soft to chart honestly. And one reading caution for every era: most schools' utilization
+        moves came from ordinary enrollment drift and building updates, not from boundary
+        changes &mdash; only the five zones touched in 2023 (and Wilburton's neighbors in 2018)
+        have utilization stories the rezoning actually wrote.</p>
+        <figure class="an-fig an-fig2">
+          <span>
+            <div class="an-map-wrap">
+              <img src="img/analysis-util-b.png" alt="Map: utilization, 2018–2023 boundaries"
+                 onerror="this.closest('figure').classList.add('missing')" />
+              <img class="an-scale" src="img/analysis-util-b-gradient.png" alt="color scale" onerror="this.remove()" />
+            </div>
+            <figcaption>Utilization, 2018&ndash;2023</figcaption>
+          </span>
+          <span>
+            <div class="an-map-wrap">
+              <img src="img/analysis-util-c.png" alt="Map: utilization, 2023–now boundaries"
+                 onerror="this.closest('figure').classList.add('missing')" />
+              <img class="an-scale" src="img/analysis-util-c-gradient.png" alt="color scale" onerror="this.remove()" />
+            </div>
+            <figcaption>Utilization, 2023&ndash;now</figcaption>
+          </span>
+        </figure>
+        <p class="an-note">Each era uses its own enrollment counts against the best documented
+        capacity for that period; a few capacity values reuse older facility assessments &mdash;
+        the exact vintages are listed in Methods &amp; Sources. Whether ~100% utilization is
+        "efficient" or "no room to breathe" is a judgment the number itself doesn't make.</p>
+        <div class="an-btnrow">
+          <a class="an-btn tabs-link" href="index.html?state=b&metric=utilization">Utilization before</a>
+          <a class="an-btn tabs-link" href="index.html?state=c&metric=utilization">Utilization after</a>
+        </div>
+      </details>
+
+      <!-- Impact: segregation / demographic mix -->
+      <details class="an-impact" id="i-mix">
+        <summary class="an-impact-head">
+          <h3>Demographic mix &mdash; did the lines sort children apart?</h3>
+          <span class="an-chip">measured</span>
+        </summary>
+        <p>First, the idea in plain words. Bellevue's families are not spread evenly across the
+        city &mdash; different neighborhoods have different mixes of White, Asian, Hispanic, and
+        Black residents. When attendance lines are drawn on top of that, each zone inherits a
+        mix. <b>"Sorting"</b> is the question of how different the zones' mixes end up being from
+        one another: if every zone looked just like the district as a whole, there would be no
+        sorting at all. One design choice to know: every era here uses the same frozen 2020
+        census population. Real families did move during these years, but we deliberately hold
+        the population still, so that any difference you see between eras isolates what the
+        <i>line-drawing alone</i> did &mdash; a fair before/after comparison needs everything
+        else held constant.</p>
+        <p>Each zone gets a <b>mix gap</b> &mdash; how far its mix sits from the district's
+        overall mix. The scale: <b>0 means identical to the district</b>, and the most
+        distinctive zone in Bellevue (Stevenson) scores about <b>0.07</b>. So when Spiritridge
+        went from 0.036 to 0.010, it went from being one of the more distinctive zones in the
+        district to nearly indistinguishable from the district average &mdash; on this scale,
+        that is a large move.</p>
+        <p>The result many readers won't expect: the 2023 consolidation <b>slightly reduced</b>
+        sorting. The district-wide index eased from 0.031 to 0.028 (about a 10% drop), every
+        rezoned zone moved <i>closer</i> to the district's mix (Enatai 0.024 &rarr; 0.006,
+        Clyde Hill 0.012 &rarr; 0.008), and the 2018 rezoning had barely moved it either way
+        (0.030 &rarr; 0.031). Merging territories tends to average out their differences;
+        whatever else the closures did, they did not carve out demographically extreme zones.</p>
+        <p>One more distinction worth knowing, using the standard <b>dissimilarity index</b> &mdash;
+        roughly, <i>out of every 100 children, how many would have to switch schools for every
+        school to mirror the district's mix</i> (0 = none, 100 = total separation). Measured on
+        who <i>lives</i> where, today's zones score about <b>15 of every 100</b>. Measured on who
+        actually <i>enrolls</i> where, it's about <b>19 of every 100</b> &mdash; schools sort
+        more than neighborhoods do, because choice schools and special programs pull the enrolled
+        mix further apart than residence alone would.</p>
+        <figure class="an-fig">
+          <div class="an-map-wrap">
+            <img src="img/analysis-mixgap-c.png" alt="Map: mix gap by zone, 2023–now"
+               onerror="this.closest('figure').classList.add('missing')" />
+            <img class="an-scale" src="img/analysis-mixgap-c-gradient.png" alt="color scale" onerror="this.remove()" />
+          </div>
+          <figcaption>Mix gap under the 2023&ndash;now boundaries (0 = same mix as the district).</figcaption>
+        </figure>
+        <p class="an-note">Indices depend on which groups are counted (we use six: White, Asian,
+        Hispanic, Black, two-or-more, other) and describe <i>sorting</i>, not intent and not
+        income. Low sorting is not automatically "good," nor high sorting "bad" &mdash; the
+        numbers only say how alike the zones are.</p>
+        <div class="an-btnrow">
+          <a class="an-btn tabs-link" href="index.html?state=c&metric=mix_gap">Color the map by mix gap</a>
+          <a class="an-btn tabs-link" href="index.html?state=c&metric=asian">Race % by zone</a>
+        </div>
+      </details>
+
+      <!-- Impact: program access -->
+      <details class="an-impact" id="i-programs">
+        <summary class="an-impact-head">
+          <h3>Program access &mdash; can families still reach optional programs?</h3>
+          <span class="an-chip an-chip-mid">partly measured</span>
+        </summary>
+        <p>Some programs live at specific schools, so when schools close or programs move, the
+        distance to the <i>nearest host</i> changes even for families whose own school didn't.
+        In 2023: Advanced Learning moved from Spiritridge to Woodridge, Eastgate's Olympic
+        program moved to Spiritridge, and Jing Mei (Mandarin immersion) moved into the former
+        Wilburton building. A Japanese immersion strand at Bennett was added after 2023.</p>
+        <p>District-wide, the average distance to the nearest host barely moved &mdash; Advanced
+        Learning <span class="u" data-km="3.8 &rarr; 4.1 km" data-min="about one driving minute farther"></span>,
+        and similarly small shifts for immersion and site-based special education. But the
+        average hides the local swings, which ran in opposite directions:</p>
+        <ul class="an-list">
+          <li><b>Woodridge</b> residents' distance to Advanced Learning
+            <span class="u" data-km="fell from 5.1 to 1.5 km" data-min="fell by roughly seven driving minutes"></span> &mdash; the program came to them.</li>
+          <li><b>Spiritridge</b> residents' distance to it
+            <span class="u" data-km="rose from 1.8 to 3.6 km" data-min="roughly doubled in driving time"></span> &mdash; the program left them.</li>
+          <li>The old <b>Eastgate</b> territory's distance to site-based special education
+            <span class="u" data-km="rose from 2.0 to 4.6 km" data-min="rose from about 4.6 to 10.3 driving minutes"></span> &mdash; the Olympic program had been at Eastgate itself.</li>
+        </ul>
+        <figure class="an-fig an-fig2">
+          <span>
+            <div class="an-map-wrap">
+              <img src="img/analysis-al-b.png" alt="Map: distance to Advanced Learning, 2018–2023"
+                 onerror="this.closest('figure').classList.add('missing')" />
+              <img class="an-scale" src="img/analysis-al-b-gradient.png" alt="color scale" onerror="this.remove()" />
+            </div>
+            <figcaption>Distance to Advanced Learning, 2018&ndash;2023</figcaption>
+          </span>
+          <span>
+            <div class="an-map-wrap">
+              <img src="img/analysis-al-c.png" alt="Map: distance to Advanced Learning, 2023–now"
+                 onerror="this.closest('figure').classList.add('missing')" />
+              <img class="an-scale" src="img/analysis-al-c-gradient.png" alt="color scale" onerror="this.remove()" />
+            </div>
+            <figcaption>Distance to Advanced Learning, 2023&ndash;now</figcaption>
+          </span>
+        </figure>
+        <p class="an-note">Why only "partly measured": distance answers <i>can you get there</i>,
+        not <i>can you get in</i> &mdash; eligibility, admission to competitive programs, and
+        available seats are not on any map. Pre-2018 program locations are too thinly documented
+        to compare, so this card covers the 2023 change only.</p>
+        <div class="an-btnrow">
+          <a class="an-btn tabs-link" href="index.html?state=c&metric=al_avg">Distance to Advanced Learning</a>
+          <a class="an-btn tabs-link" href="changes.html">See the program moves</a>
+        </div>
+      </details>
+
+      <!-- Impact: special education -->
+      <details class="an-impact" id="i-sped">
+        <summary class="an-impact-head">
+          <h3>Special education &mdash; how far are the site-based services?</h3>
+          <span class="an-chip an-chip-mid">partly measured</span>
+        </summary>
+        <p>This gets its own card, separate from optional programs, because special-education
+        services are a <b>legal right</b>, not a choice. Every school serves students with
+        IEPs day to day; what lives at specific sites are the district's three named intensive
+        programs &mdash; <b>Olympic</b> (autism spectrum), <b>Pacific</b> (developmental and
+        intellectual disabilities), and <b>Cascade</b> (social/emotional/behavioral). When a
+        host site closes, the map of those programs changes.</p>
+        <p>District-wide, the average distance to the nearest site barely moved:
+        <span class="u" data-km="3.8 &rarr; 3.9 km" data-min="well under one driving minute of change"></span>.
+        The local picture is where it matters. The old <b>Eastgate</b> territory had the Olympic
+        program in its own school; after the closure its distance to site-based special ed
+        <span class="u" data-km="rose from 2.0 to 4.6 km" data-min="rose from about a 4.6- to a 10.3-minute drive"></span>.
+        <b>Somerset</b> also lost Eastgate as its nearest site
+        (<span class="u" data-km="3.1 &rarr; 4.4 km" data-min="about two driving minutes farther"></span>),
+        while <b>Spiritridge</b> &mdash; Olympic's new home &mdash; came slightly closer for its
+        residents.</p>
+        <figure class="an-fig">
+          <div class="an-map-wrap">
+            <img src="img/analysis-sped-c.png" alt="Map: distance to site-based special education, 2023–now"
+               onerror="this.closest('figure').classList.add('missing')" />
+            <img class="an-scale" src="img/analysis-sped-c-gradient.png" alt="color scale" onerror="this.remove()" />
+          </div>
+          <figcaption>Distance to the nearest site-based special-education program, 2023&ndash;now.</figcaption>
+        </figure>
+        <p class="an-note">Why "partly measured": students are placed in these programs through
+        the IEP process &mdash; the district assigns the site, and it is not always the nearest
+        one. Distance describes the geography of the program map, not any family's actual
+        assignment. Inclusion support and integrated preschool exist at many schools and are
+        listed per school in the map tool.</p>
+        <div class="an-btnrow">
+          <a class="an-btn tabs-link" href="index.html?state=c&metric=sped_avg">Distance to site-based special ed</a>
+          <a class="an-btn tabs-link" href="changes.html">See the Olympic move</a>
+        </div>
+      </details>
+
+      <!-- Impact: neighborhood continuity -->
+      <details class="an-impact" id="i-continuity">
+        <summary class="an-impact-head">
+          <h3>Neighborhood continuity &mdash; did the lines keep communities together?</h3>
+          <span class="an-chip an-chip-mid">partly measured</span>
+        </summary>
+        <p>A neighborhood counts as <b>"split"</b> when its children are zoned to different
+        elementary schools &mdash; classmates on one street, different schools on the next.
+        First, the yardstick, because it surprises people: <b>splits are the norm here</b>.
+        Of Bellevue's 16 official city neighborhoods with school-age children, <b>13 are split
+        across two or more elementary zones today</b>. School lines and neighborhood lines were
+        never the same map.</p>
+        <p>Against that baseline, the 2023 consolidation changed remarkably little &mdash; but
+        what it changed is pointed. Exactly two neighborhoods' split counts moved: the
+        <b>Wilburton neighborhood went from whole to split</b> (its children had all attended
+        one school; they now divide between Clyde Hill and Enatai), and <b>Eastgate became
+        less split</b> (from four schools to three). The neighborhood that lost its school also
+        lost its single shared school community &mdash; that is the human reading of "1 &rarr; 2."</p>
+        <figure class="an-fig">
+          <div class="an-map-wrap">
+            <img src="img/analysis-nbh-c.png" alt="Map: neighborhoods colored by how many schools they split across"
+               onerror="this.closest('figure').classList.add('missing')" />
+            <img class="an-scale" src="img/analysis-nbh-c-gradient.png" alt="color scale" onerror="this.remove()" />
+          </div>
+          <figcaption>Neighborhoods colored by how many elementary zones their children divide across (2023&ndash;now).</figcaption>
+        </figure>
+        <p class="an-note">Counts cover the City of Bellevue's official neighborhoods only (the
+        district also serves Clyde Hill, Medina, and other towns that have no Bellevue
+        neighborhood), and a split count is not a measure of community feeling &mdash; it counts
+        assignments, not friendships. Where a neighborhood extends <i>outside</i> the school
+        district entirely, that portion does <b>not</b> count as an extra school in its split
+        count: those children were never Bellevue's to assign, so counting them would blame the
+        district's lines for a boundary the district doesn't control. The outside share is
+        listed separately in each neighborhood's popup on the map tool. One preview of
+        <a href="#s4">Section 4</a>: a boundary that <i>follows</i> a neighborhood edge keeps
+        the community whole but often makes the zone's shape score worse &mdash; the shape
+        metric punishes the community-friendly line.</p>
+        <div class="an-btnrow">
+          <a class="an-btn tabs-link" href="index.html?state=c&nbh=1">See the neighborhood splits</a>
+        </div>
+      </details>
+
+      <!-- Impact: housing -->
+      <details class="an-impact" id="i-housing">
+        <summary class="an-impact-head">
+          <h3>Housing &mdash; who can afford to live in each zone?</h3>
+          <span class="an-chip an-chip-mid">partly measured</span>
+        </summary>
+        <p>School zones are also price tags: to enroll at a school by right, you live inside its
+        line, so each zone's housing costs decide who can join it. The scale in Bellevue is its
+        own yardstick: <b>every elementary zone's median home value is above one million
+        dollars</b>, running from about $1.0M (Lake Hills) to $1.8M (Medina), with zone median
+        household incomes from about $133,000 to over $200,000.</p>
+        <p>Because all eras use the same frozen residents, redrawing lines changes a zone's
+        housing profile only by <i>regrouping</i> homes &mdash; and 2023 did visibly regroup
+        them. <b>Clyde Hill's zone</b>, which absorbed part of the Wilburton area with its
+        apartments and denser housing, saw its median income figure move from about $211,000 to
+        $185,000 and its median home value from $1.84M to $1.46M &mdash; the zone now spans a
+        much wider range of housing than before. <b>Spiritridge's</b> median income figure rose
+        from about $173,000 to $188,000. Untouched zones didn't move a dollar &mdash; same
+        residents, same lines.</p>
+        <figure class="an-fig">
+          <div class="an-map-wrap">
+            <img src="img/analysis-income-c.png" alt="Map: median household income by zone, 2023–now"
+               onerror="this.closest('figure').classList.add('missing')" />
+            <img class="an-scale" src="img/analysis-income-c-gradient.png" alt="color scale" onerror="this.remove()" />
+          </div>
+          <figcaption>Median household income by zone, 2023&ndash;now boundaries.</figcaption>
+        </figure>
+        <p class="an-note">These are census medians regrouped by boundary &mdash; they say who
+        lived where in 2020, not what the rezoning did to prices. Whether school assignments
+        move home prices ("capitalization") is a real research question we deliberately do not
+        claim here; the map tool's price-history charts are context, not attribution.</p>
+        <div class="an-btnrow">
+          <a class="an-btn tabs-link" href="index.html?state=c&metric=income">Income by zone</a>
+          <a class="an-btn tabs-link" href="index.html?state=c&metric=home_value">Home values by zone</a>
+        </div>
+      </details>
+
+      <!-- Impact: language -->
+      <details class="an-impact" id="i-language">
+        <summary class="an-impact-head">
+          <h3>Language &mdash; where do multilingual families live?</h3>
+          <span class="an-chip an-chip-mid">partly measured</span>
+        </summary>
+        <p>The census calls a household <b>"limited-English"</b> when no one 14 or older speaks
+        English very well &mdash; the households for whom school letters, meetings, and
+        deadlines are hardest to navigate. They are not spread evenly: today's zones range from
+        <b>2.4%</b> of households (Medina) to <b>13.7%</b> (Woodridge) &mdash; more than a
+        five-fold difference between zones in the same district.</p>
+        <p>The 2023 lines moved this map most for one zone: <b>Clyde Hill's</b>, where absorbing
+        part of the old Wilburton area raised its limited-English share from 7.5% to
+        <b>10.9%</b> &mdash; the school now serves a noticeably more multilingual community than
+        its old zone did. Other affected zones barely moved (Spiritridge 5.8 &rarr; 6.1%,
+        Enatai 9.0 &rarr; 9.2%).</p>
+        <figure class="an-fig">
+          <div class="an-map-wrap">
+            <img src="img/analysis-limited-c.png" alt="Map: limited-English households by zone, 2023–now"
+               onerror="this.closest('figure').classList.add('missing')" />
+            <img class="an-scale" src="img/analysis-limited-c-gradient.png" alt="color scale" onerror="this.remove()" />
+          </div>
+          <figcaption>Limited-English households by zone, 2023&ndash;now boundaries.</figcaption>
+        </figure>
+        <p class="an-note">Why "partly measured": <i>where</i> multilingual families live is
+        measurable; whether they could effectively <i>follow and respond to</i> the consolidation
+        process (translated materials, meeting formats, timelines) is a process question &mdash;
+        it belongs to <a href="#s6">Section 6</a>. Dual-language programs are covered in the
+        program-access card above.</p>
+        <div class="an-btnrow">
+          <a class="an-btn tabs-link" href="index.html?state=c&metric=limited">Limited-English households by zone</a>
+        </div>
+      </details>
+
+      <!-- Impact: middle/high ripple -->
+      <details class="an-impact" id="i-ripple">
+        <summary class="an-impact-head">
+          <h3>Middle &amp; high schools &mdash; the ripple nobody rezoned</h3>
+          <span class="an-chip an-chip-mid">partly measured</span>
+        </summary>
+        <p>Here is a finding that looks like nothing: <b>middle and high school boundaries did
+        not change at all</b> &mdash; not in 2018, not in 2023. Only elementary lines moved.
+        You can verify the "nothing" yourself on the map tool.</p>
+        <p>But unchanged lines do not mean unchanged schools, because of <b>feeder patterns</b> &mdash;
+        which elementary cohorts arrive together at each middle school. A middle school's
+        entering class is built from the elementary communities below it, and 2023 rebuilt some
+        of those communities: children from the old Eastgate zone now arrive having spent
+        elementary years at Spiritridge instead of Eastgate. Same building, same boundary, a
+        differently-woven entering class.</p>
+        <p>The structural tension was there before 2023 and remains: elementary zones do not
+        nest neatly inside middle zones. <b>Phantom Lake's</b> children split roughly 54/46
+        between two middle schools, and <b>Stevenson's</b> split at <i>both</i> the middle and
+        high level &mdash; families there face a built-in choice between keeping the elementary
+        community together and attending the nearest school. The 2023 change didn't create that
+        tension, but every rezoning reshuffles who experiences it.</p>
+        <figure class="an-fig">
+          <img src="img/analysis-middle.png" alt="Map: middle school attendance zones (unchanged across eras)"
+               onerror="this.closest('figure').classList.add('missing')" />
+          <figcaption>Middle-school zones &mdash; the same lines in every era.</figcaption>
+        </figure>
+        <p class="an-note">"Partly measured": the boundary stability and the feeder splits are
+        computed; how a re-woven cohort <i>feels</i> to the students in it is not a number.</p>
+        <div class="an-btnrow">
+          <a class="an-btn tabs-link" href="index.html?level=middle">Middle-school zones</a>
+          <a class="an-btn tabs-link" href="index.html?level=high">High-school zones</a>
+        </div>
+      </details>
+
+      <!-- Impact: stability -->
+      <details class="an-impact" id="i-stability">
+        <summary class="an-impact-head">
+          <h3>Stability &mdash; how often do the same streets get rezoned?</h3>
+          <span class="an-chip an-chip-mid">partly measured</span>
+        </summary>
+        <p>A boundary map can look reasonable in any single year and still be hard to live
+        under, if it keeps changing. The yardstick here is a child's own timeline: elementary
+        school lasts six years, so <b>two rezonings five years apart can both land on the same
+        student</b>.</p>
+        <p>That is exactly what happened in the center of this story. The <b>Wilburton area</b>
+        was rezoned in 2018 (carved out of Woodridge, Enatai, and Clyde Hill for the brand-new
+        school) and rezoned again in 2023 (handed to Clyde Hill and Enatai when that school
+        closed). A child who started kindergarten at Wilburton when it opened attended a school
+        that no longer existed by the time they left fifth grade. <b>Enatai and Clyde Hill ran
+        the loop in reverse</b>: they gave territory to Wilburton in 2018 and received it &mdash;
+        plus more &mdash; back in 2023.</p>
+        <p>The count across our three eras: most of the district was rezoned <b>zero</b> times
+        &mdash; the majority of zones are identical in all three maps. A handful of areas moved
+        <b>once</b>. And one area &mdash; about <b>8.5&nbsp;km&sup2;</b>, home to roughly
+        <b>1,200 children</b> &mdash; was rezoned <b>twice</b>. Instability was not spread
+        around; it was concentrated on the same streets, both times.</p>
+        <figure class="an-fig">
+          <div class="an-map-wrap">
+            <img src="img/analysis-changes-2018.png" alt="Boundary changes page showing the 2018 rezoning"
+                 onerror="this.closest('figure').classList.add('missing')" />
+            <img class="an-scale" src="img/analysis-changes-2018-key.png" alt="map key" onerror="this.remove()" />
+          </div>
+          <figcaption>The 2018 rezoning that assembled Wilburton's zone &mdash; undone five years later.</figcaption>
+        </figure>
+        <p class="an-note">Why "partly measured": <i>how often</i> each area was rezoned is a
+        count (zero, once, or twice, above); what repeated rezoning does to a child's friendships
+        and a family's plans is not a number. The 2018 boundaries come from a different (federal)
+        source, so the 2018 pieces are close estimates; the 2023 pieces are exact. And whether
+        the 2018&ndash;2023 whiplash was avoidable planning error or a reasonable response to
+        enrollment that genuinely reversed is a judgment we leave open &mdash; the enrollment
+        numbers are in the capacity card.</p>
+        <div class="an-btnrow">
+          <a class="an-btn tabs-link" href="changes.html">Both rezonings, on the map</a>
+        </div>
+      </details>
+
+      <!-- Impact: participation -->
+      <details class="an-impact" id="i-participation">
+        <summary class="an-impact-head">
+          <h3>Participation &mdash; who was heard before the decision?</h3>
+          <span class="an-chip an-chip-desc">described</span>
+        </summary>
+        <p>Every impact above asks what the decision did. This one asks how the decision was
+        made &mdash; and it is the impact our numbers can say the least about, which is itself
+        worth being honest about. On paper, the process was uniform: the same public meetings,
+        the same comment channels, open to every family in the district. The real question is
+        whether <i>effective</i> voice was uniform &mdash; whether a family working two jobs, or
+        navigating the process in a second language, had the same practical chance to be heard
+        as a family with time, English, and experience with school politics.</p>
+        <p>What the public record shows so far: local news coverage reported concerns about a
+        <b>fast timeline</b>, <b>limited early engagement</b>, and <b>confusing
+        communication</b>; and some parents publicly argued the plan favored wealthier
+        communities &mdash; a claim we report as <i>their stated concern</i>, not as our
+        finding. Recall from the language card that the communities absorbed into new zones
+        include noticeably more limited-English households; whether outreach met them in their
+        languages is precisely the kind of process fact this card still lacks.</p>
+        <p>What would settle the question is the procedural record itself &mdash; board meeting
+        minutes, public-comment logs, and the translation availability of key documents and
+        meetings. That is evidence to be read and weighed, not a number to be mapped, which is
+        why this card describes rather than measures.</p>
+        <p class="an-note">There is deliberately no map layer for this impact: process happens
+        district-wide, not zone by zone. Sources for the reported concerns are listed in
+        <a href="#s7">Section 7</a>.</p>
+      </details>
+
+      <p class="an-note" style="margin-top:1rem">That's all eleven cards &mdash; ten impacts,
+      plus the middle/high ripple that rides along with every elementary rezoning.</p>
+    </section>
+    <section class="an-section" id="s4">
+      <p class="an-secnum">Section 4</p>
+      <h2>What shape can &mdash; and cannot &mdash; see</h2>
+      <p>When a redistricting fight makes the news, one argument always shows up first:
+      <i>look how weird the map is</i>. The instinct behind it &mdash; strange shape means
+      someone engineered it &mdash; is the most trusted tool the public has for judging
+      boundaries. This project began with that tool, so this section takes it seriously
+      instead of dismissing it: what can a shape score actually tell you about what happened
+      to families in 2023?</p>
+
+      <h3 class="an-h3">First, the honest limit: the formula is blind</h3>
+      <p>Our main shape score, <b>Polsby&ndash;Popper</b>, compares a zone's area to its
+      perimeter: a perfect circle scores 1, and the stringier the outline, the closer to 0.
+      Bellevue's elementary zones run from about 0.25 to 0.65. Notice what goes into that
+      formula: area and perimeter. <b>No person, price, program, or travel time appears
+      anywhere in it.</b> By construction, a shape score cannot measure a single one of the
+      eleven impacts in Section 3 &mdash; not because it's a bad formula, but because it's
+      answering a different question than people think it is.</p>
+
+      <h3 class="an-h3">Second, the honest credit: shape still correlates</h3>
+      <p>And yet the public instinct isn't stupid. A stretched-out zone tends to put some
+      families far from the school building; worse shape and longer trips often arrive
+      together, because both come from the same geography. Shape can work like a
+      <b>smoke alarm</b>: it can't see fire, but it often goes off when there is one.
+      The catch is that a smoke alarm can also stay silent during a fire, or go off over
+      burnt toast. The 2023 consolidation produced a clean example of all three:</p>
+
+      <div class="an-exhibit">
+        <p><b>&#9312; The alarm works &mdash; Spiritridge.</b> Absorbing the Eastgate territory
+        stretched the zone badly: its shape score fell from 0.581 to 0.314, the biggest drop
+        in the district. And this time the weird shape really did come with a human cost:
+        the zone's average drive rose from 4.0 to 7.5 minutes &mdash; a 19-minute walk
+        becoming a 41-minute walk. Shape flagged it, and the flag was right.</p>
+        <div class="an-mini" id="mini-1"></div>
+      </div>
+      <div class="an-exhibit">
+        <p><b>&#9313; The alarm stays silent &mdash; Woodridge.</b> Woodridge's score is
+        <b>identical</b> before and after: 0.340 to 0.340. Not one meter of its boundary
+        moved. Every shape metric ever invented says nothing happened here. Meanwhile its
+        building went from 56% to 100% full and its distance to Advanced Learning collapsed
+        from 5.1&nbsp;km to 1.5&nbsp;km, because the program moved in. A zone was transformed,
+        and shape couldn't see it &mdash; the same blindness that hides the middle- and
+        high-school ripple, where no line moved but the entering classes changed.</p>
+        <div class="an-mini" id="mini-2"></div>
+      </div>
+      <div class="an-exhibit">
+        <p><b>&#9314; The alarm cries wolf &mdash; the shoreline.</b> Medina scores 0.361, Clyde Hill
+        0.299, Newport Heights 0.277 &mdash; among the "worst" shapes in the district, in part
+        because their zones trace Lake Washington's coves and points. A boundary that follows
+        a lake, a highway, or a neighborhood edge looks exactly like a boundary someone
+        gerrymandered &mdash; and following a neighborhood edge is the <i>community-preserving</i>
+        choice that the continuity card praises. Here the score punishes the innocent
+        explanation.</p>
+        <div class="an-mini" id="mini-3"></div>
+        <p class="an-mini-note">Today's shape scores, worst to best. Dark teal = zones tracing
+        Lake Washington; light teal = zones touching Lake Sammamish. Bennett, the lowest scorer
+        of all, borders Lake Sammamish &mdash; the other lake drags scores down too. And
+        Spiritridge cuts the other way: only a sliver of its boundary is shoreline, and its low
+        score comes mostly from the 2023 stretch (exhibit &#9312;), not the water. Water
+        explains a lot here &mdash; but never all of it, in either direction.</p>
+      </div>
+      <p>The quiet fourth case is most of the district: eleven zones where nothing moved and
+      the alarm correctly stayed silent.</p>
+
+      <h3 class="an-h3">All of it in one picture</h3>
+      <p>Each dot below is one of today's 14 zones. Left-right: how much its <b>shape score</b>
+      changed in 2023 (left = shape got "worse"). Up-down: how much a <b>human measure</b>
+      changed. Switch the human measure and watch the story change:</p>
+      <div class="an-scatter-card">
+        <div class="pin-mode an-ymode-row">
+          <button class="pin-mode-btn an-ymode on" data-y="drive">travel to school</button>
+          <button class="pin-mode-btn an-ymode" data-y="al">distance to Advanced Learning</button>
+        </div>
+        <div id="an-scatter"></div>
+        <p class="an-scatter-read" id="an-scatter-read"></p>
+      </div>
+      <p class="an-note">14 zones; the two closed zones have no "after" and can't be plotted.
+      Teal dots = the three zones whose boundaries changed in 2023; grey = unchanged. Axis
+      units follow the distance/time toggle. Descriptive only &mdash; the chart shows
+      co-movement, not cause, and 14 zones is far too few for statistics; it is a picture,
+      not a proof.</p>
+
+      <p><b>The takeaway in one sentence: shape tells you where to look, never what to
+      conclude</b> &mdash; and the zones whose shape never changed are exactly the ones the
+      public conversation skips, though some of them changed most.</p>
+      <div class="an-btnrow">
+        <a class="an-btn tabs-link" href="index.html?state=c&metric=polsby_popper">Shape scores on the map</a>
+        <a class="an-btn tabs-link" href="index.html?graph=1">Build your own comparisons (Graph mode)</a>
+        <a class="an-btn tabs-link" href="changes.html">The event itself</a>
+      </div>
+    </section>
+    <section class="an-section" id="s5">
+      <p class="an-secnum">Section 5</p>
+      <h2>Who absorbed the change</h2>
+      <p>Every fairness argument about a boundary change is, underneath, a <b>distribution</b>
+      argument: not "did costs exist?" but "who paid them?" This section lays that distribution
+      out &mdash; and to keep ourselves honest, it follows a rule set before we looked at any
+      results: <b>every piece of moved territory gets the same fixed set of numbers</b>, chosen
+      in advance. No highlighting the dramatic ones, no skipping the boring ones.</p>
+      <div class="an-tablewrap">
+        <table class="an-table">
+          <thead>
+            <tr><th>Reassigned territory</th><th>children (5&ndash;17)</th><th>White</th><th>Asian</th><th>Hispanic</th><th>Black</th><th>added drive</th><th>added walk</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Eastgate &rarr; Spiritridge</td><td>&asymp; 1,629</td><td>43.5%</td><td>42.4%</td><td>5.4%</td><td>2.0%</td><td>+6.0 min</td><td>+42 min</td></tr>
+            <tr><td>Wilburton &rarr; Enatai</td><td>&asymp; 820</td><td>44.6%</td><td>41.5%</td><td>5.6%</td><td>2.7%</td><td>+3.0 min</td><td>+25 min</td></tr>
+            <tr><td>Wilburton &rarr; Clyde Hill</td><td>&asymp; 386</td><td>42.2%</td><td>44.2%</td><td>6.0%</td><td>2.3%</td><td>+1.6 min</td><td>+19 min</td></tr>
+            <tr class="an-table-sum"><td>All moved territory</td><td>&asymp; 2,835</td><td>43.7%</td><td>42.4%</td><td>5.6%</td><td>2.4%</td><td>&mdash;</td><td>&mdash;</td></tr>
+            <tr class="an-table-ref"><td>District as a whole</td><td>23,315</td><td>43.9%</td><td>40.2%</td><td>7.3%</td><td>2.6%</td><td>&mdash;</td><td>&mdash;</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Read racially, the table is almost uneventful: the moved territories look like the
+      district, every group within about two percentage points of the district's share. The
+      2023 change did not fall on one racial community. What <i>did</i> concentrate is
+      <b>time</b>: roughly 1,600 children's homes in the old Eastgate area absorbed most of it
+      &mdash; forty-plus added walking minutes, each way, indefinitely.</p>
+      <p>The <b>income</b> dimension is where the public argument actually lives. The money
+      facts for the three zones at the center of it:</p>
+      <div class="an-tablewrap">
+        <table class="an-table">
+          <thead>
+            <tr><th>Zone</th><th>median income<br/>before &rarr; after</th><th>median home value<br/>before &rarr; after</th><th>median rent<br/>before &rarr; after</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Wilburton (closed)</td><td>$168k &rarr; &mdash;</td><td>$1.20M &rarr; &mdash;</td><td>$2,799 &rarr; &mdash;</td></tr>
+            <tr><td>Clyde Hill</td><td>$211k &rarr; $185k</td><td>$1.84M &rarr; $1.46M</td><td>$3,112 &rarr; $2,955</td></tr>
+            <tr><td>Enatai</td><td>$174k &rarr; $178k</td><td>$1.45M &rarr; $1.45M</td><td>$2,706 &rarr; $2,780</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="an-note">Same frozen 2020 residents throughout &mdash; "after" values change
+      only because the zone now contains different homes. The Wilburton zone stops existing,
+      so it has no "after."</p>
+      <p>Here are the facts on both sides, side by side. Fueling the concern that parents
+      raised in news coverage &mdash; that the plan "favored wealthier communities" &mdash;
+      is the top of the table: the Wilburton area, with the district's denser housing, more
+      apartments, and (per the language card) noticeably more limited-English households, was
+      closed and folded into the two zones below it, which had the district's highest income
+      and home-value medians. Cutting the other way is what the arrows show: the receiving
+      zones' medians <i>dropped or held</i> when the merge happened, the merged zones became
+      demographically <i>more</i> mixed, not less (the mix-gap card), and the heaviest travel
+      burden landed on the Eastgate side, whose profile matches the district almost exactly.
+      Both columns of facts are true at once. We report the concern as the community's stated
+      concern, and the numbers as numbers.</p>
+      <p>One background pressure belongs in this picture without being attributable to it:
+      housing costs. Families in the denser, more affordable pockets of the district were
+      already under market pressure before any line moved, and nothing in our data can
+      separate "moved because of the rezoning" from "moved because of rent." We state it as
+      context, not as an effect.</p>
+      <p><b>Whether this distribution was acceptable is not a math question.</b> The rezoning's
+      costs were real, they were not spread evenly, and the community that absorbed the most
+      of one cost (time) was not the community the loudest concern was about (income). That
+      tension is exactly the kind of thing the affected public &mdash; not this website &mdash;
+      gets to weigh.</p>
+      <div class="an-btnrow">
+        <a class="an-btn tabs-link" href="changes.html">The moved territory, on the map</a>
+        <a class="an-btn tabs-link" href="index.html?state=c&metric=income">Income by zone</a>
+        <a class="an-btn tabs-link" href="index.html?state=c&metric=asian">Race shares by zone</a>
+      </div>
+    </section>
+    <section class="an-section" id="s6">
+      <p class="an-secnum">Section 6</p>
+      <h2>What the numbers can't say</h2>
+      <p>This site measures a lot: routes, seats, shapes, shares. Ending there would quietly
+      imply that what got measured is what mattered &mdash; and that implication would be the
+      least honest thing on the site. So this section names what our numbers cannot reach,
+      plainly, before handing the judgment over.</p>
+      <p><b>The process itself.</b> The largest unmeasured question is the one the
+      <a href="#i-participation">participation card</a> holds open: not whether families
+      <i>could</i> speak &mdash; the meetings were public and uniform &mdash; but whether
+      speaking <i>worked</i>, and worked equally, for families with less time, less English,
+      and less practice with school politics. News coverage reported concerns about a fast
+      timeline and confusing communication; checking those concerns properly means reading the
+      procedural record &mdash; board minutes, comment logs, translation availability &mdash;
+      which is evidence to weigh, not a number to map. On this site, that question is
+      deliberately kept as a question.</p>
+      <p><b>Things that were never on a map.</b> Even with perfect data, a boundary analysis
+      cannot see:</p>
+      <ul class="an-list">
+        <li><b>What a route feels like.</b> Our minutes count travel; they don't know which
+        crossings a seven-year-old shouldn't make alone, or which stretch has no sidewalk.</li>
+        <li><b>What a school means.</b> A closure doesn't just reassign students; it dissolves
+        a PTA, teacher relationships, morning rituals &mdash; the stability card counts
+        rezonings, not what a rezoning takes.</li>
+        <li><b>Whether the money worked.</b> The district projected savings; auditing whether
+        the consolidation delivered them, and what the savings bought, is a budget question
+        outside our data.</li>
+        <li><b>Trust.</b> How a decision was experienced shapes how its outcomes are received.
+        No layer measures that, and pretending otherwise is how "data-driven" becomes a way of
+        not listening.</li>
+      </ul>
+      <p>One caution about the words "not measurable": they do not mean <i>less important</i>,
+      and they certainly do not mean <i>deniable</i>. Some of the most consequential parts of
+      this story live in this section precisely because no one can put a number on them. The
+      measured impacts set the table; they do not finish the meal.</p>
+      <p><b>So here is the hand-off.</b> This site was built on one premise: the people
+      affected by a decision deserve to judge it with the facts in hand. You now have every
+      fact we could compute, every caveat we owed you, and the tools to check both. The
+      judgment is yours.</p>
+      <div class="an-btnrow">
+        <a class="an-btn tabs-link" href="index.html">Explore the map tool</a>
+        <a class="an-btn tabs-link" href="changes.html">Revisit the changes</a>
+        <a class="an-btn tabs-link" href="index.html?graph=1">Build your own charts</a>
+      </div>
+    </section>
+    <section class="an-section an-stub" id="s7">
+      <p class="an-secnum">Section 7</p>
+      <h2>Sources for this page</h2>
+      <p class="an-stubnote">Assembled last.</p>
+    </section>
+
+    <footer class="an-footer">
+      <p>Part of <i>One District, Three Maps</i>. Full data sources and methods will live in
+      Methods &amp; Sources.</p>
+    </footer>
+  </main>
+
+  <!-- sticky unit toggles: follow the reader down the page -->
+  <div class="an-toggles panel">
+    <div class="pin-mode">
+      <button class="pin-mode-btn an-count on" data-mode="n">counts</button>
+      <button class="pin-mode-btn an-count" data-mode="pct">percent</button>
+    </div>
+    <div class="pin-mode">
+      <button class="pin-mode-btn an-unit on" data-mode="dist">distance</button>
+      <button class="pin-mode-btn an-unit" data-mode="time">time</button>
+    </div>
+  </div>
+
+  <!-- Entry screens + shared language state -->
+  <script src="intro.js?v=108"></script>
+
+  <script>
+    /* tabs menu */
+    (function () {
+      const btn = document.getElementById("tabs-btn");
+      const menu = document.getElementById("tabs-menu");
+      const setOpen = (open) => { menu.hidden = !open; btn.setAttribute("aria-expanded", String(open)); };
+      btn.addEventListener("click", (e) => { e.stopPropagation(); setOpen(menu.hidden); });
+      document.addEventListener("click", (e) => { if (!menu.hidden && !menu.contains(e.target)) setOpen(false); });
+      document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !menu.hidden) setOpen(false); });
+    })();
+
+    /* global unit modes: every number in the text that has two forms is a
+       <span class="u" data-n="…" data-pct="…"> or data-km/data-min pair;
+       the sticky toggles re-render them all */
+    let countMode = "n";     // "n" | "pct"
+    let unitMode = "dist";   // "dist" | "time"
+    function renderUnits() {
+      document.querySelectorAll("span.u").forEach(el => {
+        const d = el.dataset;
+        if (d.n != null && d.pct != null) { el.innerHTML = countMode === "n" ? d.n : d.pct; return; }
+        if (d.km != null && d.min != null) { el.innerHTML = unitMode === "dist" ? d.km : d.min; return; }
+      });
+      document.dispatchEvent(new CustomEvent("unitswap"));   // live charts re-draw on this
+    }
+    document.querySelectorAll(".an-count").forEach(b => b.addEventListener("click", () => {
+      countMode = b.dataset.mode;
+      document.querySelectorAll(".an-count").forEach(x => x.classList.toggle("on", x === b));
+      renderUnits();
+    }));
+    document.querySelectorAll(".an-unit").forEach(b => b.addEventListener("click", () => {
+      unitMode = b.dataset.mode;
+      document.querySelectorAll(".an-unit").forEach(x => x.classList.toggle("on", x === b));
+      renderUnits();
+    }));
+    renderUnits();
+
+    // links to a collapsed impact card should expand it on arrival
+    document.addEventListener("click", (e) => {
+      const a = e.target.closest && e.target.closest('a[href^="#i-"]');
+      if (!a) return;
+      const t = document.getElementById(a.getAttribute("href").slice(1));
+      if (t && t.tagName === "DETAILS") t.open = true;
+    });
+  </script>
+
+  <!-- §4 live scatter: Δ shape score vs Δ human measure, 2023 event -->
+  <script>
+    (function () {
+      const V = "?v=107";
+      const CHANGED = { "Spiritridge": 1, "Enatai": 1, "Clyde Hill": 1 };
+      let DELTAS = null, PC = null, yMode = "drive";
+      const EXHIBIT = { "Spiritridge": "①", "Woodridge": "②" };
+
+      const READ = {
+        drive: "How to read it: ① Spiritridge sits alone in the far corner — big shape change, big travel change — the alarm working. ② Woodridge is buried at dead center: on this measure, and to every shape metric, nothing happened there.",
+        al: "How to read it: the vertical stripe at zero shape change is six zones whose access to Advanced Learning changed while their shape score saw nothing — ② Woodridge, at the bottom, gained the most. ① Spiritridge shows both changes at once."
+      };
+
+      async function load() {
+        const [b, c] = await Promise.all([
+          fetch("data/bellevue_b_elementary_zones.geojson" + V).then(r => r.json()),
+          fetch("data/bellevue_elementary_zones.geojson" + V).then(r => r.json())
+        ]);
+        const P = fc => Object.fromEntries(fc.features.map(f => [f.properties.name, f.properties]));
+        const pb = P(b), pc = P(c);
+        PC = pc;
+        DELTAS = Object.keys(pc).map(n => {
+          const A = pb[n], B2 = pc[n];
+          if (!A) return null;
+          const al = (p) => p.programs && p.programs.advanced_learning && p.programs.advanced_learning.road;
+          return {
+            name: n, changed: !!CHANGED[n],
+            dpp: B2.polsby_popper - A.polsby_popper,
+            driveKm: B2.travel.road.km.avg - A.travel.road.km.avg,
+            driveMin: B2.travel.road.min.avg - A.travel.road.min.avg,
+            alKm: al(B2) && al(A) ? al(B2).km.avg - al(A).km.avg : null,
+            alMin: al(B2) && al(A) ? al(B2).min.avg - al(A).min.avg : null
+          };
+        }).filter(Boolean);
+        draw();
+        drawMinis();
+      }
+
+      /* small before→after dumbbell charts for exhibits ① and ② */
+      function dumbbell(elId, rows) {
+        const el = document.getElementById(elId);
+        if (!el) return;
+        const W = 620, rowH = 46, m = { l: 220, r: 84 }, H = rows.length * rowH + 24;
+        let s = `<svg viewBox="0 0 ${W} ${H}" role="img">`;
+        s += `<text x="${W - 6}" y="14" text-anchor="end" class="an-ax">○ before &nbsp;→&nbsp; ● after</text>`;
+        rows.forEach((r, i) => {
+          const y = 30 + i * rowH;
+          const hi = Math.max(r.a, r.b) * 1.18 || 1;
+          const X = v => m.l + v / hi * (W - m.l - m.r);
+          s += `<text x="${m.l - 10}" y="${y + 4}" text-anchor="end" class="an-ax">${r.label}</text>`;
+          s += `<line x1="${m.l}" y1="${y}" x2="${W - m.r}" y2="${y}" stroke="#eceae3" stroke-width="2"/>`;
+          if (r.a === r.b) {
+            s += `<circle cx="${X(r.a)}" cy="${y}" r="7" fill="#ffffff" stroke="#21262b" stroke-width="2"/>`;
+            s += `<circle cx="${X(r.a)}" cy="${y}" r="3.5" fill="#21262b"/>`;
+            s += `<text x="${X(r.a) + 14}" y="${y + 4}" class="an-pt">${r.fmt(r.a)} — no change</text>`;
+          } else {
+            s += `<line x1="${X(r.a)}" y1="${y}" x2="${X(r.b)}" y2="${y}" stroke="#9aa1a7" stroke-width="2.5"/>`;
+            s += `<circle cx="${X(r.a)}" cy="${y}" r="6.5" fill="#ffffff" stroke="#21262b" stroke-width="2"/>`;
+            s += `<circle cx="${X(r.b)}" cy="${y}" r="6.5" fill="#0f6e66"/>`;
+            const aRight = r.a > r.b;
+            s += `<text x="${X(r.a) + (aRight ? 12 : -12)}" y="${y + 4}" text-anchor="${aRight ? "start" : "end"}" class="an-pt">${r.fmt(r.a)}</text>`;
+            s += `<text x="${X(r.b) + (aRight ? -12 : 12)}" y="${y + 4}" text-anchor="${aRight ? "end" : "start"}" class="an-pt">${r.fmt(r.b)}</text>`;
+          }
+        });
+        el.innerHTML = s + "</svg>";
+      }
+
+      /* exhibit ③: today's shape scores ranked, lakefront zones highlighted */
+      function shoreChart() {
+        const el = document.getElementById("mini-3");
+        if (!el || !PC) return;
+        const LAKE_WA = { "Medina": 1, "Clyde Hill": 1, "Newport Heights": 1, "Enatai": 1 };
+        const LAKE_SA = { "Bennett": 1, "Spiritridge": 1 };
+        const rows = Object.entries(PC).map(([n, p]) => [n, p.polsby_popper]).sort((a, b) => a[1] - b[1]);
+        const W = 620, rowH = 25, m = { l: 150, r: 60 }, H = rows.length * rowH + 14;
+        const hi = Math.max(...rows.map(r => r[1])) * 1.1;
+        let s = `<svg viewBox="0 0 ${W} ${H}" role="img">`;
+        rows.forEach(([n, v], i) => {
+          const y = 10 + i * rowH;
+          const w = v / hi * (W - m.l - m.r);
+          const col = LAKE_WA[n] ? "#0f6e66" : LAKE_SA[n] ? "#79b3a8" : "#c9c5bb";
+          s += `<text x="${m.l - 8}" y="${y + 13}" text-anchor="end" class="an-ax">${n}</text>`;
+          s += `<rect x="${m.l}" y="${y}" width="${w}" height="17" rx="3" fill="${col}"/>`;
+          s += `<text x="${m.l + w + 8}" y="${y + 13}" class="an-pt" style="font-weight:600">${v.toFixed(3)}</text>`;
+        });
+        el.innerHTML = s + "</svg>";
+      }
+
+      function drawMinis() {
+        const f3 = v => v.toFixed(3);
+        const f0 = v => Math.round(v);
+        dumbbell("mini-1", [
+          { label: "Shape score (Polsby–Popper)", a: 0.581, b: 0.314, fmt: f3 },
+          { label: "Avg walk to school (min)", a: 19, b: 41, fmt: f0 }
+        ]);
+        dumbbell("mini-2", [
+          { label: "Shape score (Polsby–Popper)", a: 0.340, b: 0.340, fmt: f3 },
+          { label: "Utilization (%)", a: 56, b: 100, fmt: f0 },
+          { label: "Distance to Adv. Learning (km)", a: 5.05, b: 1.49, fmt: v => v.toFixed(1) }
+        ]);
+        shoreChart();
+      }
+
+      function yVal(d) {
+        const dist = (typeof unitMode === "undefined") || unitMode === "dist";
+        if (yMode === "drive") return dist ? d.driveKm : d.driveMin;
+        return dist ? d.alKm : d.alMin;
+      }
+      function yLabel() {
+        const dist = (typeof unitMode === "undefined") || unitMode === "dist";
+        const u = dist ? "km" : "min";
+        return (yMode === "drive" ? "Δ avg trip to school (" : "Δ distance to Advanced Learning (") + u + ")";
+      }
+
+      function draw() {
+        if (!DELTAS) return;
+        const el = document.getElementById("an-scatter");
+        if (!el) return;
+        const W = 640, H = 400, m = { l: 52, r: 16, t: 14, b: 44 };
+        const pts = DELTAS.filter(d => yVal(d) != null);
+        const xs = pts.map(d => d.dpp), ys = pts.map(yVal);
+        const xmax = Math.max(0.05, ...xs.map(Math.abs)) * 1.15;
+        const ymax = Math.max(0.5, ...ys.map(Math.abs)) * 1.2;
+        const X = v => m.l + (v + xmax) / (2 * xmax) * (W - m.l - m.r);
+        const Y = v => H - m.b - (v + ymax) / (2 * ymax) * (H - m.t - m.b);
+        let s = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Scatter: shape change vs human-measure change">`;
+        s += `<line x1="${X(0)}" y1="${m.t}" x2="${X(0)}" y2="${H - m.b}" stroke="#b9b3a6" stroke-dasharray="4 3"/>`;
+        s += `<line x1="${m.l}" y1="${Y(0)}" x2="${W - m.r}" y2="${Y(0)}" stroke="#b9b3a6" stroke-dasharray="4 3"/>`;
+        s += `<text x="${(m.l + W - m.r) / 2}" y="${H - 8}" text-anchor="middle" class="an-ax">Δ Polsby–Popper (← shape "worse" · shape "better" →)</text>`;
+        s += `<text x="14" y="${(m.t + H - m.b) / 2}" text-anchor="middle" transform="rotate(-90 14 ${(m.t + H - m.b) / 2})" class="an-ax">${yLabel()}</text>`;
+        const labeled = pts.filter(d => d.changed || Math.abs(yVal(d)) > ymax * 0.28);
+        pts.forEach(d => {
+          s += `<circle cx="${X(d.dpp)}" cy="${Y(yVal(d))}" r="6" fill="${d.changed ? "#0f6e66" : "#9aa1a7"}" fill-opacity="0.85"/>`;
+        });
+        // ring + number the two exhibit zones so the chart ties back to the text
+        pts.filter(d => EXHIBIT[d.name]).forEach(d => {
+          s += `<circle cx="${X(d.dpp)}" cy="${Y(yVal(d))}" r="11" fill="none" stroke="#21262b" stroke-width="2"/>`;
+          s += `<text x="${X(d.dpp) - 16}" y="${Y(yVal(d)) + 5}" text-anchor="end" class="an-pt" style="font-size:14px">${EXHIBIT[d.name]}</text>`;
+        });
+        labeled.forEach(d => {
+          const anchor = X(d.dpp) > W - 140 ? "end" : "start";
+          const dx = anchor === "end" ? -9 : 9;
+          s += `<text x="${X(d.dpp) + dx}" y="${Y(yVal(d)) - 8}" text-anchor="${anchor}" class="an-pt">${d.name}</text>`;
+        });
+        s += `</svg>`;
+        el.innerHTML = s;
+        const read = document.getElementById("an-scatter-read");
+        if (read) read.textContent = READ[yMode];
+      }
+
+      document.querySelectorAll(".an-ymode").forEach(b => b.addEventListener("click", () => {
+        yMode = b.dataset.y;
+        document.querySelectorAll(".an-ymode").forEach(x => x.classList.toggle("on", x === b));
+        draw();
+      }));
+      document.addEventListener("unitswap", draw);
+
+      /* left-rail nav: highlight the section in view */
+      const navLinks = [...document.querySelectorAll(".an-nav a")];
+      const bySec = Object.fromEntries(navLinks.map(a => [a.dataset.sec, a]));
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            navLinks.forEach(a => a.classList.remove("on"));
+            const a = bySec[e.target.id];
+            if (a) a.classList.add("on");
+          }
+        });
+      }, { rootMargin: "-20% 0px -65% 0px" });
+      document.querySelectorAll(".an-section").forEach(s => io.observe(s));
+
+      load().catch(err => {
+        const el = document.getElementById("an-scatter");
+        if (el) el.innerHTML = "<p class='an-note'>Chart data failed to load — serve the site over http.</p>";
+        console.error(err);
+      });
+    })();
+  </script>
+</body>
+</html>

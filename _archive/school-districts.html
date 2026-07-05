@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>School-District Compactness, King County — Lucas</title>
+  <meta name="description" content="Polsby–Popper compactness of King County, WA school districts on a greyscale vector basemap — and why a low compactness score does not prove gerrymandering." />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" />
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <style>
+    /* This page wants a wider canvas than the 760px prose column. */
+    .wide { max-width: 1040px; }
+    #map, #map2 { width: 100%; height: 620px; border: 1px solid var(--border); border-radius: 6px; }
+    .map-note { font-size: 0.85rem; color: var(--muted); }
+    .legend { margin: 0.5rem 0; font-size: 0.85rem; max-width: 360px; }
+    .legend-title { display: block; margin-bottom: 0.25rem; font-weight: 600; }
+    .legend-bar { height: 12px; border-radius: 3px;
+      background: linear-gradient(to right, #b2182b, #ef8a62, #f7f7f7, #67a9cf, #2166ac); }
+    .legend-labels { display: flex; justify-content: space-between; color: var(--muted); margin-top: 2px; }
+    table.rank { border-collapse: collapse; width: 100%; font-size: 0.92rem; margin-top: 0.5rem; }
+    table.rank th, table.rank td { text-align: left; padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--border); }
+    table.rank th { background: var(--accent-light); }
+    table.rank td.num, table.rank th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    table.rank tr.hl td { background: #fff6e5; }
+    .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 2px; margin-right: 6px; vertical-align: middle; border: 1px solid rgba(0,0,0,0.15); }
+    .callout { background: var(--accent-light); border-left: 4px solid var(--accent); padding: 0.9rem 1.1rem; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <p class="eyebrow">Applied Mathematics &amp; GIS Research</p>
+      <h1>How Compact Are King County's School Boundaries?</h1>
+      <p class="subtitle">
+        Ranking boundaries by the Polsby&ndash;Popper compactness score at two
+        scales &mdash; 18 school districts across King County, then 14 elementary
+        attendance zones inside one district &mdash; to show why shape alone cannot
+        diagnose gerrymandering.
+      </p>
+      <p class="byline">
+        Lucas &middot; Mentored by Prof. Bo Zhao, Humanistic GIS Lab, University of Washington
+      </p>
+    </div>
+  </header>
+
+  <nav class="site-nav">
+    <div class="container">
+      <a href="index.html">&larr; Main study</a>
+      <a href="#map-section">Districts</a>
+      <a href="#ranking">Ranking</a>
+      <a href="#interpret">What it means</a>
+      <a href="#bellevue">Bellevue zones</a>
+      <a href="#methods">Methods</a>
+    </div>
+  </nav>
+
+  <main class="container wide">
+    <section id="intro">
+      <p>
+        The <strong>Polsby&ndash;Popper (PP) score</strong> measures how compact a
+        polygon is by comparing its area to the area of a circle with the same
+        perimeter:
+      </p>
+      <p style="text-align:center; font-size:1.1rem;">
+        PP = 4&pi;A / P<sup>2</sup>
+      </p>
+      <p>
+        A perfect circle scores 1.0; the more a boundary wiggles, the closer the
+        score falls toward 0. Below, every unified school district whose center
+        lies in King County, Washington is shaded by its PP score over a
+        greyscale vector basemap. <strong>Red districts are the least compact;
+        blue are the most compact.</strong>
+      </p>
+      <div class="callout">
+        <strong>Read this as a shape metric, not a gerrymandering detector.</strong>
+        This research argues &mdash; following Zhao (2026) &mdash; that low
+        compactness does <em>not</em> establish manipulation. A district can look
+        irregular simply because it traces a shoreline or a lake, and it can look
+        tidy purely because it sits on an island. The ranking here is the setup
+        for that argument, not evidence of wrongdoing.
+      </div>
+    </section>
+
+    <section id="map-section">
+      <h2>Scale 1 &mdash; King County school districts</h2>
+      <div id="map"></div>
+      <div class="legend">
+        <span class="legend-title">Polsby&ndash;Popper compactness</span>
+        <div class="legend-bar"></div>
+        <div class="legend-labels"><span>0.22 &mdash; irregular</span><span>compact &mdash; 0.66</span></div>
+      </div>
+      <p class="map-note">
+        Basemap: OpenFreeMap (positron, greyscale vector tiles) &middot; OpenStreetMap contributors.
+        Districts: U.S. Census TIGERweb unified school districts. Click a district for its score. Drag to pan, scroll to zoom.
+      </p>
+    </section>
+
+    <section id="ranking">
+      <h2>Ranking, least to most compact</h2>
+      <p>Rank 1 is the <em>least</em> compact (most visually irregular) district.</p>
+      <table class="rank" id="rank-table">
+        <thead>
+          <tr>
+            <th class="num">Rank</th>
+            <th>School district</th>
+            <th class="num">Polsby&ndash;Popper</th>
+            <th class="num">Area (km&sup2;)</th>
+            <th class="num">Perimeter (km)</th>
+          </tr>
+        </thead>
+        <tbody><!-- filled by script --></tbody>
+      </table>
+    </section>
+
+    <section id="interpret">
+      <h2>What the ranking actually shows</h2>
+      <p>
+        Sort the table and the pattern is revealing &mdash; and it cuts against
+        reading PP as a fairness score:
+      </p>
+      <ul>
+        <li>
+          <strong>The most &ldquo;compact&rdquo; districts are islands.</strong>
+          Vashon Island and Mercer Island top the compactness ranking not because
+          anyone drew them fairly, but because water defines their edges. Geography,
+          not intent, sets the shape.
+        </li>
+        <li>
+          <strong>The least compact districts hug natural and built features.</strong>
+          The low-scoring districts wind along rivers, lakeshores, and annexation
+          seams &mdash; exactly the &ldquo;irregular for innocent reasons&rdquo; case
+          that makes raw compactness unreliable.
+        </li>
+        <li>
+          <strong>School districts aren&rsquo;t partisan-drawn at all.</strong>
+          Their boundaries reflect enrollment, funding, and historical annexation,
+          not the packing-and-cracking logic of partisan redistricting. A low PP
+          here flags an interesting shape to investigate, nothing more.
+        </li>
+      </ul>
+      <p>
+        This is precisely why the main study turns to <a href="index.html">Markov
+        Chain Monte Carlo</a> ensembles: to judge a map you have to compare it
+        against thousands of valid alternatives, not against an idealized circle.
+      </p>
+    </section>
+
+    <section id="bellevue">
+      <h2>Scale 2 &mdash; elementary attendance zones inside Bellevue</h2>
+      <p>
+        The same compactness math is <strong>scale-invariant</strong> &mdash; it
+        works identically whether the unit is a whole county's districts or the
+        catchment zones inside a single district. Here we zoom into the
+        <strong>Bellevue School District</strong> and rank its 14 elementary
+        attendance zones, the areas that decide which neighborhood feeds which
+        elementary school, by the identical Polsby&ndash;Popper score and the same
+        color scale as above.
+      </p>
+      <div class="callout">
+        <strong>Why this scale matters.</strong> Attendance-zone lines are where
+        boundary drawing most directly shapes <em>who goes to school with whom</em>
+        &mdash; the segregation-and-funding equity question, not partisan packing.
+        And the same caveat holds: a wiggly zone may simply trace Lake Washington,
+        I-90, or a hillside, so a low compactness score flags a shape to examine,
+        never proof of intent.
+      </div>
+      <div id="map2"></div>
+      <div class="legend">
+        <span class="legend-title">Polsby&ndash;Popper compactness (same scale as above)</span>
+        <div class="legend-bar"></div>
+        <div class="legend-labels"><span>0.22 &mdash; irregular</span><span>compact &mdash; 0.66</span></div>
+      </div>
+      <p class="map-note">
+        Basemap: OpenFreeMap (positron, greyscale vector tiles) &middot; OpenStreetMap contributors.
+        Zones: City of Bellevue GIS, &ldquo;Attendance Areas (Elementary School).&rdquo;
+        Click a zone for its score.
+      </p>
+      <h3 style="margin-top:1.5rem;">Ranking, least to most compact</h3>
+      <table class="rank" id="rank-table2">
+        <thead>
+          <tr>
+            <th class="num">Rank</th>
+            <th>Elementary zone</th>
+            <th class="num">Polsby&ndash;Popper</th>
+            <th class="num">Area (km&sup2;)</th>
+            <th class="num">Perimeter (km)</th>
+          </tr>
+        </thead>
+        <tbody><!-- filled by script --></tbody>
+      </table>
+    </section>
+
+    <section id="methods">
+      <h2>Methods &amp; data</h2>
+      <ul>
+        <li>
+          <strong>District boundaries:</strong> U.S. Census Bureau TIGERweb, current
+          unified school districts, filtered to those centered within King County.
+        </li>
+        <li>
+          <strong>Bellevue attendance zones:</strong> City of Bellevue GIS feature
+          service, &ldquo;Attendance Areas (Elementary School)&rdquo; (14 zones).
+          Built by <code>data/build_bellevue_elementary.py</code>.
+        </li>
+        <li>
+          <strong>Compactness:</strong> PP&nbsp;=&nbsp;4&pi;A/P<sup>2</sup>, computed
+          <em>on the sphere</em> &mdash; spherical-excess area and haversine (geodesic)
+          perimeter &mdash; so the score is projection-correct rather than distorted
+          by raw longitude/latitude degrees.
+        </li>
+        <li>
+          <strong>Reproducibility:</strong> the two build scripts re-download from
+          source and regenerate <code>data/school_districts.geojson</code> and
+          <code>data/bellevue_elementary.geojson</code>.
+        </li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>&copy; <span id="year"></span> Lucas. Research website &mdash; work in progress.</p>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+
+  <script>
+    // Diverging color ramp: low PP (irregular) = red, high PP (compact) = blue.
+    const PP_FILL = ["interpolate", ["linear"], ["get", "PP"],
+      0.22, "#b2182b", 0.33, "#ef8a62", 0.44, "#f7f7f7", 0.55, "#67a9cf", 0.66, "#2166ac"];
+
+    function ppColor(pp) {
+      const stops = [[0.22,[178,24,43]],[0.33,[239,138,98]],[0.44,[247,247,247]],[0.55,[103,169,207]],[0.66,[33,102,172]]];
+      if (pp <= stops[0][0]) return rgb(stops[0][1]);
+      if (pp >= stops[stops.length-1][0]) return rgb(stops[stops.length-1][1]);
+      for (let i = 0; i < stops.length-1; i++) {
+        const [a, ca] = stops[i], [b, cb] = stops[i+1];
+        if (pp >= a && pp <= b) {
+          const t = (pp-a)/(b-a);
+          return rgb(ca.map((c,k)=>Math.round(c+(cb[k]-c)*t)));
+        }
+      }
+      return rgb(stops[0][1]);
+    }
+    const rgb = c => `rgb(${c[0]},${c[1]},${c[2]})`;
+
+    // Build one compactness map + its ranked table. Both scales share this code,
+    // the same color ramp, and the same basemap, so they are directly comparable.
+    function initCompactnessMap({ container, dataUrl, bounds, tableSelector, labelKey }) {
+      const map = new maplibregl.Map({
+        container,
+        style: "https://tiles.openfreemap.org/styles/positron",  // greyscale vector tiles, no API key
+        bounds,
+        fitBoundsOptions: { padding: 30 }
+      });
+      map.addControl(new maplibregl.NavigationControl(), "top-right");
+
+      map.on("load", async () => {
+        let data;
+        try {
+          const res = await fetch(dataUrl);
+          if (!res.ok) throw new Error(res.status + " " + res.statusText);
+          data = await res.json();
+        } catch (err) {
+          console.warn(`Could not load ${dataUrl} — ${err.message} (build the data and serve over http).`);
+          return;
+        }
+
+        const src = container + "-src";
+        map.addSource(src, { type: "geojson", data });
+
+        map.addLayer({ id: container + "-fill", type: "fill", source: src,
+          paint: { "fill-color": PP_FILL, "fill-opacity": 0.62 } });
+        map.addLayer({ id: container + "-line", type: "line", source: src,
+          paint: { "line-color": "#33404d", "line-width": 1.2 } });
+        map.addLayer({ id: container + "-label", type: "symbol", source: src,
+          layout: { "text-field": ["get", labelKey], "text-size": 11,
+            "text-font": ["Noto Sans Regular"], "text-max-width": 8 },
+          paint: { "text-color": "#1a1a2e", "text-halo-color": "#ffffff", "text-halo-width": 1.4 } });
+
+        map.on("click", container + "-fill", (e) => {
+          const p = e.features[0].properties;
+          new maplibregl.Popup().setLngLat(e.lngLat)
+            .setHTML(`<strong>${p[labelKey]}</strong><br>Polsby&ndash;Popper: <strong>${(+p.PP).toFixed(3)}</strong>` +
+              `<br>Compactness rank: ${p.rank} of ${data.features.length}` +
+              `<br>Area: ${p.area_km2} km&sup2; &middot; Perimeter: ${p.perimeter_km} km`).addTo(map);
+        });
+        map.on("mouseenter", container + "-fill", () => { map.getCanvas().style.cursor = "pointer"; });
+        map.on("mouseleave", container + "-fill", () => { map.getCanvas().style.cursor = ""; });
+
+        const rows = data.features.map(f => f.properties).sort((a, b) => a.rank - b.rank);
+        document.querySelector(tableSelector).innerHTML = rows.map(p => `
+          <tr>
+            <td class="num">${p.rank}</td>
+            <td><span class="swatch" style="background:${ppColor(+p.PP)}"></span>${p[labelKey]}</td>
+            <td class="num">${(+p.PP).toFixed(3)}</td>
+            <td class="num">${p.area_km2}</td>
+            <td class="num">${p.perimeter_km}</td>
+          </tr>`).join("");
+      });
+      return map;
+    }
+
+    // Scale 1: King County school districts.
+    initCompactnessMap({
+      container: "map",
+      dataUrl: "data/school_districts.geojson",
+      bounds: [[-122.55, 47.08], [-121.05, 47.80]],
+      tableSelector: "#rank-table tbody",
+      labelKey: "NAME"
+    });
+
+    // Scale 2: elementary attendance zones inside Bellevue School District.
+    initCompactnessMap({
+      container: "map2",
+      dataUrl: "data/bellevue_elementary.geojson",
+      bounds: [[-122.243, 47.538], [-122.087, 47.653]],
+      tableSelector: "#rank-table2 tbody",
+      labelKey: "NAME"
+    });
+  </script>
+</body>
+</html>

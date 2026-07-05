@@ -1,0 +1,41 @@
+{
+ "residential": {
+  "elementary": {
+   "D": 0.148,
+   "H": 0.023,
+   "n": 14
+  },
+  "middle": {
+   "D": 0.104,
+   "H": 0.009,
+   "n": 5
+  },
+  "high": {
+   "D": 0.077,
+   "H": 0.008,
+   "n": 4
+  }
+ },
+ "enrollment": {
+  "elementary": {
+   "D": 0.189,
+   "H": 0.095,
+   "n": 14
+  },
+  "middle": {
+   "D": 0.181,
+   "H": 0.081,
+   "n": 5
+  },
+  "high": {
+   "D": 0.145,
+   "H": 0.043,
+   "n": 4
+  }
+ },
+ "meta": {
+  "residential": "2020 census blocks aggregated to post-2023 zones",
+  "enrollment": "NCES CCD 2023-24 actual per-school race enrollment; zoned schools only (choice excluded)",
+  "groups": "White, Asian, Hispanic, Black, Two-plus, Other (combined)"
+ }
+}
