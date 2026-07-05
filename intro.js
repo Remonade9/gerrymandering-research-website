@@ -63,6 +63,8 @@
       <p class="intro-p intro-fine" data-i18n="n3"></p>
       <button class="intro-btn" id="intro-ok" data-i18n="ok"></button>
     </div>
+    <!-- version stamp, mirrored from the homepage's #site-version (empty on other pages) -->
+    <div class="intro-version" style="position:absolute;left:14px;bottom:10px;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;">${(document.getElementById("site-version") || {}).textContent || ""}</div>
   </div>`);
 
   const I18N = {
