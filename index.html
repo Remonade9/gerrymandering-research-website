@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The 2023 Bellevue Elementary Rezoning</title>
   <meta name="description" content="An interactive map of how Bellevue School District's attendance-zone boundaries changed in 2023, and what changed with them." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=109" />
-  <link rel="stylesheet" href="styles.css?v=109" />
-  <script src="vendor/maplibre-gl-csp.js?v=109"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=110" />
+  <link rel="stylesheet" href="styles.css?v=110" />
+  <script src="vendor/maplibre-gl-csp.js?v=110"></script>
 </head>
 <body>
   <div id="map"></div>
@@ -158,12 +158,12 @@
   </script>
 
   <script>
-    const MAPTILER_KEY = "Lc38sZpTIbGGzM7ebDmS";
-    const DATA_VER = "109";   // cache-bust the data GeoJSON when it is regenerated
+    const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
+    const DATA_VER = "110";   // cache-bust the data GeoJSON when it is regenerated
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=109");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=110");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
