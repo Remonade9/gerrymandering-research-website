@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Boundary Changes — Bellevue School District</title>
   <meta name="description" content="Which territory switched elementary schools in Bellevue's 2018 and 2023 rezonings, and what changed for the people living there." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=107" />
-  <link rel="stylesheet" href="styles.css?v=107" />
-  <script src="vendor/maplibre-gl.js?v=107"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=108" />
+  <link rel="stylesheet" href="styles.css?v=108" />
+  <script src="vendor/maplibre-gl-csp.js?v=108"></script>
 </head>
 <body class="chg-page">
   <div id="map"></div>
@@ -67,8 +67,12 @@
 
   <script>
     const MAPTILER_KEY = "Lc38sZpTIbGGzM7ebDmS";
-    const DATA_VER = "107";
+    const DATA_VER = "108";
 
+    if (typeof maplibregl !== "undefined") {
+      // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
+      maplibregl.workerUrl = "vendor/maplibre-gl-csp-worker.js?v=108";
+    }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
         '<div class="map-error">Map library failed to load. Serve this folder over http and confirm <code>vendor/maplibre-gl.js</code> exists.</div>';
