@@ -1596,3 +1596,30 @@ input.choro-check:checked, #chk-neighborhoods:checked, #chk-racelayer:checked {
   padding: 0.3rem 0.5rem;
   margin-left: -0.5rem;
 }
+
+/* district-overview participation dropdowns */
+.ov-d {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--paper);
+  padding: 0.5rem 0.75rem;
+  margin: 0.45rem 0;
+}
+.ov-d summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.6rem;
+  font: 700 0.84rem var(--sans);
+}
+.ov-d summary::-webkit-details-marker { display: none; }
+.ov-d summary::after {
+  content: "expand ▾";
+  font: 600 0.66rem var(--sans);
+  color: var(--accent);
+  white-space: nowrap;
+}
+.ov-d[open] summary::after { content: "collapse ▴"; }
+.ov-d .district-text { margin: 0.5rem 0 0; }
