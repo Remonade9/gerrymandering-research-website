@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Definitions &amp; References — Bellevue School District Boundaries</title>
   <meta name="description" content="Plain-language definitions of every program, term, and metric used on this site — plus yardsticks for reading the numbers." />
-  <link rel="stylesheet" href="styles.css?v=110" />
+  <link rel="stylesheet" href="styles.css?v=111" />
 </head>
 <body class="an-page">
 
@@ -135,11 +135,13 @@
         decomposed. 0 = no sorting; 1 = complete sorting. We report it alongside D because
         relying on a single index is exactly the mistake this site warns about.</dd>
 
-        <dt>The frozen 2020 population</dt>
-        <dd>Every era on this site uses the same 2020 census residents. Real families moved
-        during these years; we deliberately hold the population still so that differences
-        between eras isolate what the <i>line-drawing alone</i> did. Enrollment counts are the
-        one exception &mdash; those are real per-year headcounts.</dd>
+        <dt>The frozen population</dt>
+        <dd>Every era on this site uses the same underlying residents: race and age come from
+        the 2020 census (block level), and income, home values, rents, and language come from
+        the ACS 2019&ndash;2023 survey (block-group level, split across zones by where people
+        live). Real families moved during these years; we deliberately hold the data still so
+        that differences between eras isolate what the <i>line-drawing alone</i> did.
+        Enrollment counts are the one exception &mdash; those are real per-year headcounts.</dd>
 
         <dt>Road distance &amp; travel time</dt>
         <dd>Computed on the real road network (not straight lines), for driving and walking
@@ -187,12 +189,12 @@
         (Spiritridge before 2023, at 110%). Whether ~100% is "efficient" or "no room to
         breathe" is a judgment the number doesn't make.</dd>
 
-        <dt>Money (2020 census figures)</dt>
-        <dd>Bellevue's elementary-zone medians run from about <b>$133k to $211k</b> household
-        income, <b>$1.0M to $1.8M</b> home value, and <b>$2,700 to $3,100</b> monthly rent.
-        For scale, the U.S. median household income in 2020 was about $68k &mdash; every zone
-        in this district sits far above it, which is the backdrop for every "wealthier
-        communities" argument on this site.</dd>
+        <dt>Money (ACS 2019&ndash;2023 figures)</dt>
+        <dd>Bellevue's elementary-zone medians run from about <b>$124k to $201k</b> household
+        income, <b>$0.8M to $1.8M</b> home value (all but two zones above $1M), and
+        <b>$2,050 to $3,130</b> monthly rent. For scale, the U.S. median household income in
+        this period was about $75k &mdash; every zone in this district sits far above it,
+        which is the backdrop for every "wealthier communities" argument on this site.</dd>
 
         <dt>Children counts</dt>
         <dd>The district has about <b>23,300 school-age children (5&ndash;17)</b> in the 2020
@@ -211,7 +213,7 @@
   </main>
 
   <!-- Entry screens + shared language state -->
-  <script src="intro.js?v=110"></script>
+  <script src="intro.js?v=111"></script>
 
   <script>
     (function () {

@@ -32,7 +32,28 @@ blk = blk.to_crs(MCRS)
 bpts = gpd.GeoDataFrame(blk.drop(columns="geometry"), geometry=blk.geometry.representative_point(), crs=MCRS)
 
 acs = gpd.read_file(os.path.join(FDATA, "census", "2023", "blockgroups_acs2023.geojson")).to_crs(MCRS)
-apts = gpd.GeoDataFrame(acs.drop(columns="geometry"), geometry=acs.geometry.representative_point(), crs=MCRS)
+
+ACS_COUNT_COLS = ["lang_hh_total", "spanish_lep_hh", "other_ie_lep_hh", "api_lep_hh", "other_lep_hh"]
+
+def apportion_acs(bz_assigned, acs_bg):
+    """Population-apportion ACS block-group data across zones.
+
+    A block group that straddles a zone boundary contributes to each zone in
+    proportion to its 2020 block population inside that zone (dasymetric split),
+    instead of being dumped whole into whichever zone holds its center point.
+    Count columns are scaled by the share; median columns keep their BG value and
+    are later weighted by the in-zone 2020 population ("pop")."""
+    b = bz_assigned[["GEOID20", "name", "total"]].copy()
+    b["BG"] = b["GEOID20"].str[:12]
+    zp = b.groupby(["BG", "name"])["total"].sum().rename("bgpop").reset_index()
+    tot = zp.groupby("BG")["bgpop"].transform("sum")
+    zp["share"] = np.where(tot > 0, zp["bgpop"] / tot, 0.0)
+    zp = zp[zp["share"] > 0]
+    aw = zp.merge(acs_bg.drop(columns="geometry"), left_on="BG", right_on="GEOID", how="inner")
+    for c in ACS_COUNT_COLS:
+        aw[c] = aw[c].fillna(0) * aw["share"]
+    aw["pop"] = aw["bgpop"]
+    return aw
 
 sc = gpd.read_file(os.path.join(FDATA, "schools", "school_sites.geojson"))
 sc = sc[(sc.DISTRICT == "Bellevue") & (sc.ISPUBLIC.astype(str).str.strip() == "Y")]
@@ -155,7 +176,7 @@ def zone_lang(sa):
     tot = float(sa["lang_hh_total"].sum())
     if tot <= 0:
         return {"limited_pct": None}
-    cnt = lambda c: int(sa[c].sum())
+    cnt = lambda c: int(round(sa[c].sum()))
     sp, ie, api, oth = cnt("spanish_lep_hh"), cnt("other_ie_lep_hh"), cnt("api_lep_hh"), cnt("other_lep_hh")
     lim = sp + ie + api + oth
     pc = lambda n: round(n / tot * 100, 1)
@@ -194,7 +215,7 @@ for level in LEVELS:
     raw = json.load(open(fp))
     z = gpd.read_file(fp).to_crs(MCRS)
     bz = gpd.sjoin(bpts, z[["name", "geometry"]], predicate="within").drop(columns="index_right")
-    az = gpd.sjoin(apts, z[["name", "geometry"]], predicate="within").drop(columns="index_right")
+    az = apportion_acs(bz, acs)
     slevel = sc[sc.GradeLevel.astype(str).str.strip() == LEVEL_GRADE[level]]
     school_pt = dict(zip(slevel.nm, slevel.geometry))
     hosts = {c: host_points(level, c) for c in PROG_CATS}

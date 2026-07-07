@@ -110,11 +110,28 @@ blk = blk.merge(agef, on="GEOID20", how="left"); blk["school_age_5_17"] = blk["s
 blk = blk.to_crs(MCRS)
 bpts = gpd.GeoDataFrame(blk.drop(columns="geometry"), geometry=blk.geometry.representative_point(), crs=MCRS)
 acs = gpd.read_file(os.path.join(FDATA, "census", "2023", "blockgroups_acs2023.geojson")).to_crs(MCRS)
-apts = gpd.GeoDataFrame(acs.drop(columns="geometry"), geometry=acs.geometry.representative_point(), crs=MCRS)
+
+ACS_COUNT_COLS = ["lang_hh_total", "spanish_lep_hh", "other_ie_lep_hh", "api_lep_hh", "other_lep_hh"]
+
+def apportion_acs(bz_assigned, acs_bg):
+    """Population-apportion ACS block groups across zones (same as compute_impacts):
+    straddling BGs contribute to each zone by their 2020 block-population share
+    rather than being dumped whole into the zone holding their center point."""
+    b = bz_assigned[["GEOID20", "name", "total"]].copy()
+    b["BG"] = b["GEOID20"].str[:12]
+    zp = b.groupby(["BG", "name"])["total"].sum().rename("bgpop").reset_index()
+    tot = zp.groupby("BG")["bgpop"].transform("sum")
+    zp["share"] = np.where(tot > 0, zp["bgpop"] / tot, 0.0)
+    zp = zp[zp["share"] > 0]
+    aw = zp.merge(acs_bg.drop(columns="geometry"), left_on="BG", right_on="GEOID", how="inner")
+    for c in ACS_COUNT_COLS:
+        aw[c] = aw[c].fillna(0) * aw["share"]
+    aw["pop"] = aw["bgpop"]
+    return aw
 
 zm = g.to_crs(MCRS)
 bz = gpd.sjoin(bpts, zm[["name", "geometry"]], predicate="within").drop(columns="index_right")
-az = gpd.sjoin(apts, zm[["name", "geometry"]], predicate="within").drop(columns="index_right")
+az = apportion_acs(bz, acs)
 print("blocks assigned:", bz["GEOID20"].nunique(), "/", len(bpts))
 
 # era school points from CCD directory lat/long
@@ -265,7 +282,7 @@ for _, row in g.to_crs(4326).iterrows():
     p["housing"] = {"income": wm("med_hh_income"), "home_value": wm("med_home_value"), "rent": wm("med_gross_rent")}
     lt = float(sa["lang_hh_total"].sum())
     if lt > 0:
-        cnt = lambda c: int(sa[c].sum())
+        cnt = lambda c: int(round(sa[c].sum()))
         spn, ie, api, oth = cnt("spanish_lep_hh"), cnt("other_ie_lep_hh"), cnt("api_lep_hh"), cnt("other_lep_hh")
         lim = spn + ie + api + oth; pc = lambda n: round(n / lt * 100, 1)
         p["language"] = {"hh_total": int(lt), "limited_pct": pc(lim), "limited_n": lim,
