@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Boundary Changes — Bellevue School District</title>
   <meta name="description" content="Which territory switched elementary schools in Bellevue's 2018 and 2023 rezonings, and what changed for the people living there." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=112" />
-  <link rel="stylesheet" href="styles.css?v=112" />
-  <script src="vendor/maplibre-gl-csp.js?v=112"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=114" />
+  <link rel="stylesheet" href="styles.css?v=114" />
+  <script src="vendor/maplibre-gl-csp.js?v=114"></script>
 </head>
 <body class="chg-page">
   <div id="map"></div>
@@ -62,15 +62,15 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=112"></script>
+  <script src="intro.js?v=114"></script>
 
   <script>
     const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "112";
+    const DATA_VER = "114";
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=112");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=114");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
@@ -100,11 +100,13 @@
     const TIMELINES = {
       "2023": [
         ["Oct 2022", "District publishes its consolidation analysis (the “Planning for the Future” report)."],
-        ["Early 2023", "School board votes to close Wilburton and Eastgate elementaries."],
+        ["Feb 9, 2023", "Interim superintendent recommends closing three schools; Ardmore is later spared after community pushback."],
+        ["Mar 16, 2023", "School board votes to close Wilburton and Eastgate (3 yes, 2 abstentions)."],
         ["June 2023", "Final school day at both schools."],
         ["Fall 2023", "New elementary attendance zones take effect."]
       ],
       "2018": [
+        ["Aug 2016", "Board approves the new school's attendance map, drawn with a community advisory committee."],
         ["2016–2018", "Wilburton Elementary is built to relieve elementary overcrowding."],
         ["Sep 2018", "Wilburton opens; a new zone for it is assembled from neighboring zones."]
       ]

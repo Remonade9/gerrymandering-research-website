@@ -1578,3 +1578,19 @@ input.choro-check:checked, #chk-neighborhoods:checked, #chk-racelayer:checked {
 }
 .addr-sug-item:last-child { border-bottom: none; }
 .addr-sug-item:hover { background: var(--accent-soft); }
+
+/* §7 source lists */
+.an-srcs li { font-size: 0.84rem; margin-bottom: 0.5rem; }
+.an-srcs a { color: var(--accent); }
+
+/* inline citations -> §7 */
+.an-cite { font-size: 0.72em; }
+.an-cite a { color: var(--accent); text-decoration: none; font-weight: 700; }
+.an-cite a:hover { text-decoration: underline; }
+.src-no { color: var(--accent); }
+.an-srcs li:target {
+  background: var(--accent-soft);
+  border-radius: 6px;
+  padding: 0.3rem 0.5rem;
+  margin-left: -0.5rem;
+}
