@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The 2023 Bellevue Elementary Rezoning</title>
   <meta name="description" content="An interactive map of how Bellevue School District's attendance-zone boundaries changed in 2023, and what changed with them." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=119" />
-  <link rel="stylesheet" href="styles.css?v=119" />
-  <script src="vendor/maplibre-gl-csp.js?v=119"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=120" />
+  <link rel="stylesheet" href="styles.css?v=120" />
+  <script src="vendor/maplibre-gl-csp.js?v=120"></script>
 </head>
 <body>
   <div id="map"></div>
@@ -96,6 +96,14 @@
       <div class="route-info" id="route-info" hidden></div>
     </div>
     <div class="panel-divider"></div>
+    <div class="basemap-controls">
+      <span class="control-label">Travel mode</span>
+      <div class="pin-mode profile-mode">
+        <button class="pin-mode-btn profile-btn on" data-profile="drive">driving</button>
+        <button class="pin-mode-btn profile-btn" data-profile="walk">walking</button>
+      </div>
+    </div>
+    <div class="panel-divider"></div>
     <button class="lang-btn" id="panel-lang" title="Switch language">中文</button>
   </div>
 
@@ -120,7 +128,7 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=119"></script>
+  <script src="intro.js?v=120"></script>
 
   <script>
     (function () {
@@ -145,11 +153,11 @@
 
   <script>
     const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "119";   // cache-bust the data GeoJSON when it is regenerated
+    const DATA_VER = "120";   // cache-bust the data GeoJSON when it is regenerated
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=119");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=120");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
@@ -1096,13 +1104,7 @@
       const unit = (travelMode === "min" && prof) ? "min" : "km";
       const kind = prof ? (prof === t.walk ? "walk" : "road") : "air";
       const stats = accessStats(t, travelMode, choroBox("travel_avg"), choroBox("travel_w3"));
-      const profileSeg = prof
-        ? `<div class="section-head profile-head"><span class="detail-section-label">Travel mode <span class="lab-hint">(travel &amp; programs)</span></span>` +
-          `<span class="pin-mode seg-sm" data-seg="profile">` +
-          `<button class="pin-mode-btn${travelProfile === "drive" ? " on" : ""}" data-val="drive">driving</button>` +
-          `<button class="pin-mode-btn${travelProfile === "walk" ? " on" : ""}" data-val="walk">walking</button></span></div>`
-        : "";
-      return `<div class="impact-section">${profileSeg}<div class="section-head"><span class="detail-section-label">Travel to assigned school</span>` +
+      return `<div class="impact-section"><div class="section-head"><span class="detail-section-label">Travel to assigned school</span>` +
         `<span class="head-btns">${modeAltBtn("travel", !!prof, travelMode)}` +
         `<button class="toggle-btn mini" data-target="travel-dist" aria-expanded="false">distribution</button></span></div>` +
         `<div class="stat-row">${stats}</div>` +
@@ -1240,8 +1242,6 @@
         if (currentZone) openDetail(currentZone.props, currentZone.lvl);
         return;
       }
-      const pr = e.target.closest('[data-seg="profile"] .pin-mode-btn');
-      if (pr) { setTravelProfile(pr.dataset.val); return; }
       const btn = e.target.closest(".toggle-btn"); if (!btn) return;
       const box = document.getElementById(btn.dataset.target); if (!box) return;
       const open = box.hasAttribute("hidden");
@@ -1926,9 +1926,12 @@
     });
 
     // Travel-mode switch (driving | walking) — flips the panel stats, pins, and route tool.
+    document.querySelectorAll(".profile-btn").forEach(b =>
+      b.addEventListener("click", () => setTravelProfile(b.dataset.profile)));
     function setTravelProfile(p) {
       if (p === travelProfile) return;
       travelProfile = p;
+      document.querySelectorAll(".profile-btn").forEach(x => x.classList.toggle("on", x.dataset.profile === travelProfile));
       if (currentZone) openDetail(currentZone.props, currentZone.lvl);
       applyChoropleth();
       userPins.forEach(up => updateUserPin(up));
