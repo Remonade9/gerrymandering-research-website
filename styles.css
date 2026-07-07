@@ -1563,21 +1563,22 @@ input.choro-check:checked, #chk-neighborhoods:checked, #chk-racelayer:checked {
   box-shadow: 0 8px 24px -10px rgba(20, 30, 40, 0.45);
   overflow: hidden;
 }
-.addr-sug-item {
+.addr-row button.addr-sug-item, .addr-sug-item {
   font: 0.75rem var(--sans);
   color: var(--ink);
   text-align: left;
-  background: none;
+  background: var(--surface);
   border: none;
   border-bottom: 1px solid var(--border);
+  border-radius: 0;
   padding: 0.45rem 0.6rem;
   cursor: pointer;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.addr-sug-item:last-child { border-bottom: none; }
-.addr-sug-item:hover { background: var(--accent-soft); }
+.addr-row button.addr-sug-item:last-child, .addr-sug-item:last-child { border-bottom: none; }
+.addr-row button.addr-sug-item:hover, .addr-sug-item:hover { background: var(--accent-soft); }
 
 /* §7 source lists */
 .an-srcs li { font-size: 0.84rem; margin-bottom: 0.5rem; }
