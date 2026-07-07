@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The 2023 Bellevue Elementary Rezoning</title>
   <meta name="description" content="An interactive map of how Bellevue School District's attendance-zone boundaries changed in 2023, and what changed with them." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=117" />
-  <link rel="stylesheet" href="styles.css?v=117" />
-  <script src="vendor/maplibre-gl-csp.js?v=117"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=118" />
+  <link rel="stylesheet" href="styles.css?v=118" />
+  <script src="vendor/maplibre-gl-csp.js?v=118"></script>
 </head>
 <body>
   <div id="map"></div>
@@ -120,7 +120,7 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=117"></script>
+  <script src="intro.js?v=118"></script>
 
   <script>
     (function () {
@@ -145,11 +145,11 @@
 
   <script>
     const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "117";   // cache-bust the data GeoJSON when it is regenerated
+    const DATA_VER = "118";   // cache-bust the data GeoJSON when it is regenerated
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=117");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=118");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
@@ -1210,7 +1210,14 @@
           `<p class="district-text"><b>How usable they were is the contested part.</b> Every key meeting &mdash; the hearings, the final comment opportunity, and the vote itself &mdash; was scheduled for 4:30 p.m. on a weekday at one central district building. The place was arguably the fair part: by our own routing, that building sits near the district's drive-time center &mdash; even the farthest corners of the district are only about 13&ndash;18 minutes away by car &mdash; though none of the meetings were held at the affected schools themselves. The hour was the barrier described from inside the process: at the Ardmore hearing, school staff told the board that parents were absent because they could not leave work by 4:30. The seven PTAs' joint letter said the proposal had not been translated for multilingual families, though spoken interpretation appeared at least once at the hearings. On recommendation night, media received the school list by press release an hour before the district emailed families &mdash; parents in the boardroom learned which schools were named from the news. And in the final week, Chinese-immigrant families in the Eastgate neighborhood, saying district communication had not reached them, printed thousands of bilingual flyers and canvassed door-to-door to inform their own neighbors.</p>` +
           `<p class="district-text"><b>What input changed.</b> After the hearings, Ardmore came off the closure list &mdash; in the interim superintendent's own words, because of "the request of parents to give them a chance," paired with a planned Arabic Heritage Language program expected to rebuild its enrollment &mdash; and Eastgate's receiving plan was simplified. The committees appeared two to three weeks after the PTAs' letter asked why none existed. The structural decisions &mdash; closing two schools, and the timeline itself &mdash; did not move; the district's stated reasons for the pace were expiring state funds and families' need for spring to plan.</p>` +
           `<p class="district-text"><b>Two neighboring processes frame this one.</b> In 2016, when the district drew the future Wilburton school's zone, an advisory committee of parents and staff formed <i>before</i> any map existed, the public weighed five map scenarios at open houses, and affected families received grandfathering options. In late 2023, the district's middle-school consolidation study ran with two outside demographers and early engagement sessions held at the schools in several languages &mdash; and ended, to applause, with no closures. In June 2023 the board passed a resolution recommitting to "equitable participation&hellip; of all students and families."</p>` +
+          `<button class="district-btn" id="isc-pin-btn" title="Drop a pin at the Wilburton Instructional Service Center">&#128205; Pin the hearing venue (ISC) on the map</button>` +
           `<p class="sub">Whether this process gave every family an equal, effective voice is a judgment this site leaves to the reader; the facts above are what the public record shows. Full sourcing is on the Analysis page.</p></div>`;
+      const ISC = [-122.175939, 47.609237];   // Wilburton Instructional Service Center, 12241 Main St
+      document.getElementById("isc-pin-btn").addEventListener("click", () => {
+        const nm = "Wilburton Instructional Service Center";
+        if (!userPins.some(p => p.name === nm)) addUserPin(ISC, nm);
+        map.flyTo({ center: ISC, zoom: 13.4, duration: 900 });
+      });
       detailPanel.classList.add("open");
     }
     document.getElementById("district-btn").addEventListener("click", openDistrict);
