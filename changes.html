@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Boundary Changes — Bellevue School District</title>
   <meta name="description" content="Which territory switched elementary schools in Bellevue's 2018 and 2023 rezonings, and what changed for the people living there." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=111" />
-  <link rel="stylesheet" href="styles.css?v=111" />
-  <script src="vendor/maplibre-gl-csp.js?v=111"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=112" />
+  <link rel="stylesheet" href="styles.css?v=112" />
+  <script src="vendor/maplibre-gl-csp.js?v=112"></script>
 </head>
 <body class="chg-page">
   <div id="map"></div>
@@ -35,7 +35,6 @@
       <span>pre-2018</span><span>2018&ndash;2023</span><span>2023&ndash;now</span>
     </div>
     <div class="chg-slider-foot">
-      <label class="chk chg-chk"><input type="checkbox" id="chk-nbhsplit" /> Neighborhood splits (before &rarr; after)</label>
       <button class="chg-replay" id="replay-btn" title="Replay the change animation">&#8635; Replay</button>
     </div>
   </div>
@@ -63,15 +62,15 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=111"></script>
+  <script src="intro.js?v=112"></script>
 
   <script>
     const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "111";
+    const DATA_VER = "112";
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=111");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=112");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
@@ -124,7 +123,7 @@
 
     const getJSON = (u) => fetch(u).then(r => { if (!r.ok) throw new Error(u); return r.json(); });
 
-    let DATA = null;              // { zones:{a,b,c}, district, changes:{ "2018","2023" }, flows, neighborhoods }
+    let DATA = null;              // { zones:{a,b,c}, district, changes:{ "2018","2023" }, flows, schoolXY }
     let activeEvent = "2023";
     let selectedPiece = null;     // "from|to"
     let ghostMarkers = [];
@@ -287,22 +286,6 @@
                   "text-allow-overlap": true, "text-ignore-placement": true },
         paint: { "text-color": "#21262b", "text-halo-color": "#ffffff", "text-halo-width": 1.8 } });
 
-      /* neighborhood-splits layer (hidden until checked) */
-      map.addSource("nbh-split", { type: "geojson", data: fc([]) });
-      map.addLayer({ id: "nbh-split-fill", type: "fill", source: "nbh-split",
-        paint: { "fill-color": "#0f6e66",
-                 "fill-opacity": ["interpolate", ["linear"], ["abs", ["get", "delta"]], 0, 0, 1, 0.35, 3, 0.55] },
-        layout: { visibility: "none" } }, "district-line");
-      map.addLayer({ id: "nbh-split-line", type: "line", source: "nbh-split",
-        paint: { "line-color": "#0f6e66", "line-width": 1, "line-opacity": 0.6 },
-        layout: { visibility: "none" } });
-      map.on("click", "nbh-split-fill", (e) => {
-        const p = e.features[0].properties;
-        new maplibregl.Popup({ closeButton: true, maxWidth: "280px" })
-          .setLngLat(e.lngLat)
-          .setHTML(`<div class="chg-pop"><b>${esc(p.name)}</b><br/>Elementary schools its children are divided across:<br/><b>${p.before}</b> before &rarr; <b>${p.after}</b> after${p.delta === 0 ? " (no change)" : ""}</div>`)
-          .addTo(map);
-      });
     }
 
     /* ---------- slider / era state ---------- */
@@ -349,7 +332,6 @@
       placeGhosts(ev);
       if (typeof userPin !== "undefined" && userPin) updatePinPopup(false);
       renderSummary(ev);
-      refreshSplitLayer();
       document.getElementById("gap-2018").classList.toggle("on", ev === "2018");
       document.getElementById("gap-2023").classList.toggle("on", ev === "2023");
       if (!opts.keepSlider) { /* caller moves the slider */ }
@@ -424,31 +406,6 @@
         ghostMarkers.push(mk);
       });
     }
-
-    /* ---------- neighborhood splits ---------- */
-    function splitCount(splits, key) {
-      const lv = splits[key];
-      return lv && lv.zones ? lv.zones.length : null;
-    }
-    function refreshSplitLayer() {
-      if (!DATA.neighborhoods) return;
-      const beforeKey = activeEvent === "2023" ? "elementary_b" : "elementary_a";
-      const afterKey = activeEvent === "2023" ? "elementary" : "elementary_b";
-      const feats = DATA.neighborhoods.features.map(f => {
-        let s = f.properties.splits;
-        if (typeof s === "string") s = JSON.parse(s);
-        const b = splitCount(s, beforeKey), a = splitCount(s, afterKey);
-        if (b == null || a == null) return null;
-        return { type: "Feature", geometry: f.geometry,
-                 properties: { name: f.properties.name, before: b, after: a, delta: a - b } };
-      }).filter(Boolean).filter(f => f.properties.delta !== 0);
-      map.getSource("nbh-split").setData(fc(feats));
-    }
-    document.getElementById("chk-nbhsplit").addEventListener("change", (e) => {
-      const vis = e.target.checked ? "visible" : "none";
-      map.setLayoutProperty("nbh-split-fill", "visibility", vis);
-      map.setLayoutProperty("nbh-split-line", "visibility", vis);
-    });
 
     /* ---------- affected-zone metrics (curated before/after set) ---------- */
     const EVENT_ERAS = { "2018": ["a", "b"], "2023": ["b", "c"] };
@@ -795,6 +752,49 @@
     document.getElementById("pin-addr-go").addEventListener("click", geocodePin);
     document.getElementById("pin-addr").addEventListener("keydown", (e) => { if (e.key === "Enter") geocodePin(); });
 
+    /* live suggestions while typing (Google-Maps style) */
+    wireAddrSuggest(document.getElementById("pin-addr"), (f) => {
+      placePinAt({ lng: f.center[0], lat: f.center[1] });
+      map.flyTo({ center: f.center, zoom: Math.max(map.getZoom(), 13), duration: 900 });
+      document.getElementById("pin-addr").value = "";
+    });
+    function wireAddrSuggest(inputEl, onPick) {
+      const box = document.createElement("div");
+      box.className = "addr-sug";
+      box.hidden = true;
+      inputEl.parentElement.style.position = "relative";
+      inputEl.parentElement.appendChild(box);
+      const [bx0, by0, bx1, by1] = GEO_BBOX.split(",").map(Number);
+      let timer = null, seq = 0;
+      inputEl.addEventListener("input", () => {
+        clearTimeout(timer);
+        const q = inputEl.value.trim();
+        if (q.length < 3) { box.hidden = true; return; }
+        timer = setTimeout(async () => {
+          const my = ++seq;
+          try {
+            const r = await fetch(`https://api.maptiler.com/geocoding/${encodeURIComponent(q)}.json` +
+              `?key=${MAPTILER_KEY}&autocomplete=true&proximity=-122.164,47.6045&bbox=${GEO_BBOX}&limit=4`);
+            const j = await r.json();
+            if (my !== seq) return;
+            const feats = (j.features || []).filter(f =>
+              f.center[0] >= bx0 && f.center[0] <= bx1 && f.center[1] >= by0 && f.center[1] <= by1);
+            box.innerHTML = "";
+            if (!feats.length) { box.hidden = true; return; }
+            feats.forEach(f => {
+              const b = document.createElement("button");
+              b.className = "addr-sug-item";
+              b.textContent = f.place_name;
+              b.addEventListener("mousedown", (ev) => { ev.preventDefault(); box.hidden = true; onPick(f); });
+              box.appendChild(b);
+            });
+            box.hidden = false;
+          } catch (err) { box.hidden = true; }
+        }, 250);
+      });
+      inputEl.addEventListener("blur", () => setTimeout(() => { box.hidden = true; }, 150));
+    }
+
     /* ---------- entrance animation ---------- */
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -822,7 +822,7 @@
     /* ---------- boot ---------- */
     async function boot() {
       const V = `?v=${DATA_VER}`;
-      const [district, za, zb, zc, c18, c23, flows, nbh, sa, sb, sc] = await Promise.all([
+      const [district, za, zb, zc, c18, c23, flows, sa, sb, sc] = await Promise.all([
         getJSON(`data/bellevue_district.geojson${V}`),
         getJSON(`data/bellevue_a_elementary_zones.geojson${V}`),
         getJSON(`data/bellevue_b_elementary_zones.geojson${V}`),
@@ -830,7 +830,6 @@
         getJSON(`data/changes_2018.geojson${V}`),
         getJSON(`data/changes_2023.geojson${V}`),
         getJSON(`data/changes_flows.json${V}`),
-        getJSON(`data/bellevue_neighborhoods.geojson${V}`),
         getJSON(`data/bellevue_a_elementary_schools.geojson${V}`),
         getJSON(`data/bellevue_b_elementary_schools.geojson${V}`),
         getJSON(`data/bellevue_elementary_schools.geojson${V}`)
@@ -841,7 +840,7 @@
         return m;
       };
       DATA = { district, zones: { a: za, b: zb, c: zc }, changes: { "2018": c18, "2023": c23 },
-               flows, neighborhoods: nbh, schoolXY: { a: xyOf(sa), b: xyOf(sb), c: xyOf(sc) } };
+               flows, schoolXY: { a: xyOf(sa), b: xyOf(sb), c: xyOf(sc) } };
       addLayers();
 
       const b = new maplibregl.LngLatBounds();

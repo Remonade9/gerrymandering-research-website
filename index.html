@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The 2023 Bellevue Elementary Rezoning</title>
   <meta name="description" content="An interactive map of how Bellevue School District's attendance-zone boundaries changed in 2023, and what changed with them." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=111" />
-  <link rel="stylesheet" href="styles.css?v=111" />
-  <script src="vendor/maplibre-gl-csp.js?v=111"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=112" />
+  <link rel="stylesheet" href="styles.css?v=112" />
+  <script src="vendor/maplibre-gl-csp.js?v=112"></script>
 </head>
 <body>
   <div id="map"></div>
@@ -96,20 +96,6 @@
       <div class="route-info" id="route-info" hidden></div>
     </div>
     <div class="panel-divider"></div>
-    <div class="basemap-controls">
-      <span class="control-label">Travel mode</span>
-      <div class="pin-mode profile-mode">
-        <button class="pin-mode-btn profile-btn on" data-profile="drive">driving</button>
-        <button class="pin-mode-btn profile-btn" data-profile="walk">walking</button>
-      </div>
-    </div>
-    <div class="panel-divider"></div>
-    <div class="basemap-controls">
-      <span class="control-label">Base map</span>
-      <label class="chk"><input type="checkbox" id="chk-satellite" /> Satellite</label>
-      <label class="chk"><input type="checkbox" id="chk-terrain" /> Terrain</label>
-    </div>
-    <div class="panel-divider"></div>
     <button class="lang-btn" id="panel-lang" title="Switch language">中文</button>
   </div>
 
@@ -134,7 +120,7 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=111"></script>
+  <script src="intro.js?v=112"></script>
 
   <script>
     (function () {
@@ -159,11 +145,11 @@
 
   <script>
     const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "111";   // cache-bust the data GeoJSON when it is regenerated
+    const DATA_VER = "112";   // cache-bust the data GeoJSON when it is regenerated
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=111");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=112");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
@@ -648,15 +634,17 @@
         .setHTML(`<div class="sch-pop"><strong>${p.name}</strong><div class="popup-sub">Neighborhood · ` +
                  `${Number(splits && splits.kids || 0).toLocaleString()} school-age kids</div>` +
                  `<div class="nbh-body">${bodyHTML()}</div>` +
-                 (hasToggle ? `<button class="view-toggle nbh-toggle">${mode === "pct" ? "Show counts" : "Show %"}</button>` : "") +
+                 (hasToggle ? `<span class="pin-mode seg-sm nbh-seg">` +
+                   `<button class="pin-mode-btn${mode === "pct" ? " on" : ""}" data-val="pct">percent</button>` +
+                   `<button class="pin-mode-btn${mode === "pop" ? " on" : ""}" data-val="pop">counts</button></span>` : "") +
                  `</div>`)
         .addTo(map);
-      const btn = popup.getElement().querySelector(".nbh-toggle");
-      if (btn) btn.addEventListener("click", () => {
-        mode = mode === "pct" ? "pop" : "pct";
+      popup.getElement().querySelectorAll(".nbh-seg .pin-mode-btn").forEach(btn => btn.addEventListener("click", () => {
+        if (mode === btn.dataset.val) return;
+        mode = btn.dataset.val;
         popup.getElement().querySelector(".nbh-body").innerHTML = bodyHTML();
-        btn.textContent = mode === "pct" ? "Show counts" : "Show %";
-      });
+        popup.getElement().querySelectorAll(".nbh-seg .pin-mode-btn").forEach(x => x.classList.toggle("on", x.dataset.val === mode));
+      }));
       popup.on("close", () => { if (seq === nbhClickSeq) clearNbhSelected(); });
     }
 
@@ -943,7 +931,9 @@
         `<p class="dist-note">${note}</p>`;
     }
     const modeAltBtn = (scope, has, mode) => has
-      ? `<button class="view-toggle mode-alt" data-scope="${scope}">${mode === "km" ? "show time" : "show distance"}</button>`
+      ? `<span class="pin-mode seg-sm seg-alt" data-scope="${scope}">` +
+        `<button class="pin-mode-btn${mode === "km" ? " on" : ""}" data-val="km">distance</button>` +
+        `<button class="pin-mode-btn${mode === "min" ? " on" : ""}" data-val="min">time</button></span>`
       : "";
     function accessStats(d, mode, box1, box2) {   // headline pair for a travel/program entry
       const prof = profOf(d);
@@ -1105,7 +1095,13 @@
       const unit = (travelMode === "min" && prof) ? "min" : "km";
       const kind = prof ? (prof === t.walk ? "walk" : "road") : "air";
       const stats = accessStats(t, travelMode, choroBox("travel_avg"), choroBox("travel_w3"));
-      return `<div class="impact-section"><div class="section-head"><span class="detail-section-label">Travel to assigned school</span>` +
+      const profileSeg = prof
+        ? `<div class="section-head profile-head"><span class="detail-section-label">Travel mode <span class="lab-hint">(travel &amp; programs)</span></span>` +
+          `<span class="pin-mode seg-sm" data-seg="profile">` +
+          `<button class="pin-mode-btn${travelProfile === "drive" ? " on" : ""}" data-val="drive">driving</button>` +
+          `<button class="pin-mode-btn${travelProfile === "walk" ? " on" : ""}" data-val="walk">walking</button></span></div>`
+        : "";
+      return `<div class="impact-section">${profileSeg}<div class="section-head"><span class="detail-section-label">Travel to assigned school</span>` +
         `<span class="head-btns">${modeAltBtn("travel", !!prof, travelMode)}` +
         `<button class="toggle-btn mini" data-target="travel-dist" aria-expanded="false">distribution</button></span></div>` +
         `<div class="stat-row">${stats}</div>` +
@@ -1143,7 +1139,9 @@
         stabilityHTML(lvl, props.name) +
         `<div class="zone-meta">` +
           (kids != null ? `<span class="zone-pop">${choroBox("kids")}<b>${fmtInt(kids)}</b> school-age (5–17)</span>` : `<span></span>`) +
-          `<button class="view-toggle" title="Switch between percentages and counts">${viewMode === "pct" ? "Show counts" : "Show %"}</button>` +
+          `<span class="pin-mode seg-sm" data-seg="view" title="Percentages or counts">` +
+          `<button class="pin-mode-btn${viewMode === "pct" ? " on" : ""}" data-val="pct">percent</button>` +
+          `<button class="pin-mode-btn${viewMode === "pop" ? " on" : ""}" data-val="pop">counts</button></span>` +
         `</div>`;
       document.getElementById("detail-body").innerHTML =
         header + summaryHTML(props, lvl) +
@@ -1176,9 +1174,29 @@
         `<dt>Theil's H (entropy index)</dt><dd>Uses all six race groups at once. How much less diverse the average school is than the district overall. 0 = every school mirrors the district, 1 = total separation.</dd>` +
         `<dt>Two bases</dt><dd><b>Actual enrollment</b> = who attends each zoned school (NCES 2023-24), the real outcome, including transfers and program placements. <b>Residential</b> = who lives inside each zone (2020 Census), what the boundary lines alone would produce. The gap between them is the effect of choice, transfers, and programs.</dd>` +
         `<dt>Caveats</dt><dd>Choice schools excluded (not zone units). With few schools per level (4-5 at secondary), small differences are not meaningful. Current (post-2023) map only; the before/after comes with the pre-2023 boundaries.</dd></dl>`;
+      const zf = DATA.levels[activeLevel].zones.features;
+      let gEnr = 0, gCap = 0, gKids = 0, gN = 0;
+      zf.forEach(f => {
+        const p = f.properties, c = p.cap || {};
+        gKids += p.kids_5_17 || 0; gN++;
+        if (c.enroll != null) gEnr += c.enroll;
+        if (c.capacity != null) gCap += c.capacity;
+      });
+      const gUtil = gCap > 0 ? Math.round(100 * gEnr / gCap) : null;
+      const glance =
+        `<div class="section-head"><span class="detail-section-label">At a glance &mdash; ${LEVEL_META[activeLevel].legend}s, ${eraLabel()}</span></div>` +
+        `<div class="glance-row">` +
+          `<div class="glance"><b>${gN}</b> zoned schools</div>` +
+          `<div class="glance"><b>${fmtInt(gEnr)}</b> enrolled</div>` +
+          `<div class="glance"><b>${fmtInt(gCap)}</b> seats</div>` +
+          (gUtil != null ? `<div class="glance"><b>${gUtil}%</b> utilization</div>` : "") +
+          `<div class="glance"><b>${fmtInt(gKids)}</b> school-age residents</div>` +
+        `</div>` +
+        `<p class="sub">Zoned schools at this level only (choice schools have no zone). Enrollment is this era's headcount; residents use the fixed 2020 snapshot.</p>`;
       document.getElementById("detail-body").innerHTML =
         `<p class="detail-eyebrow">Bellevue School District</p>` +
         `<h2 class="detail-title">District overview</h2>` +
+        glance +
         `<div class="section-head"><span class="detail-section-label">Segregation across schools</span>` +
           `<button class="info-btn toggle-btn" data-target="seg-idx-defs" aria-expanded="false" title="What these indices mean">i</button></div>` +
         `<div class="metric-defs" id="seg-idx-defs" hidden>${segDefs}</div>` +
@@ -1188,26 +1206,31 @@
         `<div class="impact-section"><div class="section-head"><span class="detail-section-label">Participation (the process)</span></div>` +
           `<p class="district-text">The 2023 closures came out of the district's <em>"Planning for the Future"</em> process: staff-built consolidation scenarios by region, board study sessions, and public meetings and comment periods through the 2022&ndash;23 winter, ending in the board's spring 2023 vote to close Wilburton and Eastgate.</p>` +
           `<p class="district-text">The formal opportunity to participate was the same for everyone &mdash; the meetings and comment periods were open district-wide. The open question, raised in community pushback and local news coverage at the time, is whether <em>effective</em> voice was equal: whether well-organized or well-connected communities were heard more than quieter ones. We present the process facts and leave that judgment to the reader.</p>` +
-          `<p class="sub">A fuller procedural record (meeting counts, translation availability, public-comment records, and what changed in response) is still being compiled.</p></div>`;
+          `<p class="sub">The record that would answer it &mdash; meeting minutes, translation availability, public comments &mdash; is evidence to read rather than a number to map; the Analysis page discusses it.</p></div>`;
       detailPanel.classList.add("open");
     }
     document.getElementById("district-btn").addEventListener("click", openDistrict);
 
     // One delegated handler for expandables (info + distribution toggles) and the % / count view switch.
     detailPanel.addEventListener("click", (e) => {
-      const dm = e.target.closest(".mode-alt");   // must run BEFORE .view-toggle (shares that class for styling)
-      if (dm) {
-        if (dm.dataset.scope === "travel") travelMode = travelMode === "km" ? "min" : "km";
-        else progMode = progMode === "km" ? "min" : "km";
+      const alt = e.target.closest(".seg-alt .pin-mode-btn");
+      if (alt) {
+        const scope = alt.closest(".seg-alt").dataset.scope, val = alt.dataset.val;
+        if (scope === "travel") { if (travelMode === val) return; travelMode = val; }
+        else { if (progMode === val) return; progMode = val; }
         if (currentZone) openDetail(currentZone.props, currentZone.lvl);
         return;
       }
-      if (e.target.closest(".view-toggle")) {
-        viewMode = viewMode === "pct" ? "pop" : "pct";
+      const vw = e.target.closest('[data-seg="view"] .pin-mode-btn');
+      if (vw) {
+        if (viewMode === vw.dataset.val) return;
+        viewMode = vw.dataset.val;
         applyChoropleth();   // count/percent metrics recolor + relabel the legend
         if (currentZone) openDetail(currentZone.props, currentZone.lvl);
         return;
       }
+      const pr = e.target.closest('[data-seg="profile"] .pin-mode-btn');
+      if (pr) { setTravelProfile(pr.dataset.val); return; }
       const btn = e.target.closest(".toggle-btn"); if (!btn) return;
       const box = document.getElementById(btn.dataset.target); if (!box) return;
       const open = box.hasAttribute("hidden");
@@ -1757,6 +1780,50 @@
     document.getElementById("addr-go").addEventListener("click", geocodeAdd);
     document.getElementById("addr-input").addEventListener("keydown", (e) => { if (e.key === "Enter") geocodeAdd(); });
 
+    /* live suggestions while typing (Google-Maps style) */
+    wireAddrSuggest(document.getElementById("addr-input"), (f) => {
+      addUserPin(f.center, (f.place_name || "").split(",")[0]);
+      map.flyTo({ center: f.center, zoom: Math.max(map.getZoom(), 13), duration: 900 });
+      const inp = document.getElementById("addr-input");
+      inp.value = ""; inp.placeholder = "Add a pin: type an address…";
+    });
+    function wireAddrSuggest(inputEl, onPick) {
+      const box = document.createElement("div");
+      box.className = "addr-sug";
+      box.hidden = true;
+      inputEl.parentElement.style.position = "relative";
+      inputEl.parentElement.appendChild(box);
+      const [bx0, by0, bx1, by1] = GEO_BBOX.split(",").map(Number);
+      let timer = null, seq = 0;
+      inputEl.addEventListener("input", () => {
+        clearTimeout(timer);
+        const q = inputEl.value.trim();
+        if (q.length < 3) { box.hidden = true; return; }
+        timer = setTimeout(async () => {
+          const my = ++seq;
+          try {
+            const r = await fetch(`https://api.maptiler.com/geocoding/${encodeURIComponent(q)}.json` +
+              `?key=${MAPTILER_KEY}&autocomplete=true&proximity=-122.164,47.6045&bbox=${GEO_BBOX}&limit=4`);
+            const j = await r.json();
+            if (my !== seq) return;
+            const feats = (j.features || []).filter(f =>
+              f.center[0] >= bx0 && f.center[0] <= bx1 && f.center[1] >= by0 && f.center[1] <= by1);
+            box.innerHTML = "";
+            if (!feats.length) { box.hidden = true; return; }
+            feats.forEach(f => {
+              const b = document.createElement("button");
+              b.className = "addr-sug-item";
+              b.textContent = f.place_name;
+              b.addEventListener("mousedown", (ev) => { ev.preventDefault(); box.hidden = true; onPick(f); });
+              box.appendChild(b);
+            });
+            box.hidden = false;
+          } catch (err) { box.hidden = true; }
+        }, 250);
+      });
+      inputEl.addEventListener("blur", () => setTimeout(() => { box.hidden = true; }, 150));
+    }
+
     // --- route tool: two blue endpoint markers, driving distance + time between them ---
     let routeOn = false, routeMarkers = null, routeGeom = null, routeSeq = 0;
     const routeInfoEl = document.getElementById("route-info");
@@ -1842,15 +1909,14 @@
     });
 
     // Travel-mode switch (driving | walking) — flips the panel stats, pins, and route tool.
-    document.querySelectorAll(".profile-btn").forEach(b => b.addEventListener("click", () => {
-      if (b.dataset.profile === travelProfile) return;
-      travelProfile = b.dataset.profile;
-      document.querySelectorAll(".profile-btn").forEach(x => x.classList.toggle("on", x.dataset.profile === travelProfile));
+    function setTravelProfile(p) {
+      if (p === travelProfile) return;
+      travelProfile = p;
       if (currentZone) openDetail(currentZone.props, currentZone.lvl);
       applyChoropleth();
-      userPins.forEach(p => updateUserPin(p));
+      userPins.forEach(up => updateUserPin(up));
       if (routeMarkers) updateRoute();
-    }));
+    }
 
     // Neighborhoods info button.
     const nbhInfoBtn = document.getElementById("nbh-info-btn");
@@ -1895,26 +1961,6 @@
       if (raceLayerOn) applyRaceLayer();
     }));
 
-    // Base-map checkboxes.
-    const chkSat = document.getElementById("chk-satellite");
-    const chkTer = document.getElementById("chk-terrain");
-    // Satellite and Terrain are mutually exclusive (like Google Maps); either, or neither (grayscale).
-    chkSat.addEventListener("change", () => { if (chkSat.checked) chkTer.checked = false; applyBasemap(); });
-    chkTer.addEventListener("change", () => { if (chkTer.checked) chkSat.checked = false; applyBasemap(); });
-
-    function applyBasemap() {
-      const sat = chkSat.checked, ter = chkTer.checked;
-      const style = sat ? STYLES.hybrid : (ter ? STYLES.outdoor : STYLES.grayscale);
-      want3D = ter;
-      wantHillshade = ter;   // strong 2D relief whenever Terrain is on
-
-      if (style !== currentStyleUrl) {
-        setBasemap(style);                 // re-adds zones/district/labels + terrain after the swap
-      } else {
-        applyHillshadeState();             // same basemap (e.g. toggling Terrain while Satellite on)
-        applyTerrainState();
-      }
-    }
 
     // ----- Graph mode: small-multiple charts + all-zones delta scatter -----
     const GM_STATES = ["a", "b", "c"];
