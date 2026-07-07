@@ -1550,6 +1550,7 @@ input.choro-check:checked, #chk-neighborhoods:checked, #chk-racelayer:checked {
 .glance b { display: block; font-family: var(--serif); font-size: 1.05rem; color: var(--ink); }
 
 /* address autocomplete dropdown (opens upward: inputs sit near panel bottoms) */
+.addr-sug[hidden] { display: none !important; }   /* display:flex below would defeat the hidden attribute */
 .addr-sug {
   position: absolute;
   bottom: calc(100% + 4px);
