@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Boundary Changes — Bellevue School District</title>
   <meta name="description" content="Which territory switched elementary schools in Bellevue's 2018 and 2023 rezonings, and what changed for the people living there." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=122" />
-  <link rel="stylesheet" href="styles.css?v=122" />
-  <script src="vendor/maplibre-gl-csp.js?v=122"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=123" />
+  <link rel="stylesheet" href="styles.css?v=123" />
+  <script src="vendor/maplibre-gl-csp.js?v=123"></script>
 </head>
 <body class="chg-page">
   <div id="map"></div>
@@ -18,7 +18,7 @@
     <div class="tabs-menu" id="tabs-menu" hidden>
       <a class="tabs-item tabs-link" href="index.html">Map tool</a>
       <a class="tabs-item tabs-link" href="analysis.html">Analysis</a>
-      <button class="tabs-item" disabled>Methods &amp; sources <span class="soon">coming soon</span></button>
+      <a class="tabs-item tabs-link" href="methods.html">Methods &amp; sources</a>
       <a class="tabs-item tabs-link" href="definitions.html">Definitions &amp; references</a>
     </div>
   </div>
@@ -62,15 +62,15 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=122"></script>
+  <script src="intro.js?v=123"></script>
 
   <script>
     const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "122";
+    const DATA_VER = "123";
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=122");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=123");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
