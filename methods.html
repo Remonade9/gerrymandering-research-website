@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Methods &amp; Sources — Bellevue School District Boundaries</title>
   <meta name="description" content="How every number on this site was computed: data sources, formulas, design choices, limitations, and citations." />
-  <link rel="stylesheet" href="styles.css?v=123" />
+  <link rel="stylesheet" href="styles.css?v=124" />
 </head>
 <body class="an-page">
 
@@ -50,19 +50,21 @@
       baseline is always debatable, and studies using different baselines reach different
       conclusions.<sup class="an-cite"><a href="#ref-1">1</a>,<a href="#ref-2">2</a></sup></p>
       <p>This project largely sidesteps that debate, because Bellevue's history supplies a real
-      comparison: the district redrew its elementary boundaries in 2018 and again in 2023. The
-      map before each change <i>is</i> the baseline. Every measure on this site is computed
-      three times &mdash; once per boundary era &mdash; and compared.</p>
-      <p><b>The frozen population.</b> All three eras use the same residents: the 2020 census.
-      Real families moved during these years, but if each era used its own population, a
-      difference between eras could mean "the lines changed" <i>or</i> "the people changed,"
-      with no way to tell them apart. Holding the population still isolates what the
-      line-drawing alone did. We use 2020 specifically because it is the only complete,
-      block-by-block count available &mdash; the decennial census; year-by-year alternatives
-      exist only as survey estimates for much coarser areas. The cost of this choice is
-      described honestly in <a href="#m6">Limitations</a>. School enrollment is the deliberate
-      exception: those are real per-year headcounts, because "how full was the building" is a
-      question about a specific year.</p>
+      comparison: the district redrew its elementary boundaries in 2018 and again in 2023.
+      <b>The map before each change <i>is</i> the baseline.</b> Every measure on this site is
+      computed three times &mdash; once per boundary era &mdash; and compared.</p>
+      <h3 class="an-h3">The frozen population</h3>
+      <p>All three eras use the same residents: the 2020 census. Real families moved during
+      these years, but if each era used its own population, a difference between eras could
+      mean "the lines changed" <i>or</i> "the people changed," with no way to tell them apart.
+      <b>Holding the population still isolates what the line-drawing alone did.</b></p>
+      <h3 class="an-h3">Why 2020 specifically</h3>
+      <p><b>The 2020 decennial census is the only complete, block-by-block count available</b>
+      &mdash; year-by-year alternatives exist only as survey estimates for much coarser areas.
+      The cost of this choice is described honestly in <a href="#m6">Limitations</a>.</p>
+      <p>School enrollment is the deliberate exception: those are <b>real per-year
+      headcounts</b>, because "how full was the building" is a question about a specific
+      year.</p>
     </section>
 
     <!-- §2 -->
@@ -75,7 +77,7 @@
         <li><b>2023&ndash;now ("after"):</b> current attendance-area boundaries from the City of
         Bellevue's open GIS data.</li>
         <li><b>2018&ndash;2023 ("before"):</b> recovered from an archived City of Bellevue GIS
-        layer and validated geometrically: the recovered Wilburton zone's 8.50&nbsp;km&sup2;
+        layer and <b>validated geometrically</b>: the recovered Wilburton zone's 8.50&nbsp;km&sup2;
         equals, to the hundredth, the territory Clyde Hill (+3.60) and Enatai (+4.90) gained in
         2023, and ten of the era's sixteen zones are geometrically identical to today's &mdash;
         exactly the zones untouched by the consolidation.</li>
@@ -84,51 +86,57 @@
         boundary (the raw versions run into Lake Washington, which would corrupt shape scores)
         and treat their exact edges as approximate throughout the site.</li>
       </ul>
-      <p><b>The Boundary-changes page</b> computes moved territory directly: the before-map and
+      <h3 class="an-h3">How moved territory is computed</h3>
+      <p>The Boundary-changes page computes moved territory directly: the before-map and
       after-map are overlaid, and every area whose assigned school differs becomes a "piece,"
       dissolved per from&rarr;to flow. Near-zero slivers along shared edges (boundary-snapping
       noise, with no residents) are filtered; for the pre-2018 comparison, a larger filter
       absorbs the cross-source imprecision. Piece totals were validated against the
       independently known zone-size changes above.</p>
-      <p><b>Program locations</b> (Advanced Learning, dual-language, site-based special
+      <h3 class="an-h3">Program locations, by era</h3>
+      <p>Program locations (Advanced Learning, dual-language, site-based special
       education) are era-specific: the 2018&ndash;2023 hosting list comes from the per-school
       table in the district's own consolidation report (October 2022 enrollment snapshot),
       current hosting from district program pages and the 2024&ndash;25 substitute handbook.
       Pre-2018 program locations are too thinly documented in public sources to support
       distance measures, so the pre-2018 era shows none &mdash; a distance to the "nearest
-      host" computed from an incomplete host list would overstate distances, and a wrong
-      number is worse than no number.</p>
+      host" computed from an incomplete host list would overstate distances, and <b>a wrong
+      number is worse than no number</b>.</p>
     </section>
 
     <!-- §3 -->
     <section class="an-section" id="m3">
       <p class="an-secnum">Section 3</p>
       <h2>People data</h2>
-      <p><b>Race and age</b> come from the 2020 census at the block level (the smallest census
+      <h3 class="an-h3">Race and age &mdash; 2020 census blocks</h3>
+      <p>Race and age come from the 2020 census at the block level (the smallest census
       unit; 1,327 blocks in the district): race/ethnicity from the redistricting file
       (P.L.&nbsp;94-171), age counts from the demographic profile (table P12). Each block is
       assigned to the zone containing its location point, per era; blocks are small enough that
       this assignment is essentially exact.</p>
-      <p><b>Income, home values, rents, and language</b> come from the American Community
+      <h3 class="an-h3">Income, rents, and language &mdash; ACS block groups</h3>
+      <p>Income, home values, rents, and language come from the American Community
       Survey (ACS) 2019&ndash;2023 five-year estimates (tables B19013, B25077, B25064, C16002),
       published for block groups &mdash; areas much larger than blocks, which sometimes
-      straddle zone boundaries. A straddling block group's counts are split across zones in
-      proportion to its 2020 block population on each side (population apportionment); zone
+      straddle zone boundaries. <b>A straddling block group's counts are split across zones in
+      proportion to its 2020 block population on each side</b> (population apportionment); zone
       medians are population-weighted averages of the block-group medians. A "limited-English
       household" follows the census definition: no member aged 14+ speaks English very
       well.</p>
-      <p><b>Enrollment and capacity</b>: enrollment from NCES Common Core of Data per-school
+      <h3 class="an-h3">Enrollment and capacity</h3>
+      <p>Enrollment comes from NCES Common Core of Data per-school
       counts (plus the district's own October snapshots where cited); building capacity from
       district facilities documents (2023 consolidation report for elementaries; 2019
       assessments for secondary schools &mdash; vintages are stated wherever they mix). One
-      counting rule applied everywhere: NCES totals include preschoolers, the district's K-5
-      counts don't, so any quoted enrollment states whose count it is.</p>
-      <p><b>Travel</b> is computed on the real road network: for every block, the driving and
+      counting rule applied everywhere: <b>NCES totals include preschoolers, the district's K-5
+      counts don't</b>, so any quoted enrollment states whose count it is.</p>
+      <h3 class="an-h3">Travel</h3>
+      <p>Travel is computed on <b>the real road network</b>: for every block, the driving and
       walking distance and time to each relevant school were precomputed with the
-      openrouteservice engine (based on OpenStreetMap). Times are typical, traffic-free
-      estimates.</p>
-      <p><b>What population does each number describe?</b> Read every figure with its base in
-      mind:</p>
+      openrouteservice engine (based on OpenStreetMap). <b>Times are typical, traffic-free
+      estimates.</b></p>
+      <h3 class="an-h3">What population does each number describe?</h3>
+      <p>Read every figure with its base in mind:</p>
       <ul class="an-list">
         <li><b>School-age children (5&ndash;17, 2020 census)</b> &mdash; all travel and
         program-distance figures are averaged over where children live; zone "kids" counts and
@@ -163,7 +171,7 @@
       </ul>
       <p>All five are computed in a metric map projection (UTM zone 10N), and each zone also
       gets a percentile rank among its own era's zones. Five scores are shown, not one,
-      because no single shape score is trustworthy alone &mdash; scores can disagree, and
+      because <b>no single shape score is trustworthy alone</b> &mdash; scores can disagree, and
       implementation choices (projection, resolution, coastline handling) move
       them.<sup class="an-cite"><a href="#ref-6">6</a>,<a href="#ref-7">7</a></sup></p>
 
@@ -172,8 +180,8 @@
       (and to the nearest host of each program), weighted by where children live, plus
       minimum, quartiles, median, maximum, and shares within thresholds (3&nbsp;km; 10-minute
       drive; 20-minute walk). The <b>distribution curves</b> in the side panels come from
-      discrete data &mdash; census blocks &mdash; so the smooth-looking curve is really a
-      cumulative count: for each distance x, the share of children living within x, sampled at
+      discrete data &mdash; census blocks &mdash; so <b>the smooth-looking curve is really a
+      cumulative count</b>: for each distance x, the share of children living within x, sampled at
       forty points between zero and the zone's maximum. Both straight-line and road-network
       versions exist; the site displays road values wherever routing is available.</p>
 
@@ -216,7 +224,8 @@
     <section class="an-section" id="m5">
       <p class="an-secnum">Section 5</p>
       <h2>Where this sits in the literature</h2>
-      <p><b>The school-zone lineage.</b> The closest published work compares real attendance
+      <h3 class="an-h3">The school-zone lineage</h3>
+      <p>The closest published work compares real attendance
       zones to invented baselines: Richards measured 15,290 zones against nearest-school
       ("Voronoi") versions and found irregular boundaries slightly <i>increase</i>
       segregation on net;<sup class="an-cite"><a href="#ref-1">1</a></sup> Monarrez, with a
@@ -224,15 +233,15 @@
       from boundary drawing, found boundaries slightly <i>integrate</i> (about &minus;5%
       relative to the distance-minimizing baseline, with roughly 86% of boundary-level
       differences carrying through to actual
-      enrollment).<sup class="an-cite"><a href="#ref-2">2</a></sup> Two careful studies,
-      opposite signs &mdash; the answer depends on the index, sample, and baseline chosen.
+      enrollment).<sup class="an-cite"><a href="#ref-2">2</a></sup> <b>Two careful studies,
+      opposite signs &mdash; the answer depends on the index, sample, and baseline chosen.</b>
       Both agree that effects vary sharply district by district, which is precisely why a
       single district's real before/after event is worth studying on its own terms. Richards
       and Stroub also showed that zone irregularity can be an "accident of geography" rather
       than evidence of manipulation<sup class="an-cite"><a href="#ref-5">5</a></sup> &mdash;
       the argument our Analysis page's shape section develops with Bellevue's lakes.</p>
-      <p><b>The redistricting-mathematics literature</b> supplies the cautions this site is
-      built around. Compactness scores can be moved by implementation choices alone and a map
+      <h3 class="an-h3">The cautions from redistricting mathematics</h3>
+      <p>That literature supplies the rules this site is built around. Compactness scores can be moved by implementation choices alone and a map
       can pass every shape test while engineered underneath;<sup class="an-cite"><a href="#ref-6">6</a></sup>
       optimizing compactness does not produce fair maps &mdash; across states the two are
       essentially uncorrelated;<sup class="an-cite"><a href="#ref-7">7</a></sup> single
@@ -241,12 +250,13 @@
       disagree about the same map;<sup class="an-cite"><a href="#ref-9">9</a></sup> and
       geography itself &mdash; coastlines, mountains, where communities actually sit &mdash;
       produces irregular, innocent boundaries that formulas alone cannot tell from engineered
-      ones.<sup class="an-cite"><a href="#ref-10">10</a></sup> Hence this site's rules: many
-      measures, no composite score, no verdicts.</p>
-      <p><b>Why no simulated ensembles.</b> The strongest modern redistricting analyses compare
+      ones.<sup class="an-cite"><a href="#ref-10">10</a></sup> Hence this site's rules:
+      <b>many measures, no composite score, no verdicts</b>.</p>
+      <h3 class="an-h3">Why no simulated ensembles</h3>
+      <p>The strongest modern redistricting analyses compare
       an enacted map against thousands of simulated alternatives.<sup class="an-cite"><a href="#ref-11">11</a>,<a href="#ref-12">12</a></sup>
       Ensembles answer "is this map unusual?" &mdash; an attribution question. Our question is
-      "what did this change do?", and for that the before-map is the natural comparison; a
+      "what did this change do?", and for that <b>the before-map is the natural comparison</b>; a
       simulated pile of hypothetical Bellevues would add machinery without adding an answer.</p>
     </section>
 
@@ -303,8 +313,8 @@
       &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>;
       routing by <a href="https://openrouteservice.org/">openrouteservice</a> (HeiGIT), built
       on OpenStreetMap. Map rendering by MapLibre GL JS.</p>
-      <p><b>Reproducibility:</b> this site is a static, open build. Every processing script,
-      every intermediate dataset, and every page is public in the project repository
+      <p><b>Reproducibility:</b> this site is a static, open build. <b>Every processing script,
+      every intermediate dataset, and every page is public</b> in the project repository
       (<a href="https://github.com/Remonade9/gerrymandering-research-website">github.com/Remonade9/gerrymandering-research-website</a>)
       &mdash; the pipeline can be rerun and every number retraced from raw sources.</p>
 
@@ -357,7 +367,7 @@
   </main>
 
   <!-- Entry screens + shared language state -->
-  <script src="intro.js?v=123"></script>
+  <script src="intro.js?v=124"></script>
 
   <script>
     (function () {
