@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The 2023 Bellevue Elementary Rezoning</title>
   <meta name="description" content="An interactive map of how Bellevue School District's attendance-zone boundaries changed in 2023, and what changed with them." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=121" />
-  <link rel="stylesheet" href="styles.css?v=121" />
-  <script src="vendor/maplibre-gl-csp.js?v=121"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=122" />
+  <link rel="stylesheet" href="styles.css?v=122" />
+  <script src="vendor/maplibre-gl-csp.js?v=122"></script>
 </head>
 <body>
   <div id="map"></div>
@@ -128,7 +128,7 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=121"></script>
+  <script src="intro.js?v=122"></script>
 
   <script>
     (function () {
@@ -153,11 +153,11 @@
 
   <script>
     const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "121";   // cache-bust the data GeoJSON when it is regenerated
+    const DATA_VER = "122";   // cache-bust the data GeoJSON when it is regenerated
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=121");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=122");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
@@ -1187,7 +1187,9 @@
       });
       const gUtil = gCap > 0 ? Math.round(100 * gEnr / gCap) : null;
       const glance =
-        `<div class="section-head"><span class="detail-section-label">At a glance &mdash; ${LEVEL_META[activeLevel].legend}s, ${eraLabel()}</span></div>` +
+        `<div class="section-head"><span class="detail-section-label">At a glance &mdash; ${LEVEL_META[activeLevel].legend}s, ${eraLabel()}</span>` +
+          `<button class="info-btn toggle-btn" data-target="glance-info" aria-expanded="false" title="What these counts include">i</button></div>` +
+        `<div class="metric-defs" id="glance-info" hidden>Enrollment counts everyone attending these schools &mdash; including students who live <b>outside</b> the district (about 982 district-wide in 2023&ndash;24, roughly 5% of enrollment). The reverse is also true: not every child living in the district attends a district school (private schools and transfers out). Zone-based measures on this site &mdash; travel, demographics, program distances &mdash; describe <b>residents</b> of each zone, so enrollment and resident counts never match exactly.</div>` +
         `<div class="glance-row">` +
           `<div class="glance"><b>${gN}</b> zoned schools</div>` +
           `<div class="glance"><b>${fmtInt(gEnr)}</b> enrolled</div>` +
