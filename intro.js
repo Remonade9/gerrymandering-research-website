@@ -63,7 +63,13 @@
     chg_addr: ["What changed for my address?", "我家地址有什么变化？"],
     go: ["Go", "查询"],
     ph_addr: ["Add a pin: type an address&hellip;", "添加图钉：输入地址……"],
-    ph_addr2: ["Type an address&hellip;", "输入地址……"]
+    ph_addr2: ["Type an address&hellip;", "输入地址……"],
+    gm_title: ["Graph mode", "图表模式"],
+    gm_back: ["&larr; Back to map", "&larr; 返回地图"],
+    gm_note: ["Each chart tracks one measure for one school's zone across the three boundary eras. Demographics use the fixed 2020 population snapshot, so changes reflect <b>boundary changes only</b>. Distance measures follow the current travel mode. Descriptive only &mdash; no judgment implied.",
+      "每张图跟踪一所学校分区的一项指标在三个边界时期的变化。人口数据使用固定的 2020 年快照，因此变化只反映<b>边界变更本身</b>。距离指标跟随当前的出行方式。仅为描述 &mdash; 不含评判。"],
+    nbh_info: ["These are the City of Bellevue's official neighborhoods, so they cover the city only. The school district also reaches into Clyde Hill, Medina, Hunts Point, Yarrow Point, Beaux Arts, and parts of Redmond, Kirkland &amp; Newcastle &mdash; separate towns with no Bellevue neighborhood. Likewise, some neighborhoods (e.g. Cougar Mountain / Lakemont) are partly served by other school districts.<br /><br /><b>How the split count works:</b> each neighborhood is colored by how many of this level's attendance zones its school-age children are divided across. Portions living <em>outside</em> the district do <b>not</b> count as an extra school &mdash; they are listed separately in the popup. Green = kept whole (1 school); red = split across the most schools.",
+      "这些是贝尔维尤市的官方社区，因此只覆盖市域。学区还延伸到 Clyde Hill、Medina、Hunts Point、Yarrow Point、Beaux Arts，以及 Redmond、Kirkland 和 Newcastle 的一部分 &mdash; 这些是没有贝尔维尤社区建制的独立城镇。同样，有些社区（如 Cougar Mountain / Lakemont）部分由其他学区服务。<br /><br /><b>拆分数怎么算：</b>每个社区按其学龄儿童被分进本学段几个入学分区来上色。住在学区<em>之外</em>的部分<b>不</b>算作一所额外的学校 &mdash; 它们在弹窗中单独列出。绿色 = 保持完整（1 所学校）；红色 = 拆分最多。"]
   };
   function applyChrome() {
     const zh = (localStorage.getItem("bsd_lang") || "en") === "zh";
@@ -100,6 +106,7 @@
     }
     if (panelLangBtn) panelLangBtn.textContent = btnLabel();
     applyChrome();
+    document.dispatchEvent(new CustomEvent("bsd-lang"));   // map pages re-render dynamic panels
     if (applyIntro) applyIntro();
   }
   const toggleLang = () => setLang(lang === "en" ? "zh" : "en");

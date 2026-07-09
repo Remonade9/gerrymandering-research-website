@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The 2023 Bellevue Elementary Rezoning</title>
   <meta name="description" content="An interactive map of how Bellevue School District's attendance-zone boundaries changed in 2023, and what changed with them." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=128" />
-  <link rel="stylesheet" href="styles.css?v=128" />
-  <script src="vendor/maplibre-gl-csp.js?v=128"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=129" />
+  <link rel="stylesheet" href="styles.css?v=129" />
+  <script src="vendor/maplibre-gl-csp.js?v=129"></script>
 </head>
 <body>
   <div id="map"></div>
 
   <!-- Deployed-version stamp. Bump on EVERY push: YYYY.MM.DD.NN (NN = nth push that day). -->
-  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.07.08.06</div>
+  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.07.08.07</div>
 
   <!-- More-tabs launcher, top-left -->
   <div class="tabs-launcher">
@@ -72,7 +72,7 @@
         <button class="pin-mode-btn race-grp" data-grp="b" data-i18n="r_b">Black</button>
       </div>
       <button class="info-btn" id="nbh-info-btn" aria-expanded="false" title="Why some areas have no neighborhood">i</button>
-      <div class="metric-defs layer-info" id="nbh-info" hidden>
+      <div class="metric-defs layer-info" id="nbh-info" data-i18n="nbh_info" hidden>
         These are the City of Bellevue's official neighborhoods, so they cover the city only. The school
         district also reaches into Clyde Hill, Medina, Hunts Point, Yarrow Point, Beaux Arts, and parts of
         Redmond, Kirkland &amp; Newcastle &mdash; separate towns with no Bellevue neighborhood. Likewise, some
@@ -117,18 +117,18 @@
   <div id="graph-mode" hidden>
     <div class="gm-head">
       <div>
-        <h2>Graph mode</h2>
-        <p class="gm-note">Each chart tracks one measure for one school's zone across the three boundary eras.
+        <h2 data-i18n="gm_title">Graph mode</h2>
+        <p class="gm-note" data-i18n="gm_note">Each chart tracks one measure for one school's zone across the three boundary eras.
         Demographics use the fixed 2020 population snapshot, so changes reflect <b>boundary changes only</b>.
         Distance measures follow the current travel mode. Descriptive only &mdash; no judgment implied.</p>
       </div>
-      <button class="district-btn gm-close-btn" id="gm-close">&larr; Back to map</button>
+      <button class="district-btn gm-close-btn" id="gm-close" data-i18n="gm_back">&larr; Back to map</button>
     </div>
     <div class="gm-grid" id="gm-grid"></div>
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=128"></script>
+  <script src="intro.js?v=129"></script>
 
   <script>
     (function () {
@@ -153,11 +153,133 @@
 
   <script>
     const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "128";   // cache-bust the data GeoJSON when it is regenerated
+    const DATA_VER = "129";   // cache-bust the data GeoJSON when it is regenerated
+
+    /* ---- in-place Chinese for all dynamic panel content ----
+     * T() looks a string up in ZHD when the shared language is Chinese and
+     * falls back to the English original, so unmatched data values stay safe. */
+    const isZH = () => (localStorage.getItem("bsd_lang") || "en") === "zh";
+    const ZHD = {
+      /* metric labels */
+      "Convex hull ratio": "凸包比", "Min. rectangle ratio": "最小外接矩形比",
+      "Moment of inertia": "转动惯量", "Area": "面积", "Perimeter": "周长",
+      "Polsby–Popper percentile": "Polsby–Popper 百分位", "Reock percentile": "Reock 百分位",
+      "Convex hull percentile": "凸包比百分位",
+      "White %": "白人 %", "Asian %": "亚裔 %", "Hispanic %": "西语裔 %", "Black %": "非裔 %",
+      "Median household income": "家庭收入中位数", "Median home value": "房价中位数",
+      "Limited-English households %": "英语能力有限户 %",
+      "School-age population (5–17)": "学龄人口（5–17 岁）",
+      "Mix gap (difference from district mix)": "构成差距（与全学区构成之差）",
+      "School enrollment (actual headcount)": "在校人数（实际统计）",
+      "Building capacity (seats)": "校舍容量（座位数）",
+      "Utilization (% of capacity)": "使用率（容量百分比）",
+      "Avg. distance to assigned school": "到指定学校的平均距离",
+      "Within 3 km of assigned school": "距指定学校 3 公里内",
+      "Avg. distance to Advanced Learning": "到高阶学习的平均距离",
+      "Within 3 km of Advanced Learning": "距高阶学习 3 公里内",
+      "Avg. distance to dual-language": "到双语沉浸的平均距离",
+      "Within 3 km of dual-language": "距双语沉浸 3 公里内",
+      "Avg. distance to special-ed": "到特教项目的平均距离",
+      "Within 3 km of special-ed": "距特教项目 3 公里内",
+      "Avg. distance to IB (Interlake)": "到 IB（Interlake）的平均距离",
+      "Within 3 km of IB (Interlake)": "距 IB（Interlake）3 公里内",
+      /* metric hints */
+      "4πA ÷ P², where A = area, P = perimeter. 1 = a perfect circle; lower = more contorted outline.":
+        "4πA ÷ P²，其中 A 为面积，P 为周长。1 = 正圆；越低表示轮廓越曲折。",
+      "This zone's Polsby–Popper score ranked against the other zones at the same level.":
+        "该分区的 Polsby–Popper 得分在同学段各分区中的排位。",
+      "Area ÷ area of the smallest circle that encloses the zone. 1 = a circle.":
+        "面积 ÷ 能包住该分区的最小圆的面积。1 = 圆形。",
+      "This zone's Reock score ranked against the other zones at the same level.":
+        "该分区的 Reock 得分在同学段各分区中的排位。",
+      "Area ÷ area of the zone's convex hull (the smallest convex shape containing it). Measures how much the outline caves in.":
+        "面积 ÷ 该分区凸包（包含它的最小凸形）的面积。测量轮廓向内凹陷的程度。",
+      "This zone's convex-hull ratio ranked against the other zones at the same level.":
+        "该分区的凸包比在同学段各分区中的排位。",
+      "Area ÷ area of the smallest rotated rectangle that encloses the zone.":
+        "面积 ÷ 能装下该分区的最小旋转矩形的面积。",
+      "A² ÷ (2π · polar second moment of area about the centroid). 1 = a circle; rewards mass held close to the center.":
+        "A² ÷（2π · 关于质心的极二阶矩）。1 = 圆形；面积越集中于中心得分越高。",
+      "Zone area, computed in UTM zone 10N (metres).": "分区面积，按 UTM 第 10N 带（米制）计算。",
+      "Length of the zone boundary, computed in UTM zone 10N.": "分区边界长度，按 UTM 第 10N 带计算。",
+      /* race + program labels */
+      "White": "白人", "Asian": "亚裔", "Hispanic": "西语裔", "Black": "非裔",
+      "Two or more": "两个及以上族裔", "Other": "其他",
+      "Advanced Learning": "高阶学习项目", "Dual-language immersion": "双语沉浸项目",
+      "Special-ed program": "特殊教育项目", "International Baccalaureate (IB)": "国际文凭课程（IB）",
+      /* level / era words */
+      "Elementary attendance zone": "小学入学分区", "Middle school attendance zone": "初中入学分区",
+      "High school attendance zone": "高中入学分区",
+      "Elementary": "小学", "Middle School": "初中", "High School": "高中",
+      "pre-2018": "2018 年前", "2023–present": "2023 至今",
+      "pre-2018 boundaries (federal SABS 2015-16 survey — approximate)": "2018 年前边界（联邦 SABS 2015–16 调查，近似）",
+      "2018–2023 boundaries": "2018–2023 边界",
+      "current (post-2023) boundaries": "现行（2023 年后）边界",
+      /* school popup data values */
+      "Attendance-area school": "划片入学学校",
+      "Choice / immersion school": "选校制／沉浸式学校",
+      "Choice school (grades 6–12)": "选校制学校（6–12 年级）",
+      "Advanced Learning Centered": "高阶学习项目（AL Centered）",
+      "Advanced Placement (AP)": "大学先修课程（AP）",
+      "Arabic Language Program": "阿拉伯语项目",
+      "Bellevue Big Picture (choice)": "Bellevue Big Picture（选校制）",
+      "Cascade (social / emotional / behavioral)": "Cascade（社交／情绪／行为）",
+      "Inclusion": "融合教育",
+      "Integrated Preschool (ages 3-5)": "融合学前班（3–5 岁）",
+      "Japanese Dual Language Immersion": "日语双语沉浸",
+      "Korean Language Program": "韩语项目",
+      "Mandarin Dual Language Immersion": "中文双语沉浸",
+      "Olympic (autism spectrum)": "Olympic（自闭症谱系）",
+      "Pacific (developmental / intellectual disabilities)": "Pacific（发育／智力障碍）",
+      "Spanish Dual Language Immersion (schoolwide)": "西班牙语双语沉浸（全校制）",
+      "Spanish Dual Language Immersion (strand)": "西班牙语双语沉浸（班级制）",
+      "Transitions (ages 18-21)": "Transitions（18–21 岁）",
+      /* small UI bits */
+      "percent": "百分比", "counts": "数量", "distance": "距离", "time": "时间",
+      "distribution": "分布", "price history": "房价历史",
+      "Avg. walk time": "平均步行时间", "Avg. drive time": "平均驾车时间",
+      "Avg. walking distance": "平均步行距离", "Avg. road distance": "平均道路距离",
+      "Avg. straight-line distance": "平均直线距离",
+      "Within 20 min walk": "步行 20 分钟内", "Within 10 min drive": "驾车 10 分钟内",
+      "Within 3 km": "3 公里内",
+      "Enrollment": "在校人数", "Building capacity": "校舍容量", "Utilization": "使用率",
+      "Rezoning history": "重划历史", "At a glance": "一览",
+      "pre-'18": "'18 前", "'23–now": "'23–今",
+      "Ranking": "排名", "Hide ranking": "收起排名",
+      /* stability strips */
+      "Opened fall 2018, at the start of this era; closed in the 2023 consolidation at its end.":
+        "2018 年秋开办（本时期之初）；本时期结束时在 2023 年合并中关闭。",
+      "Closed in the 2023 consolidation, at the end of this era.": "本时期结束时在 2023 年合并中关闭。",
+      "Gave up territory when Wilburton opened (2018); took much of it back when Wilburton closed (2023).":
+        "Wilburton 开办时（2018）划出土地；Wilburton 关闭时（2023）收回大半。",
+      "No boundary changes during this era (2018–2023).": "本时期（2018–2023）边界无变化。",
+      "Middle-school boundaries did not change during this era.": "本时期初中边界未变。",
+      "High-school boundaries did not change during this era.": "本时期高中边界未变。",
+      "Later closed in the 2023 consolidation.": "后于 2023 年合并中关闭。",
+      "Later gave up territory when Wilburton opened (2018).": "后在 Wilburton 开办时（2018）划出土地。",
+      "Boundaries as surveyed in the federal SABS 2015-16 snapshot (different source than the city layers — approximate).":
+        "边界来自联邦 SABS 2015–16 调查快照（与市政图层来源不同，近似）。",
+      "Middle-school boundaries unchanged across all three eras.": "初中边界三个时期均未变。",
+      "High-school boundaries unchanged across all three eras.": "高中边界三个时期均未变。",
+      "Rezoned twice in five years: gave up territory when Wilburton opened (2018), then took much of it back when Wilburton closed (2023).":
+        "五年内被重划两次：Wilburton 开办时（2018）划出土地，Wilburton 关闭时（2023）又收回大半。",
+      "Rezoned in 2023: absorbed most of the closed Eastgate zone.": "2023 年被重划：吸收了被关闭的 Eastgate 分区的大部分。",
+      "Rezoned in 2023: absorbed part of the closed Eastgate zone.": "2023 年被重划：吸收了被关闭的 Eastgate 分区的一部分。",
+      "Boundaries stable in 2023; gained the Advanced Learning program (moved from Spiritridge).":
+        "2023 年边界未动；获得高阶学习项目（自 Spiritridge 迁来）。",
+      "Considered for consolidation in the 2023 process; kept open with no boundary change.":
+        "2023 年曾列入合并候选；最终保留，边界未变。",
+      "No boundary changes in the 2023 consolidation.": "2023 年合并中边界无变化。",
+      "Middle-school boundaries did not change in the 2023 elementary consolidation; a later consolidation study did not lead to closures.":
+        "2023 年小学合并未改变初中边界；其后的合并研究也没有导致关校。",
+      "High-school boundaries did not change in the 2023 elementary consolidation.":
+        "2023 年小学合并未改变高中边界。"
+    };
+    const T = s => { if (!isZH()) return s; const v = ZHD[s]; return v != null ? v : s; };
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=128");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=129");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
@@ -444,6 +566,7 @@
       createStateMarkers();
       setActiveMarkers(activeLevel);
       restoreUserPins();   // bring back saved pins (silently - no popups)
+      document.getElementById("zone-legend-label").innerHTML = `${T(LEVEL_META[activeLevel].legend)}（${T(eraLabel())}）`;
       whenStyleReady(() => { rebuildLayers(); applyUrlPreset(); });
     })();
 
@@ -497,13 +620,15 @@
     }
 
     function cleanRole(r) {
-      const s = (r || "").toLowerCase();
-      if (s.startsWith("unchanged")) return "attendance boundaries unchanged";
-      if (s.startsWith("receiver")) return "received students" +
-        (s.includes("wilburton") ? " from Wilburton" : s.includes("eastgate") ? " from Eastgate" :
-         s.includes("advanced") ? " (and the Advanced Learning program)" : "");
-      if (s.startsWith("considered")) return "considered for consolidation";
-      if (s.startsWith("closed") || s.startsWith("converted")) return "converted to a program site";
+      const s = (r || "").toLowerCase(), zh = isZH();
+      if (s.startsWith("unchanged")) return zh ? "入学边界未变" : "attendance boundaries unchanged";
+      if (s.startsWith("receiver")) {
+        const from = s.includes("wilburton") ? "Wilburton" : s.includes("eastgate") ? "Eastgate" : null;
+        if (zh) return from ? `接收了来自 ${from} 的学生` : s.includes("advanced") ? "接收了学生（以及高阶学习项目）" : "接收了学生";
+        return "received students" + (from ? " from " + from : s.includes("advanced") ? " (and the Advanced Learning program)" : "");
+      }
+      if (s.startsWith("considered")) return zh ? "曾列入合并候选" : "considered for consolidation";
+      if (s.startsWith("closed") || s.startsWith("converted")) return zh ? "改为项目用址" : "converted to a program site";
       return r;
     }
     function sparkline(trend) {
@@ -512,20 +637,24 @@
       const ns = pts.map(t => t.n), mn = Math.min(...ns), mx = Math.max(...ns), sp = (mx - mn) || 1, w = 150, h = 30;
       const xy = pts.map((t, i) => `${(i / (pts.length - 1) * (w - 6) + 3).toFixed(1)},${(h - 3 - ((t.n - mn) / sp) * (h - 8)).toFixed(1)}`).join(" ");
       return `<svg class="sparkline" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polyline points="${xy}"/></svg>` +
-        `<div class="spark-lab">${pts[0].year} → ${pts[pts.length - 1].year} enrollment · ${mn.toLocaleString()}–${mx.toLocaleString()}</div>`;
+        `<div class="spark-lab">${pts[0].year} → ${pts[pts.length - 1].year} ${T("Enrollment")} · ${mn.toLocaleString()}–${mx.toLocaleString()}</div>`;
     }
     function schoolPopupHTML(p) {
       const i = p.info || {};
-      let h = `<div class="sch-pop"><strong>${p.display}</strong><div class="popup-sub">${p.type_label}</div>`;
+      let h = `<div class="sch-pop"><strong>${p.display}</strong><div class="popup-sub">${T(p.type_label)}</div>`;
       if (i.enroll_current != null) {
-        h += `<div class="sch-stat"><b>${i.enroll_current.toLocaleString()}</b> students <span class="muted">(${i.enroll_year})</span>`;
-        if (i.capacity) h += ` &middot; cap ${i.capacity.toLocaleString()} &middot; <b>${i.utilization}%</b> full`;
+        h += isZH()
+          ? `<div class="sch-stat"><b>${i.enroll_current.toLocaleString()}</b> 名学生 <span class="muted">（${i.enroll_year}）</span>`
+          : `<div class="sch-stat"><b>${i.enroll_current.toLocaleString()}</b> students <span class="muted">(${i.enroll_year})</span>`;
+        if (i.capacity) h += isZH()
+          ? ` &middot; 容量 ${i.capacity.toLocaleString()} &middot; 使用率 <b>${i.utilization}%</b>`
+          : ` &middot; cap ${i.capacity.toLocaleString()} &middot; <b>${i.utilization}%</b> full`;
         h += `</div>`;
       }
       if (i.role) h += `<div class="sch-role"><span class="sch-tag">2023</span> ${cleanRole(i.role)}</div>`;
       if (i.programs && i.programs.length) {
-        h += `<div class="sch-progs"><div class="sch-lab">Programs hosted</div>` +
-          i.programs.map(pr => `<div class="sch-prog">${pr.program}${pr.note ? `<span class="prog-note">${pr.note}</span>` : ""}</div>`).join("") + `</div>`;
+        h += `<div class="sch-progs"><div class="sch-lab">${isZH() ? "设有项目" : "Programs hosted"}</div>` +
+          i.programs.map(pr => `<div class="sch-prog">${T(pr.program)}${pr.note ? `<span class="prog-note">${T(pr.note)}</span>` : ""}</div>`).join("") + `</div>`;
       }
       return h + `</div>`;
     }
@@ -542,6 +671,7 @@
             .addTo(map);
           marker.getElement().style.display = "none";
           marker._label = p.display;   // for route-endpoint snapping
+          marker._props = p;           // for re-rendering the popup on language change
           // our stopPropagation blocks MapLibre's map-level popup toggle - do it ourselves
           marker.getElement().addEventListener("click", () => marker.togglePopup());
           schoolMarkers[lvl].push(marker);
@@ -563,6 +693,7 @@
             .addTo(map);
           marker.getElement().style.display = "none";
           marker._label = p.display;
+          marker._props = p;
           marker.getElement().addEventListener("click", () => marker.togglePopup());
           stateMarkers[S].push(marker);
         });
@@ -623,16 +754,19 @@
       const key = (activeState !== "c" && lvl === "elementary") ? "elementary_" + activeState : lvl;
       const d = (splits && (splits[key] || splits[lvl])) || { zones: [], outside: 0, outside_n: 0 };
       const list = d.zones || [], outside = d.outside || 0;
-      const label = LEVEL_META[lvl].suffix.toLowerCase() + (list.length === 1 ? "" : "s");
+      const label = isZH() ? "所" + T(LEVEL_META[lvl].suffix)
+        : LEVEL_META[lvl].suffix.toLowerCase() + (list.length === 1 ? "" : "s");
       let mode = viewMode;   // popup starts in the panel's current view, then toggles independently
       const fv = s => mode === "pct" ? `${s.pct}%` : fmtInt(s.n);
       function bodyHTML() {
-        if (!list.length && !outside) return `<span class="popup-sub">No school-age residents recorded.</span>`;
-        if (list.length === 1 && !outside) return `Entirely within the <b>${list[0].school}</b> zone.`;
-        return `Split across <b>${list.length} ${label}</b>` + (outside ? ` (plus outside the district)` : "") + `:` +
+        const zh = isZH();
+        if (!list.length && !outside) return `<span class="popup-sub">${zh ? "无学龄居民记录。" : "No school-age residents recorded."}</span>`;
+        if (list.length === 1 && !outside) return zh ? `完整位于 <b>${list[0].school}</b> 分区内。` : `Entirely within the <b>${list[0].school}</b> zone.`;
+        return (zh ? `分属 <b>${list.length} ${label}</b>` + (outside ? `（另有部分在学区外）` : "") + `：`
+                   : `Split across <b>${list.length} ${label}</b>` + (outside ? ` (plus outside the district)` : "") + `:`) +
           `<div class="nbh-splits">` +
           list.map(s => `<div class="nbh-split-row"><span>${s.school}</span><b>${fv(s)}</b></div>`).join("") +
-          (outside ? `<div class="nbh-split-row nbh-outside"><span>Outside Bellevue School District</span>` +
+          (outside ? `<div class="nbh-split-row nbh-outside"><span>${zh ? "贝尔维尤学区之外" : "Outside Bellevue School District"}</span>` +
             `<b>${mode === "pct" ? outside + "%" : fmtInt(d.outside_n)}</b></div>` : "") +
           `</div>`;
       }
@@ -640,12 +774,12 @@
       const seq = ++nbhClickSeq;
       const popup = new maplibregl.Popup({ closeButton: true, offset: 6, maxWidth: "270px" })
         .setLngLat(e.lngLat)
-        .setHTML(`<div class="sch-pop"><strong>${p.name}</strong><div class="popup-sub">Neighborhood · ` +
-                 `${Number(splits && splits.kids || 0).toLocaleString()} school-age kids</div>` +
+        .setHTML(`<div class="sch-pop"><strong>${p.name}</strong><div class="popup-sub">${isZH() ? "社区" : "Neighborhood"} · ` +
+                 `${Number(splits && splits.kids || 0).toLocaleString()} ${isZH() ? "名学龄儿童" : "school-age kids"}</div>` +
                  `<div class="nbh-body">${bodyHTML()}</div>` +
                  (hasToggle ? `<span class="pin-mode seg-sm nbh-seg">` +
-                   `<button class="pin-mode-btn${mode === "pct" ? " on" : ""}" data-val="pct">percent</button>` +
-                   `<button class="pin-mode-btn${mode === "pop" ? " on" : ""}" data-val="pop">counts</button></span>` : "") +
+                   `<button class="pin-mode-btn${mode === "pct" ? " on" : ""}" data-val="pct">${T("percent")}</button>` +
+                   `<button class="pin-mode-btn${mode === "pop" ? " on" : ""}" data-val="pop">${T("counts")}</button></span>` : "") +
                  `</div>`)
         .addTo(map);
       popup.getElement().querySelectorAll(".nbh-seg .pin-mode-btn").forEach(btn => btn.addEventListener("click", () => {
@@ -697,7 +831,7 @@
       const m = SS[lvl] || {};
       const s = m[name] || m["_default"];
       if (!s) return "";
-      return `<div class="stability-strip${s.hot ? " hot" : ""}"><span class="stab-tag">Rezoning history</span>${s.text}</div>`;
+      return `<div class="stability-strip${s.hot ? " hot" : ""}"><span class="stab-tag">${T("Rezoning history")}</span>${T(s.text)}</div>`;
     }
 
     // Per-zone plain-language summary — STRICTLY neutral: rank-facts and measurements only,
@@ -715,28 +849,40 @@
       const feats = (DATA && DATA.levels[lvl].zones.features) || [];
       const all = feats.map(f => f.properties);
       const bits = [];
-      const lvlWord = LEVEL_META[lvl].suffix.toLowerCase().replace(" school", "") + " zones";
+      const zh = isZH();
+      const lvlWord = zh ? "个" + T(LEVEL_META[lvl].suffix) + "分区"
+        : LEVEL_META[lvl].suffix.toLowerCase().replace(" school", "") + " zones";
       // size
       if (props.kids_5_17 != null) {
         const rk = rankOf(all.map(p => p.kids_5_17), props.kids_5_17, "desc");
-        bits.push(`Home to <b>${fmtInt(props.kids_5_17)}</b> school-age children, the ${ordinal(rk.r)}-largest of the ${rk.n} ${lvlWord}.`);
+        bits.push(zh
+          ? `居住着 <b>${fmtInt(props.kids_5_17)}</b> 名学龄儿童，在 ${rk.n} ${lvlWord}中排第 ${rk.r} 大。`
+          : `Home to <b>${fmtInt(props.kids_5_17)}</b> school-age children, the ${ordinal(rk.r)}-largest of the ${rk.n} ${lvlWord}.`);
       }
       // commute (active profile's network distance)
       const t = profOf(props.travel);
       if (t && t.km && t.min) {
         const rk = rankOf(all.map(p => { const q = profOf(p.travel); return q && q.km ? q.km.avg : null; }), t.km.avg, "asc");
-        const modeWord = travelProfile === "walk" ? "on foot" : "by road";
-        bits.push(`The average trip to the assigned school is <b>${t.km.avg} km</b> ${modeWord} (about ${Math.round(t.min.avg)} min), the ${ordinal(rk.r)}-shortest of ${rk.n}.`);
+        const modeWord = zh ? (travelProfile === "walk" ? "步行" : "经道路")
+          : (travelProfile === "walk" ? "on foot" : "by road");
+        bits.push(zh
+          ? `到指定学校的平均路程为 <b>${t.km.avg} 公里</b>（${modeWord}，约 ${Math.round(t.min.avg)} 分钟），在 ${rk.n} 个分区中排第 ${rk.r} 短。`
+          : `The average trip to the assigned school is <b>${t.km.avg} km</b> ${modeWord} (about ${Math.round(t.min.avg)} min), the ${ordinal(rk.r)}-shortest of ${rk.n}.`);
       }
       // demographics: plurality group + income rank
       const s = props.seg;
       if (s && s.total_pop) {
         const groups = [["White", s.white], ["Asian", s.asian], ["Hispanic", s.hispanic], ["Black", s.black], ["residents of two or more races", s.twoplus]];
         groups.sort((a, b) => (b[1] || 0) - (a[1] || 0));
-        let demo = `The largest resident group is <b>${groups[0][0]}</b> (${groups[0][1]}%).`;
+        const gName = zh ? (ZHD[groups[0][0]] || (groups[0][0] === "residents of two or more races" ? "两个及以上族裔的居民" : groups[0][0])) : groups[0][0];
+        let demo = zh
+          ? `居民中最大的组别是<b>${gName}</b>（${groups[0][1]}%）。`
+          : `The largest resident group is <b>${groups[0][0]}</b> (${groups[0][1]}%).`;
         if (props.housing && props.housing.income != null) {
           const rk = rankOf(all.map(p => p.housing && p.housing.income), props.housing.income, "desc");
-          demo += ` Median household income is ${money(props.housing.income)}, the ${ordinal(rk.r)}-highest of ${rk.n}.`;
+          demo += zh
+            ? `家庭收入中位数为 ${money(props.housing.income)}，在 ${rk.n} 个分区中排第 ${rk.r} 高。`
+            : ` Median household income is ${money(props.housing.income)}, the ${ordinal(rk.r)}-highest of ${rk.n}.`;
         }
         bits.push(demo);
       }
@@ -747,10 +893,17 @@
         const q = profOf(P[c]);
         if (q && q.km && (!far || q.km.avg > far.avg)) far = { c, avg: q.km.avg };
       }
-      if (far) bits.push(`Of the tracked programs, <b>${(PROG_LABELS[far.c] || far.c).replace(" (IB)", "")}</b> is the farthest to reach on average (${far.avg} km).`);
+      if (far) {
+        const pName = T((PROG_LABELS[far.c] || far.c)).replace(" (IB)", "");
+        bits.push(zh
+          ? `在所跟踪的项目中，平均而言最远的是<b>${pName}</b>（${far.avg} 公里）。`
+          : `Of the tracked programs, <b>${pName}</b> is the farthest to reach on average (${far.avg} km).`);
+      }
       if (!bits.length) return "";
-      return `<div class="zone-summary"><span class="zs-tag">At a glance</span>${bits.join(" ")}` +
-        `<div class="zs-note">Descriptive only — ${STATE_META[activeState].note}. Demographics use the fixed 2020 population snapshot for every era.</div></div>`;
+      return `<div class="zone-summary"><span class="zs-tag">${T("At a glance")}</span>${bits.join(" ")}` +
+        `<div class="zs-note">${zh
+          ? `仅为描述——${T(STATE_META[activeState].note)}。所有时期的人口数据均使用固定的 2020 年普查快照。`
+          : `Descriptive only — ${STATE_META[activeState].note}. Demographics use the fixed 2020 population snapshot for every era.`}</div></div>`;
     }
 
     // ----- Zone detail side panel -----
@@ -878,7 +1031,7 @@
       return { x0: c.l, x1: c.w - c.r, y0: c.h - c.b, y1: c.t, pw: c.w - c.l - c.r, ph: c.h - c.b - c.t };
     }
     function buildChart(d, unit) {
-      if (!d || !d.cdf || d.cdf.max <= 0) return `<p class="dist-empty">Everyone is at essentially the same distance.</p>`;
+      if (!d || !d.cdf || d.cdf.max <= 0) return `<p class="dist-empty">${isZH() ? "所有人的距离基本相同。" : "Everyone is at essentially the same distance."}</p>`;
       const cdf = d.cdf, g = chartGeom(), N = cdf.y.length - 1;
       const px = i => g.x0 + (i / N) * g.pw;
       const py = v => g.y0 - (v / 100) * g.ph;
@@ -892,7 +1045,8 @@
       }).join("");
       const xt = [0, 0.5, 1].map(f =>
         `<text class="ax" x="${g.x0 + f * g.pw}" y="${g.y0 + 16}" text-anchor="middle">${(cdf.max * f).toFixed(cdf.max < 10 ? 1 : 0)}</text>`).join("");
-      const capY = viewMode === "pct" ? "% of students within" : "students within";
+      const capY = isZH() ? (viewMode === "pct" ? "该距离内学生 %" : "该距离内学生数")
+        : (viewMode === "pct" ? "% of students within" : "students within");
       return `<svg class="dist-chart" viewBox="0 0 ${CHART.w} ${CHART.h}" data-max="${cdf.max}" data-unit="${unit}" data-n="${n}" data-mode="${viewMode}" data-y="${cdf.y.join(",")}">` +
         yg + xt +
         `<polygon class="area" points="${area}"/><polyline class="line" points="${pts}"/>` +
@@ -900,7 +1054,7 @@
         `<circle class="cmark" r="3.2" style="display:none"/>` +
         `<rect class="hit" x="${g.x0}" y="${g.y1}" width="${g.pw}" height="${g.ph}" fill="transparent"/>` +
         `<text class="ctip" text-anchor="middle" style="display:none"></text></svg>` +
-        `<div class="chart-cap">Y: ${capY} &nbsp;·&nbsp; X: distance (${unit})</div>`;
+        `<div class="chart-cap">Y: ${capY} &nbsp;·&nbsp; X: ${isZH() ? "距离" : "distance"} (${unit})</div>`;
     }
     function wireCharts(root) {
       root.querySelectorAll(".dist-chart:not(.time-chart)").forEach(svg => {
@@ -929,20 +1083,29 @@
       });
     }
     function renderDist(d, unit, kind) {
-      if (!d) return `<p class="dist-empty">No data.</p>`;
-      const note = kind === "road"
-        ? `Driving via roads, no traffic (OpenRouteService), weighted by school-age children. Estimated from block-level data (a very close approximation).`
-        : kind === "walk"
-        ? `Walking via streets &amp; paths (OpenRouteService), weighted by school-age children. Estimated from block-level data (a very close approximation).`
-        : `Estimated from block-level data (a very close approximation). Straight-line ${unit}, weighted by school-age children.`;
+      if (!d) return `<p class="dist-empty">${isZH() ? "无数据。" : "No data."}</p>`;
+      const zh = isZH();
+      const note = zh
+        ? (kind === "road"
+          ? `驾车经道路、不含堵车（OpenRouteService），按学龄儿童加权。由街区级数据估算（非常接近的近似）。`
+          : kind === "walk"
+          ? `步行经街道与步道（OpenRouteService），按学龄儿童加权。由街区级数据估算（非常接近的近似）。`
+          : `由街区级数据估算（非常接近的近似）。直线${unit}，按学龄儿童加权。`)
+        : (kind === "road"
+          ? `Driving via roads, no traffic (OpenRouteService), weighted by school-age children. Estimated from block-level data (a very close approximation).`
+          : kind === "walk"
+          ? `Walking via streets &amp; paths (OpenRouteService), weighted by school-age children. Estimated from block-level data (a very close approximation).`
+          : `Estimated from block-level data (a very close approximation). Straight-line ${unit}, weighted by school-age children.`);
       return buildChart(d, unit) +
-        `<p class="dist-stats">min ${d.min} · Q1 ${d.q1} · <b>median ${d.med}</b> · Q3 ${d.q3} · max ${d.max} ${unit}</p>` +
+        (zh
+          ? `<p class="dist-stats">最小 ${d.min} · Q1 ${d.q1} · <b>中位 ${d.med}</b> · Q3 ${d.q3} · 最大 ${d.max} ${unit}</p>`
+          : `<p class="dist-stats">min ${d.min} · Q1 ${d.q1} · <b>median ${d.med}</b> · Q3 ${d.q3} · max ${d.max} ${unit}</p>`) +
         `<p class="dist-note">${note}</p>`;
     }
     const modeAltBtn = (scope, has, mode) => has
       ? `<span class="pin-mode seg-sm seg-alt" data-scope="${scope}">` +
-        `<button class="pin-mode-btn${mode === "km" ? " on" : ""}" data-val="km">distance</button>` +
-        `<button class="pin-mode-btn${mode === "min" ? " on" : ""}" data-val="min">time</button></span>`
+        `<button class="pin-mode-btn${mode === "km" ? " on" : ""}" data-val="km">${T("distance")}</button>` +
+        `<button class="pin-mode-btn${mode === "min" ? " on" : ""}" data-val="min">${T("time")}</button></span>`
       : "";
     function accessStats(d, mode, box1, box2) {   // headline pair for a travel/program entry
       const prof = profOf(d);
@@ -951,11 +1114,11 @@
       const s = isMin ? prof.min : (prof ? prof.km : d);
       if (!s) return "";
       const unit = isMin ? " min" : " km";
-      const label1 = isMin ? (walk ? "Avg. walk time" : "Avg. drive time")
-        : prof ? (walk ? "Avg. walking distance" : "Avg. road distance") : "Avg. straight-line distance";
+      const label1 = T(isMin ? (walk ? "Avg. walk time" : "Avg. drive time")
+        : prof ? (walk ? "Avg. walking distance" : "Avg. road distance") : "Avg. straight-line distance");
       const thr = isMin
-        ? (walk ? { v: s.within20, lab: "Within 20 min walk" } : { v: s.within10, lab: "Within 10 min drive" })
-        : { v: s.within3, lab: "Within 3 km" };
+        ? (walk ? { v: s.within20, lab: T("Within 20 min walk") } : { v: s.within10, lab: T("Within 10 min drive") })
+        : { v: s.within3, lab: T("Within 3 km") };
       return `<div class="stat">${box1 || ""}<div class="stat-val">${s.avg}<span class="metric-unit">${unit}</span></div><div class="stat-lab">${label1}</div></div>` +
         `<div class="stat">${box2 || ""}<div class="stat-val">${pctOrN(thr.v, Math.round(thr.v / 100 * s.n))}</div><div class="stat-lab">${thr.lab}</div></div>`;
     }
@@ -967,26 +1130,30 @@
           : m.pct  ? `${Math.round(raw)}<span class="metric-unit">%</span>`
           : m.unit ? `${raw}<span class="metric-unit"> ${m.unit}</span>`
           : Number(raw).toFixed(3);
-        return `<div class="metric-card">${CHORO_BY_ID[m.key] ? choroBox(m.key) : ""}<div class="metric-val">${val}</div><div class="metric-label">${m.label}</div></div>`;
+        return `<div class="metric-card">${CHORO_BY_ID[m.key] ? choroBox(m.key) : ""}<div class="metric-val">${val}</div><div class="metric-label">${T(m.label)}</div></div>`;
       }).join("");
-      const defs = COMPACTNESS.map(m => `<dt>${m.label}</dt><dd>${m.hint || ""}</dd>`).join("");
-      return `<div class="section-head"><span class="detail-section-label">Compactness (shape only)</span>` +
-        `<button class="info-btn toggle-btn" data-target="metric-defs" aria-expanded="false" title="How these are calculated">i</button></div>` +
+      const defs = COMPACTNESS.map(m => `<dt>${T(m.label)}</dt><dd>${T(m.hint) || ""}</dd>`).join("");
+      return `<div class="section-head"><span class="detail-section-label">${isZH() ? "紧凑度（只看形状）" : "Compactness (shape only)"}</span>` +
+        `<button class="info-btn toggle-btn" data-target="metric-defs" aria-expanded="false" title="${isZH() ? "这些指标怎么算" : "How these are calculated"}">i</button></div>` +
         `<div class="metric-defs" id="metric-defs" hidden><dl>${defs}</dl></div>` +
         `<div class="metric-grid">${cards}</div>`;
     }
 
     function sectionCapacity(props) {
       const c = props.cap; if (!c) return "";
-      const defs = `<dl><dt>Enrollment</dt><dd>Actual students at this zone's school in the era's school year — a real headcount, so era-to-era changes mix boundary effects with enrollment drift (unlike the fixed-2020 demographics).</dd>` +
-        `<dt>Capacity</dt><dd>The district's own building-capacity figure for the era. Definitions and vintages differ by era and level (see Methods) — treat cross-era utilization comparisons as approximate.</dd></dl>`;
-      return `<div class="impact-section"><div class="section-head"><span class="detail-section-label">School capacity (${c.enroll_year || ""})</span>` +
-        `<button class="info-btn toggle-btn" data-target="cap-defs" aria-expanded="false" title="What these mean">i</button></div>` +
+      const zh = isZH();
+      const defs = zh
+        ? `<dl><dt>在校人数</dt><dd>该时期学年在这所学校就读的真实学生数——是实际统计，因此时期之间的变化混合了边界效应与入学漂移（不同于固定 2020 年的人口数据）。</dd>` +
+          `<dt>容量</dt><dd>学区自己给出的该时期校舍容量。不同时期、不同学段的定义与年份不同（见"方法"）——跨时期的使用率比较请视为近似。</dd></dl>`
+        : `<dl><dt>Enrollment</dt><dd>Actual students at this zone's school in the era's school year — a real headcount, so era-to-era changes mix boundary effects with enrollment drift (unlike the fixed-2020 demographics).</dd>` +
+          `<dt>Capacity</dt><dd>The district's own building-capacity figure for the era. Definitions and vintages differ by era and level (see Methods) — treat cross-era utilization comparisons as approximate.</dd></dl>`;
+      return `<div class="impact-section"><div class="section-head"><span class="detail-section-label">${zh ? `学校容量（${c.enroll_year || ""}）` : `School capacity (${c.enroll_year || ""})`}</span>` +
+        `<button class="info-btn toggle-btn" data-target="cap-defs" aria-expanded="false" title="${zh ? "这些是什么意思" : "What these mean"}">i</button></div>` +
         `<div class="metric-defs" id="cap-defs" hidden>${defs}</div>` +
         `<div class="stat-row three">` +
-        `<div class="stat">${choroBox("enroll")}<div class="stat-val">${c.enroll != null ? fmtInt(c.enroll) : "&mdash;"}</div><div class="stat-lab">Enrollment</div></div>` +
-        `<div class="stat">${choroBox("capacity")}<div class="stat-val">${c.capacity != null ? fmtInt(c.capacity) : "&mdash;"}</div><div class="stat-lab">Building capacity</div></div>` +
-        `<div class="stat">${choroBox("utilization")}<div class="stat-val">${c.utilization != null ? c.utilization + '<span class="metric-unit">%</span>' : "&mdash;"}</div><div class="stat-lab">Utilization</div></div>` +
+        `<div class="stat">${choroBox("enroll")}<div class="stat-val">${c.enroll != null ? fmtInt(c.enroll) : "&mdash;"}</div><div class="stat-lab">${T("Enrollment")}</div></div>` +
+        `<div class="stat">${choroBox("capacity")}<div class="stat-val">${c.capacity != null ? fmtInt(c.capacity) : "&mdash;"}</div><div class="stat-lab">${T("Building capacity")}</div></div>` +
+        `<div class="stat">${choroBox("utilization")}<div class="stat-val">${c.utilization != null ? c.utilization + '<span class="metric-unit">%</span>' : "&mdash;"}</div><div class="stat-lab">${T("Utilization")}</div></div>` +
         `</div></div>`;
     }
 
@@ -997,23 +1164,29 @@
         const n = g.key === "other" ? ((s.aian_n || 0) + (s.nhpi_n || 0) + (s.other_n || 0)) : (s[g.key + "_n"] || 0);
         return { ...g, val, n };
       }).filter(g => g.val > 0);
-      const bar = groups.map(g => `<span class="race-seg" style="width:${g.val}%;background:${g.color}" title="${g.label} ${g.val}%"></span>`).join("");
-      const list = groups.map(g => `<li>${CHORO_RACE[g.key] ? choroBox(g.key) : ""}<span class="dot" style="background:${g.color}"></span>${g.label} <b>${viewMode === "pct" ? g.val + "%" : fmtInt(g.n)}</b></li>`).join("");
-      const defs = `<dl><dt>Race &amp; ethnicity</dt><dd>2020 Census categories. Hispanic/Latino is an <em>ethnicity</em> (any race) counted separately; the other groups are non-Hispanic.</dd>` +
-        `<dt>Two or more</dt><dd>People who identify with two or more races (for example White and Asian).</dd>` +
-        `<dt>Other</dt><dd>Combines American Indian / Alaska Native, Native Hawaiian / Pacific Islander, and other single races.</dd>` +
-        `<dt>Mix gap</dt><dd>How different this zone's racial mix is from the district-wide mix (a divergence measure). 0 = the zone mirrors the district; larger = less alike. Population-weighted mix gaps sum to a district-wide segregation index, so this is the district overview's segregation number seen zone by zone. Residential (2020), not enrollment.</dd></dl>`;
+      const zh = isZH();
+      const bar = groups.map(g => `<span class="race-seg" style="width:${g.val}%;background:${g.color}" title="${T(g.label)} ${g.val}%"></span>`).join("");
+      const list = groups.map(g => `<li>${CHORO_RACE[g.key] ? choroBox(g.key) : ""}<span class="dot" style="background:${g.color}"></span>${T(g.label)} <b>${viewMode === "pct" ? g.val + "%" : fmtInt(g.n)}</b></li>`).join("");
+      const defs = zh
+        ? `<dl><dt>族裔</dt><dd>2020 年人口普查分类。西语裔／拉丁裔是<em>族群</em>（不分种族）单独统计；其余组别均为非西语裔。</dd>` +
+          `<dt>两个及以上</dt><dd>认同两个或更多种族的人（例如白人加亚裔）。</dd>` +
+          `<dt>其他</dt><dd>合并美洲原住民／阿拉斯加原住民、夏威夷原住民／太平洋岛民及其他单一种族。</dd>` +
+          `<dt>构成差距</dt><dd>该分区的族裔构成与全学区构成相差多远（一种散度测量）。0 = 分区与学区一致；越大越不相像。按人口加权的构成差距加总即为全学区隔离指数，所以这是"学区总览"里的隔离数字在各分区的分解。基于居住地（2020），不是就读。</dd></dl>`
+        : `<dl><dt>Race &amp; ethnicity</dt><dd>2020 Census categories. Hispanic/Latino is an <em>ethnicity</em> (any race) counted separately; the other groups are non-Hispanic.</dd>` +
+          `<dt>Two or more</dt><dd>People who identify with two or more races (for example White and Asian).</dd>` +
+          `<dt>Other</dt><dd>Combines American Indian / Alaska Native, Native Hawaiian / Pacific Islander, and other single races.</dd>` +
+          `<dt>Mix gap</dt><dd>How different this zone's racial mix is from the district-wide mix (a divergence measure). 0 = the zone mirrors the district; larger = less alike. Population-weighted mix gaps sum to a district-wide segregation index, so this is the district overview's segregation number seen zone by zone. Residential (2020), not enrollment.</dd></dl>`;
       const mg = props.mix_gap;
       const mgCard = (mg != null)
         ? `<div class="stat mixgap-stat">${choroBox("mix_gap")}<div class="stat-val">${Number(mg).toFixed(3)}</div>` +
-          `<div class="stat-lab">Mix gap — difference from the district-wide mix (0 = mirrors the district)</div></div>`
+          `<div class="stat-lab">${zh ? "构成差距——与全学区构成之差（0 = 与学区一致）" : "Mix gap — difference from the district-wide mix (0 = mirrors the district)"}</div></div>`
         : "";
-      return `<div class="impact-section"><div class="section-head"><span class="detail-section-label">Who lives here · race (2020)</span>` +
-        `<button class="info-btn toggle-btn" data-target="seg-defs" aria-expanded="false" title="How these categories work">i</button></div>` +
+      return `<div class="impact-section"><div class="section-head"><span class="detail-section-label">${zh ? "谁住在这里 · 族裔（2020）" : "Who lives here · race (2020)"}</span>` +
+        `<button class="info-btn toggle-btn" data-target="seg-defs" aria-expanded="false" title="${zh ? "这些分类怎么用" : "How these categories work"}">i</button></div>` +
         `<div class="metric-defs" id="seg-defs" hidden>${defs}</div>` +
         `<div class="race-bar">${bar}</div><ul class="race-list">${list}</ul>` +
         mgCard +
-        `<p class="sub">${s.total_pop.toLocaleString()} residents. Residential composition, not confirmed school enrollment.</p></div>`;
+        `<p class="sub">${s.total_pop.toLocaleString()} ${zh ? "名居民。为居住构成，不是经确认的就读构成。" : "residents. Residential composition, not confirmed school enrollment."}</p></div>`;
     }
 
     // Time-series chart (Zillow ZHVI). Same look as the distribution chart; X = time, Y = $.
@@ -1038,7 +1211,7 @@
         `<circle class="cmark" r="3.2" style="display:none"/>` +
         `<rect class="hit" x="${g.x0}" y="${g.y1}" width="${g.pw}" height="${g.ph}" fill="transparent"/>` +
         `<text class="ctip" text-anchor="middle" style="display:none"></text></svg>` +
-        `<div class="chart-cap">Typical home value, City of Bellevue (Zillow ZHVI)</div>`;
+        `<div class="chart-cap">${isZH() ? "贝尔维尤市典型房价（Zillow ZHVI）" : "Typical home value, City of Bellevue (Zillow ZHVI)"}</div>`;
     }
     function wireTimeCharts(root) {
       root.querySelectorAll(".time-chart").forEach(svg => {
@@ -1067,20 +1240,27 @@
 
     function sectionHousing(props) {
       const h = props.housing; if (!h) return "";
-      return `<div class="impact-section"><div class="section-head"><span class="detail-section-label">Housing (ACS 2023)</span>` +
-        `<button class="toggle-btn mini" data-target="zhvi-box" aria-expanded="false">price history</button></div>` +
+      const zh = isZH();
+      return `<div class="impact-section"><div class="section-head"><span class="detail-section-label">${zh ? "住房（ACS 2023）" : "Housing (ACS 2023)"}</span>` +
+        `<button class="toggle-btn mini" data-target="zhvi-box" aria-expanded="false">${T("price history")}</button></div>` +
         `<div class="dist-box" id="zhvi-box" hidden>${buildTimeChart(DATA && DATA.zhvi)}` +
-          `<p class="dist-note">District-wide market context, the same for every zone. Rising prices are the housing market at work, <b>not</b> an effect of the rezoning.</p></div>` +
+          `<p class="dist-note">${zh ? "全学区的市场背景，对每个分区都相同。房价上涨是住房市场的作用，<b>不是</b>重划的效应。" : "District-wide market context, the same for every zone. Rising prices are the housing market at work, <b>not</b> an effect of the rezoning."}</p></div>` +
         `<div class="stat-row three">` +
-        `<div class="stat">${choroBox("income")}<div class="stat-val">${money(h.income)}</div><div class="stat-lab">Median household income</div></div>` +
-        `<div class="stat">${choroBox("home_value")}<div class="stat-val">${money(h.home_value)}</div><div class="stat-lab">Median home value</div></div>` +
-        `<div class="stat"><div class="stat-val">${rent(h.rent)}</div><div class="stat-lab">Median gross rent</div></div>` +
-        `</div><p class="sub">Population-weighted ACS block-group medians (approximate).</p></div>`;
+        `<div class="stat">${choroBox("income")}<div class="stat-val">${money(h.income)}</div><div class="stat-lab">${T("Median household income")}</div></div>` +
+        `<div class="stat">${choroBox("home_value")}<div class="stat-val">${money(h.home_value)}</div><div class="stat-lab">${T("Median home value")}</div></div>` +
+        `<div class="stat"><div class="stat-val">${rent(h.rent)}</div><div class="stat-lab">${zh ? "租金中位数" : "Median gross rent"}</div></div>` +
+        `</div><p class="sub">${zh ? "按人口加权的 ACS 街区组中位数（近似）。" : "Population-weighted ACS block-group medians (approximate)."}</p></div>`;
     }
 
     function sectionLanguage(props) {
       const L = props.language; if (!L || L.limited_pct == null) return "";
-      const cats = [
+      const zh = isZH();
+      const cats = zh ? [
+        { pct: L.spanish_pct,  n: L.spanish_n,  label: "西班牙语",           ex: "西班牙语" },
+        { pct: L.other_ie_pct, n: L.other_ie_n, label: "其他印欧语",         ex: "如俄语、印地语、乌克兰语、波斯语" },
+        { pct: L.api_pct,      n: L.api_n,      label: "亚洲及太平洋岛语",   ex: "如中文、韩语、越南语、日语" },
+        { pct: L.other_pct,    n: L.other_n,    label: "其他",               ex: "如阿拉伯语、阿姆哈拉语、索马里语" }
+      ] : [
         { pct: L.spanish_pct,  n: L.spanish_n,  label: "Spanish",                ex: "Spanish" },
         { pct: L.other_ie_pct, n: L.other_ie_n, label: "Other Indo-European",    ex: "e.g. Russian, Hindi, Ukrainian, Persian" },
         { pct: L.api_pct,      n: L.api_n,      label: "Asian &amp; Pacific Island", ex: "e.g. Chinese, Korean, Vietnamese, Japanese" },
@@ -1088,12 +1268,15 @@
       ];
       const rows = cats.map(c =>
         `<li><span class="lang-name">${c.label}</span><span class="lang-ex">${c.ex}</span><b>${viewMode === "pct" ? c.pct + "%" : fmtInt(c.n)}</b></li>`).join("");
-      const defs = `<dl><dt>Limited-English household</dt><dd>A household where no one aged 14 or older speaks only English, and no one aged 14+ speaks English "very well" (the Census measure of a linguistically isolated household).</dd>` +
-        `<dt>Language groups</dt><dd>ACS reports only these four broad buckets, not individual languages. The examples are common languages within each bucket, not this zone's specific mix.</dd></dl>`;
-      return `<div class="impact-section"><div class="section-head"><span class="detail-section-label">Language (ACS 2023)</span>` +
-        `<button class="info-btn toggle-btn" data-target="lang-defs" aria-expanded="false" title="What this means">i</button></div>` +
+      const defs = zh
+        ? `<dl><dt>英语能力有限的家庭户</dt><dd>家中没有 14 岁及以上成员只说英语、也没有 14 岁及以上成员英语说得"非常好"的家庭户（普查对语言孤立家庭的测量）。</dd>` +
+          `<dt>语言组别</dt><dd>ACS 只发布这四个大类，不发布具体语言。示例是各类中常见的语言，不代表该分区的具体构成。</dd></dl>`
+        : `<dl><dt>Limited-English household</dt><dd>A household where no one aged 14 or older speaks only English, and no one aged 14+ speaks English "very well" (the Census measure of a linguistically isolated household).</dd>` +
+          `<dt>Language groups</dt><dd>ACS reports only these four broad buckets, not individual languages. The examples are common languages within each bucket, not this zone's specific mix.</dd></dl>`;
+      return `<div class="impact-section"><div class="section-head"><span class="detail-section-label">${zh ? "语言（ACS 2023）" : "Language (ACS 2023)"}</span>` +
+        `<button class="info-btn toggle-btn" data-target="lang-defs" aria-expanded="false" title="${zh ? "这是什么意思" : "What this means"}">i</button></div>` +
         `<div class="metric-defs" id="lang-defs" hidden>${defs}</div>` +
-        `<div class="stat">${choroBox("limited")}<div class="stat-val">${pctOrN(L.limited_pct, L.limited_n)}</div><div class="stat-lab">Households with limited English</div></div>` +
+        `<div class="stat">${choroBox("limited")}<div class="stat-val">${pctOrN(L.limited_pct, L.limited_n)}</div><div class="stat-lab">${zh ? "英语能力有限的家庭户" : "Households with limited English"}</div></div>` +
         `<ul class="lang-list">${rows}</ul></div>`;
     }
 
@@ -1104,9 +1287,9 @@
       const unit = (travelMode === "min" && prof) ? "min" : "km";
       const kind = prof ? (prof === t.walk ? "walk" : "road") : "air";
       const stats = accessStats(t, travelMode, choroBox("travel_avg"), choroBox("travel_w3"));
-      return `<div class="impact-section"><div class="section-head"><span class="detail-section-label">Travel to assigned school</span>` +
+      return `<div class="impact-section"><div class="section-head"><span class="detail-section-label">${isZH() ? "到指定学校的通勤" : "Travel to assigned school"}</span>` +
         `<span class="head-btns">${modeAltBtn("travel", !!prof, travelMode)}` +
-        `<button class="toggle-btn mini" data-target="travel-dist" aria-expanded="false">distribution</button></span></div>` +
+        `<button class="toggle-btn mini" data-target="travel-dist" aria-expanded="false">${T("distribution")}</button></span></div>` +
         `<div class="stat-row">${stats}</div>` +
         `<div class="dist-box" id="travel-dist" hidden>${renderDist(s, unit, kind)}</div></div>`;
     }
@@ -1123,28 +1306,29 @@
         const unit = (progMode === "min" && prof) ? "min" : "km";
         const kind = prof ? (prof === d.walk ? "walk" : "road") : "air";
         const stats = accessStats(d, progMode, px ? choroBox(px + "_avg") : "", px ? choroBox(px + "_w3") : "");
-        return `<div class="prog-row"><div class="section-head sub-head"><span class="prog-name">${PROG_LABELS[c] || c}</span>` +
-          `<button class="toggle-btn mini" data-target="${id}" aria-expanded="false">distribution</button></div>` +
+        return `<div class="prog-row"><div class="section-head sub-head"><span class="prog-name">${T(PROG_LABELS[c] || c)}</span>` +
+          `<button class="toggle-btn mini" data-target="${id}" aria-expanded="false">${T("distribution")}</button></div>` +
           `<div class="stat-row">${stats}</div>` +
           `<div class="dist-box" id="${id}" hidden>${renderDist(s, unit, kind)}</div></div>`;
       }).join("");
-      return `<div class="impact-section"><div class="section-head"><span class="detail-section-label">Nearest program access</span>` +
+      return `<div class="impact-section"><div class="section-head"><span class="detail-section-label">${isZH() ? "最近项目可达性" : "Nearest program access"}</span>` +
         `<span class="head-btns">${modeAltBtn("prog", anyProf, progMode)}</span></div>` + rows +
-        `<p class="sub">From homes to the nearest school hosting each program. "Reachable," not eligibility.</p></div>`;
+        `<p class="sub">${isZH() ? "从住宅到设有各项目的最近学校。是「够得着」，不是入学资格。" : 'From homes to the nearest school hosting each program. "Reachable," not eligibility.'}</p></div>`;
     }
 
     function openDetail(props, lvl) {
       currentZone = { props, lvl };
+      districtOpen = false;
       const kids = props.kids_5_17;
       const header =
-        `<p class="detail-eyebrow">${LEVEL_META[lvl].legend} &middot; ${eraLabel()}</p>` +
-        `<h2 class="detail-title">${props.name} ${LEVEL_META[lvl].suffix}</h2>` +
+        `<p class="detail-eyebrow">${T(LEVEL_META[lvl].legend)} &middot; ${T(eraLabel())}</p>` +
+        `<h2 class="detail-title">${props.name} ${T(LEVEL_META[lvl].suffix)}</h2>` +
         stabilityHTML(lvl, props.name) +
         `<div class="zone-meta">` +
-          (kids != null ? `<span class="zone-pop">${choroBox("kids")}<b>${fmtInt(kids)}</b> school-age (5–17)</span>` : `<span></span>`) +
-          `<span class="pin-mode seg-sm" data-seg="view" title="Percentages or counts">` +
-          `<button class="pin-mode-btn${viewMode === "pct" ? " on" : ""}" data-val="pct">percent</button>` +
-          `<button class="pin-mode-btn${viewMode === "pop" ? " on" : ""}" data-val="pop">counts</button></span>` +
+          (kids != null ? `<span class="zone-pop">${choroBox("kids")}<b>${fmtInt(kids)}</b> ${isZH() ? "名学龄（5–17 岁）" : "school-age (5–17)"}</span>` : `<span></span>`) +
+          `<span class="pin-mode seg-sm" data-seg="view" title="${isZH() ? "百分比或数量" : "Percentages or counts"}">` +
+          `<button class="pin-mode-btn${viewMode === "pct" ? " on" : ""}" data-val="pct">${T("percent")}</button>` +
+          `<button class="pin-mode-btn${viewMode === "pop" ? " on" : ""}" data-val="pop">${T("counts")}</button></span>` +
         `</div>`;
       document.getElementById("detail-body").innerHTML =
         header + summaryHTML(props, lvl) +
@@ -1156,27 +1340,35 @@
     }
 
     // ----- District overview (the two district-wide impacts: segregation index + participation) -----
+    let districtOpen = false;
     function openDistrict() {
       const st = DATA && DATA.districtStats;
       if (!st) return;
       if (selected) { map.setFeatureState({ source: `zones-${selected.level}`, id: selected.id }, { selected: false }); selected = null; }
       currentZone = null;
+      districtOpen = true;
       const table = (basis, label) => {
         const rows = LEVELS.map(l => {
           const s = st[basis][l];
-          return `<div class="idx-row"><span class="idx-level">${LEVEL_META[l].suffix.replace(" School", "")}</span>` +
+          return `<div class="idx-row"><span class="idx-level">${isZH() ? T(LEVEL_META[l].suffix) : LEVEL_META[l].suffix.replace(" School", "")}</span>` +
             `<span class="idx-val">${s.D.toFixed(3)}</span><span class="idx-val">${s.H.toFixed(3)}</span>` +
-            `<span class="idx-n">${s.n} schools</span></div>`;
+            `<span class="idx-n">${s.n} ${isZH() ? "所学校" : "schools"}</span></div>`;
         }).join("");
         return `<p class="idx-basis">${label}</p>` +
           `<div class="idx-table"><div class="idx-row idx-head"><span class="idx-level"></span>` +
-          `<span class="idx-val">Dissimilarity</span><span class="idx-val">Theil's H</span><span class="idx-n"></span></div>${rows}</div>`;
+          `<span class="idx-val">${isZH() ? "相异指数" : "Dissimilarity"}</span><span class="idx-val">${isZH() ? "熵指数 H" : "Theil's H"}</span><span class="idx-n"></span></div>${rows}</div>`;
       };
-      const segDefs = `<dl>` +
-        `<dt>Dissimilarity index (D)</dt><dd>Compares White vs non-White. The share of one group that would have to change schools for a perfectly even spread. 0 = perfectly even, 1 = totally separate.</dd>` +
-        `<dt>Theil's H (entropy index)</dt><dd>Uses all six race groups at once. How much less diverse the average school is than the district overall. 0 = every school mirrors the district, 1 = total separation.</dd>` +
-        `<dt>Two bases</dt><dd><b>Actual enrollment</b> = who attends each zoned school (NCES 2023-24), the real outcome, including transfers and program placements. <b>Residential</b> = who lives inside each zone (2020 Census), what the boundary lines alone would produce. The gap between them is the effect of choice, transfers, and programs.</dd>` +
-        `<dt>Caveats</dt><dd>Choice schools excluded (not zone units). With few schools per level (4-5 at secondary), small differences are not meaningful. Current (post-2023) map only; the before/after comes with the pre-2023 boundaries.</dd></dl>`;
+      const segDefs = isZH()
+        ? `<dl>` +
+          `<dt>相异指数（D）</dt><dd>比较白人与非白人。一个组别中需要换校的比例，换完后各校才会完全均匀。0 = 完全均匀，1 = 完全分离。</dd>` +
+          `<dt>熵指数（Theil's H）</dt><dd>同时使用全部六个族裔组别。平均而言每所学校比全学区整体少多少多样性。0 = 每所学校与学区一致，1 = 完全分离。</dd>` +
+          `<dt>两种口径</dt><dd><b>实际就读</b> = 谁在每所划片学校就读（NCES 2023–24），是包含转学和项目安置的真实结果。<b>居住</b> = 谁住在每个分区内（2020 年普查），即仅凭边界线会产生的结果。两者之差就是选校、转学和项目的效应。</dd>` +
+          `<dt>注意</dt><dd>不含选校制学校（它们不是分区单位）。中学每学段只有 4–5 所学校，细小的差别没有意义。只覆盖现行（2023 年后）地图；前后对比要配合 2023 年前的边界看。</dd></dl>`
+        : `<dl>` +
+          `<dt>Dissimilarity index (D)</dt><dd>Compares White vs non-White. The share of one group that would have to change schools for a perfectly even spread. 0 = perfectly even, 1 = totally separate.</dd>` +
+          `<dt>Theil's H (entropy index)</dt><dd>Uses all six race groups at once. How much less diverse the average school is than the district overall. 0 = every school mirrors the district, 1 = total separation.</dd>` +
+          `<dt>Two bases</dt><dd><b>Actual enrollment</b> = who attends each zoned school (NCES 2023-24), the real outcome, including transfers and program placements. <b>Residential</b> = who lives inside each zone (2020 Census), what the boundary lines alone would produce. The gap between them is the effect of choice, transfers, and programs.</dd>` +
+          `<dt>Caveats</dt><dd>Choice schools excluded (not zone units). With few schools per level (4-5 at secondary), small differences are not meaningful. Current (post-2023) map only; the before/after comes with the pre-2023 boundaries.</dd></dl>`;
       const zf = DATA.levels[activeLevel].zones.features;
       let gEnr = 0, gCap = 0, gKids = 0, gN = 0;
       zf.forEach(f => {
@@ -1186,28 +1378,42 @@
         if (c.capacity != null) gCap += c.capacity;
       });
       const gUtil = gCap > 0 ? Math.round(100 * gEnr / gCap) : null;
+      const zh = isZH();
       const glance =
-        `<div class="section-head"><span class="detail-section-label">At a glance &mdash; ${LEVEL_META[activeLevel].legend}s, ${eraLabel()}</span>` +
-          `<button class="info-btn toggle-btn" data-target="glance-info" aria-expanded="false" title="What these counts include">i</button></div>` +
-        `<div class="metric-defs" id="glance-info" hidden>Enrollment counts everyone attending these schools &mdash; including students who live <b>outside</b> the district (about 982 district-wide in 2023&ndash;24, roughly 5% of enrollment). The reverse is also true: not every child living in the district attends a district school (private schools and transfers out). Zone-based measures on this site &mdash; travel, demographics, program distances &mdash; describe <b>residents</b> of each zone, so enrollment and resident counts never match exactly.</div>` +
+        `<div class="section-head"><span class="detail-section-label">${zh ? `一览 &mdash; ${T(LEVEL_META[activeLevel].legend)}，${T(eraLabel())}` : `At a glance &mdash; ${LEVEL_META[activeLevel].legend}s, ${eraLabel()}`}</span>` +
+          `<button class="info-btn toggle-btn" data-target="glance-info" aria-expanded="false" title="${zh ? "这些数字包含什么" : "What these counts include"}">i</button></div>` +
+        `<div class="metric-defs" id="glance-info" hidden>${zh
+          ? `在校人数统计的是在这些学校就读的所有人&mdash;&mdash;包括住在学区<b>之外</b>的学生（2023&ndash;24 学年全学区约 982 人，约占在校人数的 5%）。反过来也成立：并非每个住在学区里的孩子都上学区的学校（私立学校和转出）。本站基于分区的指标&mdash;&mdash;通勤、人口构成、项目距离&mdash;&mdash;描述的是各分区的<b>居民</b>，因此在校人数与居民数从不完全一致。`
+          : `Enrollment counts everyone attending these schools &mdash; including students who live <b>outside</b> the district (about 982 district-wide in 2023&ndash;24, roughly 5% of enrollment). The reverse is also true: not every child living in the district attends a district school (private schools and transfers out). Zone-based measures on this site &mdash; travel, demographics, program distances &mdash; describe <b>residents</b> of each zone, so enrollment and resident counts never match exactly.`}</div>` +
         `<div class="glance-row">` +
-          `<div class="glance"><b>${gN}</b> zoned schools</div>` +
-          `<div class="glance"><b>${fmtInt(gEnr)}</b> enrolled</div>` +
-          `<div class="glance"><b>${fmtInt(gCap)}</b> seats</div>` +
-          (gUtil != null ? `<div class="glance"><b>${gUtil}%</b> utilization</div>` : "") +
-          `<div class="glance"><b>${fmtInt(gKids)}</b> school-age residents</div>` +
+          `<div class="glance"><b>${gN}</b> ${zh ? "所划片学校" : "zoned schools"}</div>` +
+          `<div class="glance"><b>${fmtInt(gEnr)}</b> ${zh ? "名在校生" : "enrolled"}</div>` +
+          `<div class="glance"><b>${fmtInt(gCap)}</b> ${zh ? "个座位" : "seats"}</div>` +
+          (gUtil != null ? `<div class="glance"><b>${gUtil}%</b> ${zh ? "使用率" : "utilization"}</div>` : "") +
+          `<div class="glance"><b>${fmtInt(gKids)}</b> ${zh ? "名学龄居民" : "school-age residents"}</div>` +
         `</div>` +
-        `<p class="sub">Zoned schools at this level only (choice schools have no zone). Enrollment is this era's headcount; residents use the fixed 2020 snapshot.</p>`;
+        `<p class="sub">${zh ? "只含本学段的划片学校（选校制学校没有分区）。在校人数为该时期的统计；居民使用固定的 2020 年快照。" : "Zoned schools at this level only (choice schools have no zone). Enrollment is this era's headcount; residents use the fixed 2020 snapshot."}</p>`;
       document.getElementById("detail-body").innerHTML =
-        `<p class="detail-eyebrow">Bellevue School District</p>` +
-        `<h2 class="detail-title">District overview</h2>` +
+        `<p class="detail-eyebrow">${zh ? "贝尔维尤学区" : "Bellevue School District"}</p>` +
+        `<h2 class="detail-title">${zh ? "学区总览" : "District overview"}</h2>` +
         glance +
-        `<div class="section-head"><span class="detail-section-label">Segregation across schools</span>` +
-          `<button class="info-btn toggle-btn" data-target="seg-idx-defs" aria-expanded="false" title="What these indices mean">i</button></div>` +
+        `<div class="section-head"><span class="detail-section-label">${zh ? "学校之间的隔离" : "Segregation across schools"}</span>` +
+          `<button class="info-btn toggle-btn" data-target="seg-idx-defs" aria-expanded="false" title="${zh ? "这些指数是什么意思" : "What these indices mean"}">i</button></div>` +
         `<div class="metric-defs" id="seg-idx-defs" hidden>${segDefs}</div>` +
-        table("enrollment", "Actual school enrollment (2023–24)") +
-        table("residential", "Residential (who lives in each zone, 2020)") +
-        `<p class="sub">One number per level for the whole district: how unevenly racial groups are spread across that level's schools. Enrollment runs higher than residential &mdash; choice, transfers, and programs re-sort students beyond what the lines do. Neither is a fairness verdict.</p>` +
+        table("enrollment", zh ? "实际就读（2023–24）" : "Actual school enrollment (2023–24)") +
+        table("residential", zh ? "居住（谁住在每个分区内，2020）" : "Residential (who lives in each zone, 2020)") +
+        `<p class="sub">${zh ? "全学区每个学段一个数字：族裔组别在该学段各学校之间分布得多不均匀。就读口径高于居住口径&mdash;&mdash;选校、转学和项目在边界之外又重新分拣了学生。两者都不是公平裁决。" : "One number per level for the whole district: how unevenly racial groups are spread across that level's schools. Enrollment runs higher than residential &mdash; choice, transfers, and programs re-sort students beyond what the lines do. Neither is a fairness verdict."}</p>` +
+        (zh ? (
+        `<div class="impact-section"><div class="section-head"><span class="detail-section-label">参与（决策过程）</span></div>` +
+          `<details class="ov-d"><summary>发生了什么，何时发生</summary><p class="district-text">2023 年的关校出自学区的<em>"Planning for the Future"（规划未来）</em>程序。学区表示它在 <b>2022 年 10 月</b>得出结论：入学人数不会回到疫情前水平。<sup class="an-cite"><a class="tabs-link" href="analysis.html#src-10">10</a></sup><b>2023 年 1 月中旬</b>，学区公布了七所面临合并的小学候选名单；<b>2 月 9 日</b>，临时督学建议关闭三所（Ardmore、Eastgate、Wilburton）；<b>3 月 9 日</b>建议修订为两所；<b>2023 年 3 月 16 日</b>，委员会表决关闭 Wilburton 和 Eastgate&mdash;&mdash;3 票赞成，2 票弃权。<sup class="an-cite"><a class="tabs-link" href="analysis.html#src-2">2</a>,<a class="tabs-link" href="analysis.html#src-3">3</a></sup>从名单公布到表决约八周。</p></details>` +
+          `<details class="ov-d"><summary>存在过哪些参与机会</summary><p class="district-text">1 月下旬在七所候选学校都举办了开放日和倾听会，另有一场线上说明会。委员会为每所被建议关闭的学校举行了正式听证（2 月 27 日、2 月 28 日、3 月 2 日），并在 3 月 9 日安排了最后一次公众意见机会。建议提出后成立了两个审议委员会：一个六人社区委员会，以及一个由每所受影响学校各一名教职员和一名家长组成的学校委员会。学区还表示对无家可归家庭以及接受多语言、学前和特殊教育服务的家庭做了定向联络。<sup class="an-cite"><a class="tabs-link" href="analysis.html#src-10">10</a>,<a class="tabs-link" href="analysis.html#src-11">11</a></sup></p></details>` +
+          `<details class="ov-d"><summary>社区自己的文件：PTA 联名信</summary><p class="district-text">最直接的过程证据来自家庭们自己。<b>2023 年 1 月 23 日</b>&mdash;&mdash;在任何学校被建议关闭之前&mdash;&mdash;<b>全部七所候选学校</b>的 PTA 向委员会发出一封联名信。信的语气承认赤字是真实的；它的请求都关于程序：把摆信息桌的开放日改为开放问答；审视州的 90 天关校法和学区自己关于设立志愿公民关校委员会的程序；并公布方案背后的数据&mdash;&mdash;信中附上了家长们自己的分析，显示候选学校在低收入、非裔和西语裔、英语学习者比例上位居学区前列，而设有高阶学习项目的学校却不在审查之列。信中还说方案没有为多语家庭翻译，并指出学区曾为 2012 年和 2016 年的划片决定成立过社区委员会。<sup class="an-cite"><a class="tabs-link" href="analysis.html#src-9">9</a></sup></p></details>` +
+          `<details class="ov-d"><summary>这些机会有多可用</summary><p class="district-text">这是有争议的部分。每场关键会议&mdash;&mdash;听证、最后一次意见机会、表决本身&mdash;&mdash;都定在工作日下午 4:30、同一栋中心办公楼。<sup class="an-cite"><a class="tabs-link" href="analysis.html#src-11">11</a></sup>地点可以说是公平的一环：按我们自己的路径计算，那栋楼接近学区的车程中心&mdash;&mdash;学区最远的角落驾车也只需约 13&ndash;18 分钟&mdash;&mdash;不过没有任何一场会议设在受影响的学校。钟点才是过程内部人描述的障碍：在 Ardmore 听证会上，学校教职员告诉委员会，家长缺席是因为无法在 4:30 前下班。<sup class="an-cite"><a class="tabs-link" href="analysis.html#src-3">3</a></sup>建议公布当晚，媒体比学区给家庭发邮件早一小时通过新闻稿拿到名单&mdash;&mdash;坐在会议室里的家长是从新闻里得知哪些学校被点名的。<sup class="an-cite"><a class="tabs-link" href="analysis.html#src-3">3</a></sup>而在最后一周，Eastgate 的华人移民家庭印了数千份中英双语传单、挨家挨户走访&mdash;&mdash;他们说学区的通知没有传到他们那里；学区说学校通过多个渠道定期发送了更新；无论哪种说法成立，这些家庭不得不自己搭建的补救是双语的。<sup class="an-cite"><a class="tabs-link" href="analysis.html#src-3">3</a></sup></p></details>` +
+          `<button class="district-btn" id="isc-pin-btn" title="在地图上标出 Wilburton 教学服务中心">&#128205; 在地图上标出听证地点（ISC）</button>` +
+          `<details class="ov-d"><summary>公众意见改变了什么</summary><p class="district-text">听证之后，Ardmore 被撤下关闭名单&mdash;&mdash;用临时督学自己的话说，是因为"家长们请求给他们一个机会"，加上一个预期能重建其生源的阿拉伯语传承语言项目<sup class="an-cite"><a class="tabs-link" href="analysis.html#src-12">12</a></sup>&mdash;&mdash;Eastgate 的接收方案也被简化。上文所说的社区与学校审议委员会&mdash;&mdash;由社区成员和受影响学校的家长与教职员组成，而非委员会或学区官员&mdash;&mdash;是在 PTA 联名信质问为何没有公民委员会之后的几周内成立的；学区称之为"建议提出以来设立的"参与机会，是否由联名信促成没有说明。<sup class="an-cite"><a class="tabs-link" href="analysis.html#src-9">9</a>,<a class="tabs-link" href="analysis.html#src-11">11</a></sup>结构性的决定&mdash;&mdash;关闭两所学校，以及时间表本身&mdash;&mdash;没有动过；学区对进度的解释是州资金即将到期，以及家庭需要春天来做安排。<sup class="an-cite"><a class="tabs-link" href="analysis.html#src-4">4</a></sup></p></details>` +
+          `<details class="ov-d"><summary>学区之前&mdash;&mdash;和之后&mdash;&mdash;怎么做</summary><p class="district-text">另外两个决定为这次程序提供了参照。<b>之前：</b>2016 年学区为未来的 Wilburton 学校画分区时，一个由家长和教职员组成的咨询委员会在任何地图存在<i>之前</i>就已成立，公众在开放日上权衡了五个地图方案，受影响的家庭获得了过渡保留选项&mdash;&mdash;地图获批前约有一年的参与期，再过两年才生效；对比 2023 年从名单到表决的八周。<sup class="an-cite"><a class="tabs-link" href="analysis.html#src-15">15</a>,<a class="tabs-link" href="analysis.html#src-16">16</a></sup><b>之后：</b>表决数周后的 2023 年 4 月，新任督学请学区的公平咨询小组重新设计参与标准；6 月，委员会决议称学区"尚未达到关键标准的应用水平……以实现所有学生和家庭的公平参与……"&mdash;&mdash;一份在关校余波中通过的、对其参与程序的总体自我评估。<sup class="an-cite"><a class="tabs-link" href="analysis.html#src-10">10</a></sup>当年秋天进行初中合并研究时，做法已经不同&mdash;&mdash;外聘人口学家、参与会议提早举行、设在学校、提供多种语言&mdash;&mdash;并在掌声中以不关校告终。<sup class="an-cite"><a class="tabs-link" href="analysis.html#src-8">8</a>,<a class="tabs-link" href="analysis.html#src-10">10</a></sup></p></details>` +
+          `<p class="sub">这次程序是否给了每个家庭平等而有效的发言机会，本站把这个判断留给读者；上面的事实是公共记录所显示的。上标链接到"分析"页的编号来源。</p></div>`
+      ) : (
         `<div class="impact-section"><div class="section-head"><span class="detail-section-label">Participation (the process)</span></div>` +
           `<details class="ov-d"><summary>What happened, when</summary><p class="district-text">The 2023 closures came out of the district's <em>"Planning for the Future"</em> process. The district has said it concluded in <b>October 2022</b> that enrollment would not return to pre-pandemic levels.<sup class="an-cite"><a class="tabs-link" href="analysis.html#src-10">10</a></sup> In <b>mid-January 2023</b> it published a list of seven elementary schools facing possible consolidation; on <b>February 9</b> the interim superintendent recommended closing three (Ardmore, Eastgate, Wilburton); on <b>March 9</b> the recommendation was revised to two; and on <b>March 16, 2023</b> the board voted to close Wilburton and Eastgate &mdash; 3 yes, 2 abstentions.<sup class="an-cite"><a class="tabs-link" href="analysis.html#src-2">2</a>,<a class="tabs-link" href="analysis.html#src-3">3</a></sup> About eight weeks passed between the public list and the vote.</p></details>` +
           `<details class="ov-d"><summary>The opportunities that existed</summary><p class="district-text">Open houses and listening sessions were held at all seven candidate schools in late January, plus a virtual information session. The board held a formal hearing for each recommended school (Feb 27, Feb 28, Mar 2) and a final public-comment opportunity on March 9. Two review committees formed after the recommendation: a six-member community committee, and a school committee with one staff member and one parent per affected school. The district also said it conducted targeted outreach to families experiencing homelessness and those receiving multilingual, preschool, or special-education services.<sup class="an-cite"><a class="tabs-link" href="analysis.html#src-10">10</a>,<a class="tabs-link" href="analysis.html#src-11">11</a></sup></p></details>` +
@@ -1216,10 +1422,11 @@
           `<button class="district-btn" id="isc-pin-btn" title="Drop a pin at the Wilburton Instructional Service Center">&#128205; Pin the hearing venue (ISC) on the map</button>` +
           `<details class="ov-d"><summary>What input changed</summary><p class="district-text">After the hearings, Ardmore came off the closure list &mdash; in the interim superintendent's own words, because of "the request of parents to give them a chance," paired with a planned Arabic Heritage Language program expected to rebuild its enrollment<sup class="an-cite"><a class="tabs-link" href="analysis.html#src-12">12</a></sup> &mdash; and Eastgate's receiving plan was simplified. The community and school review committees described above &mdash; community members plus affected-school parents and staff, not board or district officials &mdash; were formed in the weeks after the PTAs' letter had asked why no citizen committee existed; the district called them engagement opportunities "established since the recommendation," which leaves open whether the letter prompted them.<sup class="an-cite"><a class="tabs-link" href="analysis.html#src-9">9</a>,<a class="tabs-link" href="analysis.html#src-11">11</a></sup> The structural decisions &mdash; closing two schools, and the timeline itself &mdash; did not move; the district's stated reasons for the pace were expiring state funds and families' need for spring to plan.<sup class="an-cite"><a class="tabs-link" href="analysis.html#src-4">4</a></sup></p></details>` +
           `<details class="ov-d"><summary>What the district did before &mdash; and after</summary><p class="district-text">Two other decisions put this process in context. <b>Before:</b> in 2016, when the district drew the future Wilburton school's zone, an advisory committee of parents and staff formed <i>before</i> any map existed, the public weighed five map scenarios at open houses, and affected families received grandfathering options &mdash; roughly a year of engagement before the board approved the map, and two more years before it took effect, against 2023's eight weeks from list to vote.<sup class="an-cite"><a class="tabs-link" href="analysis.html#src-15">15</a>,<a class="tabs-link" href="analysis.html#src-16">16</a></sup> <b>After:</b> weeks after the vote, in April 2023, the incoming superintendent asked the district's equity advisory group to redesign its engagement criteria, and in June the board resolved that the district "has not yet achieved the level of application of the critical criteria&hellip; needed for equitable participation&hellip; of all students and families" &mdash; a general self-assessment of its engagement processes, adopted in the closures' immediate aftermath.<sup class="an-cite"><a class="tabs-link" href="analysis.html#src-10">10</a></sup> When the middle-school consolidation study ran that fall, it ran differently &mdash; outside demographers, engagement sessions held early, at the schools, in several languages &mdash; and ended, to applause, with no closures.<sup class="an-cite"><a class="tabs-link" href="analysis.html#src-8">8</a>,<a class="tabs-link" href="analysis.html#src-10">10</a></sup></p></details>` +
-          `<p class="sub">Whether this process gave every family an equal, effective voice is a judgment this site leaves to the reader; the facts above are what the public record shows. Superscripts link to the numbered sources on the Analysis page.</p></div>`;
+          `<p class="sub">Whether this process gave every family an equal, effective voice is a judgment this site leaves to the reader; the facts above are what the public record shows. Superscripts link to the numbered sources on the Analysis page.</p></div>`
+      ));
       const ISC = [-122.175939, 47.609237];   // Wilburton Instructional Service Center, 12241 Main St
       document.getElementById("isc-pin-btn").addEventListener("click", () => {
-        const nm = "Wilburton Instructional Service Center";
+        const nm = isZH() ? "Wilburton 教学服务中心（ISC）" : "Wilburton Instructional Service Center";
         if (!userPins.some(p => p.name === nm)) addUserPin(ISC, nm);
         map.flyTo({ center: ISC, zoom: 13.4, duration: 900 });
       });
@@ -1311,10 +1518,10 @@
       const el = document.getElementById("choro-legend");
       if (!el) return;
       el.removeAttribute("hidden");
-      el.innerHTML = `<div class="choro-title">Blocks colored by <b>${GRP_LABEL[raceGroup]}</b> (residential, 2020)</div>` +
+      el.innerHTML = `<div class="choro-title">${isZH() ? `街区按 <b>${T(GRP_LABEL[raceGroup])}</b> 上色（居住地，2020）` : `Blocks colored by <b>${GRP_LABEL[raceGroup]}</b> (residential, 2020)`}</div>` +
         `<div class="choro-bar" style="background:linear-gradient(to right, rgb(43,108,176), rgb(242,237,226), rgb(192,57,43))"></div>` +
-        `<div class="choro-ends"><span>${Math.max(0, Math.round(mid - span))}%</span><span>${mid}% district-wide</span><span>${Math.min(100, Math.round(mid + span))}%</span></div>` +
-        `<p class="map-hint">Where people live, not school enrollment. Blocks under ${MIN_BLOCK_POP} residents are greyed (noisy).</p>`;
+        `<div class="choro-ends"><span>${Math.max(0, Math.round(mid - span))}%</span><span>${isZH() ? `全学区 ${mid}%` : `${mid}% district-wide`}</span><span>${Math.min(100, Math.round(mid + span))}%</span></div>` +
+        `<p class="map-hint">${isZH() ? `显示居住地而非就读学校。少于 ${MIN_BLOCK_POP} 名居民的街区置灰（噪音大）。` : `Where people live, not school enrollment. Blocks under ${MIN_BLOCK_POP} residents are greyed (noisy).`}</p>`;
     }
 
     // Neighborhood mode: zone fills go colorless; neighborhoods are colored by split count.
@@ -1349,9 +1556,9 @@
       const el = document.getElementById("choro-legend");
       if (!el) return;
       el.removeAttribute("hidden");
-      el.innerHTML = `<div class="choro-title">Neighborhoods colored by <b>schools split across</b></div>` +
+      el.innerHTML = `<div class="choro-title">${isZH() ? "社区按<b>拆分学校数</b>上色" : "Neighborhoods colored by <b>schools split across</b>"}</div>` +
         `<div class="choro-bar"></div>` +
-        `<div class="choro-ends"><span>${maxC} schools (most split)</span><span>1 school (whole)</span></div>`;
+        `<div class="choro-ends"><span>${maxC} ${isZH() ? "所学校（拆分最多）" : "schools (most split)"}</span><span>${isZH() ? "1 所学校（完整）" : "1 school (whole)"}</span></div>`;
     }
 
     // Recolor the active level's zones by activeMetric (or revert to the categorical palette).
@@ -1422,12 +1629,12 @@
         ends = `<span>${f(r1v)}</span><span>${f(mid)}${note}</span><span>${f(r2v)}</span>`;
       } else {
         barHtml = `<div class="choro-bar"></div>`;
-        ends = (mn == null) ? `<span>no data at this level</span>`
+        ends = (mn == null) ? `<span>${isZH() ? "此学段无数据" : "no data at this level"}</span>`
           : meta.invert ? `<span>${f(mx)}</span><span>${f(mn)}</span>`
           : `<span>${f(mn)}</span><span>${f(mx)}</span>`;
       }
-      let html = `<div class="choro-title">Zones colored by <b>${meta.label}</b>` +
-        `<button class="choro-clear" title="Clear coloring">&times;</button></div>` +
+      let html = `<div class="choro-title">${isZH() ? `分区按 <b>${T(meta.label)}</b> 上色` : `Zones colored by <b>${meta.label}</b>`}` +
+        `<button class="choro-clear" title="${isZH() ? "清除上色" : "Clear coloring"}">&times;</button></div>` +
         barHtml + `<div class="choro-ends">${ends}</div>`;
       if (rank && rank.some(r => r.v != null)) {
         const rows = rank.map((r, i) =>
@@ -1435,13 +1642,14 @@
           `<span class="rank-dot" style="background:${r.color}"></span>` +
           `<span class="rank-name">${r.name}</span>` +
           `<span class="rank-val">${r.v == null ? "&mdash;" : f(r.v)}</span></div>`).join("");
-        html += `<button class="choro-rank-btn">${rankingOpen ? "Hide ranking" : "Ranking"}</button>` +
+        html += `<button class="choro-rank-btn">${T(rankingOpen ? "Hide ranking" : "Ranking")}</button>` +
           `<div class="choro-rank"${rankingOpen ? "" : " hidden"}>${rows}</div>`;
       }
       el.innerHTML = html;
     }
     function closeDetail() {
       detailPanel.classList.remove("open");
+      districtOpen = false;
       if (selected) { map.setFeatureState({ source: `zones-${selected.level}`, id: selected.id }, { selected: false }); selected = null; }
     }
     document.getElementById("detail-close").addEventListener("click", closeDetail);
@@ -1465,7 +1673,7 @@
       if (map.getLayer("fill-elementary")) map.setPaintProperty("fill-elementary", "fill-color", colorExpr(DATA.levels.elementary.labels));
       setActiveMarkers(activeLevel);
       applyChoropleth();   // re-rank/recolor within the era's zone set (or nbh split counts)
-      document.getElementById("zone-legend-label").innerHTML = `${LEVEL_META[activeLevel].legend} (${eraLabel()})`;
+      document.getElementById("zone-legend-label").innerHTML = `${T(LEVEL_META[activeLevel].legend)}（${T(eraLabel())}）`;
       document.querySelectorAll(".state-tab").forEach(t => {
         const on = t.dataset.state === st;
         t.classList.toggle("is-active", on);
@@ -1493,7 +1701,7 @@
       setActiveMarkers(lvl);   // show this level's school pins
       applyChoropleth();       // recolor for the new level if a metric is active
       userPins.forEach(p => updateUserPin(p));   // pins' assigned schools change with the level
-      document.getElementById("zone-legend-label").innerHTML = `${LEVEL_META[lvl].legend} (${eraLabel()})`;
+      document.getElementById("zone-legend-label").innerHTML = `${T(LEVEL_META[lvl].legend)}（${T(eraLabel())}）`;
       document.querySelectorAll(".level-tab:not(.state-tab)").forEach(t => {
         const on = t.dataset.level === lvl;
         t.classList.toggle("is-active", on);
@@ -1606,25 +1814,26 @@
         const d = road && road[s.name] ? road[s.name].km : havKm(pt, s.c);
         if (!nearest || d < nearest.d) nearest = { name: s.name, d, c: s.c };
       }
+      const zh = isZH();
       let rows = "";
       if (zone) {
         const sp = mains.find(s => s.name === zone);
-        rows += `<div class="pin-row"><span>Assigned school</span><b>${zone}${sp ? " · " + fmt(zone, havKm(pt, sp.c)) : ""}</b></div>`;
+        rows += `<div class="pin-row"><span>${zh ? "指定学校" : "Assigned school"}</span><b>${zone}${sp ? " · " + fmt(zone, havKm(pt, sp.c)) : ""}</b></div>`;
         if (nearest && nearest.name !== zone) {
-          rows += `<div class="pin-row"><span>Closest school</span><b>${nearest.name} · ${fmt(nearest.name, nearest.d)}</b></div>`;
+          rows += `<div class="pin-row"><span>${zh ? "最近的学校" : "Closest school"}</span><b>${nearest.name} · ${fmt(nearest.name, nearest.d)}</b></div>`;
         } else if (nearest) {
-          rows += `<div class="pin-row"><span>Closest school</span><b>same &mdash; ${nearest.name}</b></div>`;
+          rows += `<div class="pin-row"><span>${zh ? "最近的学校" : "Closest school"}</span><b>${zh ? `相同 &mdash; ${nearest.name}` : `same &mdash; ${nearest.name}`}</b></div>`;
         }
       } else {
-        rows += `<div class="pin-row pin-outside"><span>Outside Bellevue School District &mdash; no assigned school here</span></div>`;
-        if (nearest) rows += `<div class="pin-row"><span>Closest BSD school</span><b>${nearest.name} · ${fmt(nearest.name, nearest.d)}</b></div>`;
+        rows += `<div class="pin-row pin-outside"><span>${zh ? "在贝尔维尤学区之外 &mdash; 此处没有指定学校" : "Outside Bellevue School District &mdash; no assigned school here"}</span></div>`;
+        if (nearest) rows += `<div class="pin-row"><span>${zh ? "最近的 BSD 学校" : "Closest BSD school"}</span><b>${nearest.name} · ${fmt(nearest.name, nearest.d)}</b></div>`;
       }
       const H = programHosts(lvl);
       const progRows = [
-        ["Advanced Learning", H.advanced_learning],
-        ["Dual-language immersion", H.language_immersion],
+        [T("Advanced Learning"), H.advanced_learning],
+        [T("Dual-language immersion"), H.language_immersion],
         ["IB", H.ib],
-        ["Special-ed program", H.special_education]
+        [T("Special-ed program"), H.special_education]
       ].map(([label, list]) => {
         if (!list.length) return "";
         let best = null;
@@ -1634,19 +1843,21 @@
         }
         return `<div class="pin-row"><span>${label}</span><b>${best.name} · ${fmt(best.name, best.d)}</b></div>`;
       }).join("");
-      const levelWord = LEVEL_META[lvl].suffix.toLowerCase().replace(" school", "");
+      const levelWord = zh ? T(LEVEL_META[lvl].suffix) : LEVEL_META[lvl].suffix.toLowerCase().replace(" school", "");
       const walkP = travelProfile === "walk";
       const note = road
-        ? `${pinMode === "min" ? (walkP ? "Walk time" : "Drive time (no traffic)") : (walkP ? "Walking distance" : "Road distance (driving)")} &mdash; OpenRouteService.`
-        : `Straight-line for now &mdash; network distance &amp; time loading&hellip;`;
+        ? (zh ? `${pinMode === "min" ? (walkP ? "步行时间" : "驾车时间（不含堵车）") : (walkP ? "步行距离" : "道路距离（驾车）")} &mdash; OpenRouteService。`
+              : `${pinMode === "min" ? (walkP ? "Walk time" : "Drive time (no traffic)") : (walkP ? "Walking distance" : "Road distance (driving)")} &mdash; OpenRouteService.`)
+        : (zh ? `暂为直线距离 &mdash; 路网距离与时间加载中&hellip;` : `Straight-line for now &mdash; network distance &amp; time loading&hellip;`);
       const modeToggle = road
-        ? `<div class="pin-mode"><button class="pin-mode-btn${pinMode === "km" ? " on" : ""}" data-mode="km">distance</button>` +
-          `<button class="pin-mode-btn${pinMode === "min" ? " on" : ""}" data-mode="min">time</button></div>`
+        ? `<div class="pin-mode"><button class="pin-mode-btn${pinMode === "km" ? " on" : ""}" data-mode="km">${T("distance")}</button>` +
+          `<button class="pin-mode-btn${pinMode === "min" ? " on" : ""}" data-mode="min">${T("time")}</button></div>`
         : "";
       return {
-        zoneText: zone ? zone + " " + LEVEL_META[lvl].suffix.toLowerCase() + " zone" : "outside the district",
+        zoneText: zone ? (zh ? `${zone} ${T(LEVEL_META[lvl].suffix)}分区` : zone + " " + LEVEL_META[lvl].suffix.toLowerCase() + " zone")
+                       : (zh ? "在学区之外" : "outside the district"),
         html: modeToggle + `<div class="pin-rows">${rows}</div>` +
-          (progRows ? `<div class="sch-lab" style="margin-top:0.55rem">Nearest ${levelWord}-level program</div>` +
+          (progRows ? `<div class="sch-lab" style="margin-top:0.55rem">${zh ? `最近的${levelWord}学段项目` : `Nearest ${levelWord}-level program`}</div>` +
           `<div class="pin-rows">${progRows}</div>` : "") +
           `<p class="dist-note" style="margin-top:0.5rem">${note}</p>`
       };
@@ -1681,13 +1892,14 @@
     function renderUserPin(p, autoOpen) {
       const ll = p.marker.getLngLat();
       const b = locBody([ll.lng, ll.lat], p.road);
+      const zh = isZH();
       p.marker.getPopup().setHTML(
         `<div class="sch-pop"><div class="upin-head">` +
-          `<input class="upin-name" value="${(p.name || "My pin").replace(/"/g, "&quot;")}" maxlength="40" title="Name this pin" />` +
-          `<button class="upin-lock" title="${p.locked ? "Locked — click to allow dragging" : "Unlocked — click to lock in place"}">${p.locked ? "&#128274;" : "&#128275;"}</button>` +
+          `<input class="upin-name" value="${(p.name || (zh ? "我的图钉" : "My pin")).replace(/"/g, "&quot;")}" maxlength="40" title="${zh ? "给图钉命名" : "Name this pin"}" />` +
+          `<button class="upin-lock" title="${zh ? (p.locked ? "已锁定——点击可拖动" : "未锁定——点击固定位置") : (p.locked ? "Locked — click to allow dragging" : "Unlocked — click to lock in place")}">${p.locked ? "&#128274;" : "&#128275;"}</button>` +
         `</div>` +
-        `<div class="popup-sub">${b.zoneText}${p.locked ? "" : " &middot; drag me around"}</div>` + b.html +
-        `<button class="upin-remove">Remove this pin</button></div>`);
+        `<div class="popup-sub">${b.zoneText}${p.locked ? "" : (zh ? " &middot; 可以拖动我" : " &middot; drag me around")}</div>` + b.html +
+        `<button class="upin-remove">${zh ? "移除此图钉" : "Remove this pin"}</button></div>`);
       if (autoOpen !== false && !p.marker.getPopup().isOpen()) p.marker.togglePopup();
       const el = p.marker.getPopup().getElement();
       if (!el) return;
@@ -1727,7 +1939,7 @@
       const el = makePin("#0f6e66");
       el.classList.add("user-pin");
       const p = {
-        name: name || "My pin", road: null, seq: 0, locked,   // pins start locked in place
+        name: name || (isZH() ? "我的图钉" : "My pin"), road: null, seq: 0, locked,   // pins start locked in place
         marker: new maplibregl.Marker({ element: el, anchor: "bottom", draggable: !locked })
           .setLngLat(lngLat)
           .setPopup(new maplibregl.Popup({ offset: 34, closeButton: true, maxWidth: "300px" }))
@@ -1753,14 +1965,15 @@
     const addPinBtn = document.getElementById("add-pin-btn");
     addPinBtn.addEventListener("click", () => {
       addingPin = !addingPin;
-      addPinBtn.textContent = addingPin ? "Click anywhere on the map… (cancel)" : "…or click the map to place a pin";
+      addPinBtn.textContent = addingPin ? (isZH() ? "点击地图任意处……（取消）" : "Click anywhere on the map… (cancel)")
+        : (isZH() ? "……或点击地图放置图钉" : "…or click the map to place a pin");
       addPinBtn.classList.toggle("active", addingPin);
       map.getCanvas().style.cursor = addingPin ? "crosshair" : "";
     });
     map.on("click", (e) => {
       if (!addingPin || !DATA) return;
       addingPin = false;
-      addPinBtn.textContent = "…or click the map to place a pin";
+      addPinBtn.textContent = isZH() ? "……或点击地图放置图钉" : "…or click the map to place a pin";
       addPinBtn.classList.remove("active");
       map.getCanvas().style.cursor = "";
       addUserPin([e.lngLat.lng, e.lngLat.lat]);
@@ -1783,12 +1996,12 @@
         // match's own point to actually be inside our area
         const [bx0, by0, bx1, by1] = GEO_BBOX.split(",").map(Number);
         if (f && !(f.center[0] >= bx0 && f.center[0] <= bx1 && f.center[1] >= by0 && f.center[1] <= by1)) f = null;
-        if (!f) { inp.value = ""; inp.placeholder = "No match near Bellevue — try a fuller address…"; return; }
+        if (!f) { inp.value = ""; inp.placeholder = isZH() ? "贝尔维尤附近无匹配——请输入更完整的地址……" : "No match near Bellevue — try a fuller address…"; return; }
         // name the pin with what was actually MATCHED, so a wrong guess is visible and fixable
         const matched = (f.place_name || q).split(",")[0];
         addUserPin(f.center, matched);
         map.flyTo({ center: f.center, zoom: Math.max(map.getZoom(), 13), duration: 900 });
-        inp.value = ""; inp.placeholder = "Add a pin: type an address…";
+        inp.value = ""; inp.placeholder = isZH() ? "添加图钉：输入地址……" : "Add a pin: type an address…";
       } catch (err) { console.error("geocode failed", err); }
     }
     document.getElementById("addr-go").addEventListener("click", geocodeAdd);
@@ -1799,7 +2012,7 @@
       addUserPin(f.center, (f.place_name || "").split(",")[0]);
       map.flyTo({ center: f.center, zoom: Math.max(map.getZoom(), 13), duration: 900 });
       const inp = document.getElementById("addr-input");
-      inp.value = ""; inp.placeholder = "Add a pin: type an address…";
+      inp.value = ""; inp.placeholder = isZH() ? "添加图钉：输入地址……" : "Add a pin: type an address…";
     });
     function wireAddrSuggest(inputEl, onPick) {
       const box = document.createElement("div");
@@ -1865,9 +2078,9 @@
       const p = map.project(ll);
       const cands = [];
       (schoolMarkers[activeLevel] || []).forEach(m => {
-        if (m.getElement().style.display !== "none") cands.push({ ll: m.getLngLat(), label: m._label || "school" });
+        if (m.getElement().style.display !== "none") cands.push({ ll: m.getLngLat(), label: m._label || (isZH() ? "学校" : "school") });
       });
-      userPins.forEach(up => cands.push({ ll: up.marker.getLngLat(), label: up.name || "My pin" }));
+      userPins.forEach(up => cands.push({ ll: up.marker.getLngLat(), label: up.name || (isZH() ? "我的图钉" : "My pin") }));
       let best = null;
       for (const c of cands) {
         const q = map.project(c.ll);
@@ -1881,9 +2094,9 @@
       if (!routeMarkers) return;
       const seq = ++routeSeq;
       const a = routeMarkers[0].getLngLat(), b = routeMarkers[1].getLngLat();
-      const la = routeMarkers[0]._snap || "Point A", lb = routeMarkers[1]._snap || "Point B";
+      const la = routeMarkers[0]._snap || (isZH() ? "A 点" : "Point A"), lb = routeMarkers[1]._snap || (isZH() ? "B 点" : "Point B");
       routeInfoEl.removeAttribute("hidden");
-      routeInfoEl.innerHTML = `<b>${la}</b> &rarr; <b>${lb}</b><br><span class="muted">routing&hellip;</span>`;
+      routeInfoEl.innerHTML = `<b>${la}</b> &rarr; <b>${lb}</b><br><span class="muted">${isZH() ? "计算路线中&hellip;" : "routing&hellip;"}</span>`;
       try {
         const r = await fetch(`https://api.openrouteservice.org/v2/directions/${orsProfile()}` +
           `?api_key=${ORS_KEY}&start=${a.lng},${a.lat}&end=${b.lng},${b.lat}`);
@@ -1895,10 +2108,10 @@
         const s = f.properties.summary;
         const walkP = travelProfile === "walk";
         routeInfoEl.innerHTML = `<b>${la}</b> &rarr; <b>${lb}</b><br>` +
-          `<span class="route-nums">${kmf(s.distance / 1000)} &middot; ${Math.max(1, Math.round(s.duration / 60))} min ${walkP ? "walk" : "drive"}</span>` +
-          (walkP ? "" : `<span class="muted"> (no traffic)</span>`);
+          `<span class="route-nums">${kmf(s.distance / 1000)} &middot; ${isZH() ? `${walkP ? "步行" : "驾车"} ${Math.max(1, Math.round(s.duration / 60))} 分钟` : `${Math.max(1, Math.round(s.duration / 60))} min ${walkP ? "walk" : "drive"}`}</span>` +
+          (walkP ? "" : `<span class="muted">${isZH() ? "（不含堵车）" : " (no traffic)"}</span>`);
       } catch (err) {
-        if (seq === routeSeq) routeInfoEl.innerHTML = `<b>${la}</b> &rarr; <b>${lb}</b><br><span class="muted">routing failed &mdash; try again</span>`;
+        if (seq === routeSeq) routeInfoEl.innerHTML = `<b>${la}</b> &rarr; <b>${lb}</b><br><span class="muted">${isZH() ? "路线计算失败 &mdash; 请重试" : "routing failed &mdash; try again"}</span>`;
       }
     }
     const routeBtn = document.getElementById("route-btn");
@@ -1906,7 +2119,7 @@
       routeOn = !routeOn;
       routeBtn.classList.toggle("active", routeOn);
       if (routeOn) {
-        routeBtn.textContent = "Remove the route markers";
+        routeBtn.textContent = isZH() ? "移除路线标记" : "Remove the route markers";
         const c = map.getCenter();
         routeMarkers = [-0.012, 0.012].map(dx => {
           const el = makePin("#2b6cb0", 0.72);
@@ -1920,7 +2133,7 @@
         });
         updateRoute();
       } else {
-        routeBtn.textContent = "Measure a route (two blue markers)";
+        routeBtn.textContent = isZH() ? "测量路线（两个蓝色标记）" : "Measure a route (two blue markers)";
         if (routeMarkers) routeMarkers.forEach(m => m.remove());
         routeMarkers = null; routeGeom = null;
         if (map.getSource("route")) drawRoute();
@@ -1987,7 +2200,8 @@
 
     // ----- Graph mode: small-multiple charts + all-zones delta scatter -----
     const GM_STATES = ["a", "b", "c"];
-    const GM_XLAB = { a: "pre-'18", b: "'18–'23", c: "'23–now" };
+    const GM_XLAB_EN = { a: "pre-'18", b: "'18–'23", c: "'23–now" };
+    const GM_XLAB = new Proxy({}, { get: (_, k) => T(GM_XLAB_EN[k]) });
     const GM_COLORS = ["#0f6e66", "#b0763a", "#5d7fb2", "#a05a94"];
     const GM_STORE = "bsd_gm_graphs";
     let gmGraphs = [];
@@ -2022,7 +2236,7 @@
       const meta = CHORO_BY_ID[cfg.metric];
       const series = cfg.names.map(nm => GM_STATES.map(S => gmValue(S, cfg.lvl, nm, cfg.metric)));
       const vals = series.flat().filter(v => v != null);
-      if (!vals.length) return { svg: `<p class="dist-empty">No data for this combination.</p>`, notes: [] };
+      if (!vals.length) return { svg: `<p class="dist-empty">${isZH() ? "此组合没有数据。" : "No data for this combination."}</p>`, notes: [] };
       let mn = Math.min(...vals), mx = Math.max(...vals);
       if (mn === mx) { const pad = Math.abs(mn) * 0.1 || 1; mn -= pad; mx += pad; }
       else { const pad = (mx - mn) * 0.15; mn -= pad; mx += pad; }
@@ -2057,17 +2271,18 @@
       const notes = [];
       if (series.length === 1) {
         const p = series[0], d = [];
-        if (p[0] != null && p[1] != null) d.push(`2018 rezoning: <b>${fmtDelta(meta, p[1] - p[0])}</b>`);
-        if (p[1] != null && p[2] != null) d.push(`2023 rezoning: <b>${fmtDelta(meta, p[2] - p[1])}</b>`);
+        const zh = isZH();
+        if (p[0] != null && p[1] != null) d.push(`${zh ? "2018 年重划" : "2018 rezoning"}: <b>${fmtDelta(meta, p[1] - p[0])}</b>`);
+        if (p[1] != null && p[2] != null) d.push(`${zh ? "2023 年重划" : "2023 rezoning"}: <b>${fmtDelta(meta, p[2] - p[1])}</b>`);
         if (d.length) notes.push(`<span class="gm-delta">${d.join(" · ")}</span>`);
-        if (p.every(v => v != null) && p[0] === p[1] && p[1] === p[2]) notes.push("Unchanged across all three eras.");
+        if (p.every(v => v != null) && p[0] === p[1] && p[1] === p[2]) notes.push(zh ? "三个时期均无变化。" : "Unchanged across all three eras.");
       }
       const legend = series.length > 1
         ? `<div class="gm-legend">` + cfg.names.map((nm, i) =>
             `<span class="gm-chip"><span class="gm-chip-dot" style="background:${GM_COLORS[i % GM_COLORS.length]}"></span>${nm}</span>`).join("") + `</div>`
         : "";
       if (cfg.lvl === "elementary" && series.some(pts => pts[0] != null)) {
-        notes.push(`pre-'18 point from the federal SABS survey — different source, approximate.`);
+        notes.push(isZH() ? `'18 前的点来自联邦 SABS 调查——来源不同，近似。` : `pre-'18 point from the federal SABS survey — different source, approximate.`);
       }
       return { svg: `<svg class="gm-svg" viewBox="0 0 ${W} ${H}">${svg}</svg>` + legend, notes };
     }
@@ -2083,7 +2298,7 @@
         const y1 = gmValue(S1, cfg.lvl, nm, cfg.my), y2 = gmValue(S2, cfg.lvl, nm, cfg.my);
         if (x1 != null && x2 != null && y1 != null && y2 != null) dots.push({ nm, dx: x2 - x1, dy: y2 - y1 });
       });
-      if (!dots.length) return { svg: `<p class="dist-empty">No zones have data for both eras here.</p>`, notes: [] };
+      if (!dots.length) return { svg: `<p class="dist-empty">${isZH() ? "没有分区在两个时期都有数据。" : "No zones have data for both eras here."}</p>`, notes: [] };
       const pad = a => { let lo = Math.min(...a, 0), hi = Math.max(...a, 0); const p = (hi - lo) * 0.12 || 1; return [lo - p, hi + p]; };
       const xr = pad(dots.map(d => d.dx)), yr = pad(dots.map(d => d.dy));
       const xlo = xr[0], xhi = xr[1], ylo = yr[0], yhi = yr[1];
@@ -2100,61 +2315,64 @@
         svg += `<circle class="gm-dot" cx="${px(d.dx).toFixed(1)}" cy="${py(d.dy).toFixed(1)}" r="3.6">` +
           `<title>${d.nm}: Δ ${mx_.label} ${fmtDelta(mx_, d.dx)}, Δ ${my_.label} ${fmtDelta(my_, d.dy)}</title></circle>`;
       });
-      const notes = [`${dots.length} zones. Each dot = one zone's change across the ${cfg.event} rezoning. A shapeless cloud means no relationship — that is a finding too.`];
-      if (dots.every(d => d.dx === 0 && d.dy === 0)) notes.push("All zeros — boundaries at this level did not change in this event.");
-      if (cfg.event === "2018" && cfg.lvl === "elementary") notes.push("pre-'18 values from the federal SABS survey — different source, approximate.");
+      const notes = [isZH()
+        ? `共 ${dots.length} 个分区。每个点 = 一个分区在 ${cfg.event} 年重划前后的变化。无形状的散点云表示没有关系——这本身也是一个发现。`
+        : `${dots.length} zones. Each dot = one zone's change across the ${cfg.event} rezoning. A shapeless cloud means no relationship — that is a finding too.`];
+      if (dots.every(d => d.dx === 0 && d.dy === 0)) notes.push(isZH() ? "全为零——此学段的边界在这次事件中没有变化。" : "All zeros — boundaries at this level did not change in this event.");
+      if (cfg.event === "2018" && cfg.lvl === "elementary") notes.push(isZH() ? "'18 前的数值来自联邦 SABS 调查——来源不同，近似。" : "pre-'18 values from the federal SABS survey — different source, approximate.");
       return {
         svg: `<svg class="gm-svg" viewBox="0 0 ${W} ${H}">${svg}</svg>` +
-             `<div class="chart-cap">x: Δ ${mx_.label} · y: Δ ${my_.label}</div>`,
+             `<div class="chart-cap">x: Δ ${T(mx_.label)} · y: Δ ${T(my_.label)}</div>`,
         notes: notes
       };
     }
 
-    function gmLevelWord(lvl) { return LEVEL_META[lvl].suffix; }
+    function gmLevelWord(lvl) { return T(LEVEL_META[lvl].suffix); }
     function gmRender() {
       let html = gmGraphs.map((cfg, gi) => {
         let head, body;
         if (cfg.type === "scatter") {
           const r = gmScatterSVG(cfg);
-          head = `<div><b>All zones — Δ scatter</b> <span class="muted">${gmLevelWord(cfg.lvl)} · ${cfg.event} rezoning</span>` +
-                 `<div class="gm-metric">Δ ${CHORO_BY_ID[cfg.mx].label} vs Δ ${CHORO_BY_ID[cfg.my].label}</div></div>`;
+          head = `<div><b>${isZH() ? "全部分区 — Δ 散点" : "All zones — Δ scatter"}</b> <span class="muted">${gmLevelWord(cfg.lvl)} · ${isZH() ? `${cfg.event} 年重划` : `${cfg.event} rezoning`}</span>` +
+                 `<div class="gm-metric">Δ ${T(CHORO_BY_ID[cfg.mx].label)} vs Δ ${T(CHORO_BY_ID[cfg.my].label)}</div></div>`;
           body = r.svg + r.notes.map(n => `<div class="gm-caveat">${n}</div>`).join("");
         } else {
           const r = gmLineSVG(cfg);
-          const nm = cfg.names.length > 2 ? `${cfg.names[0]} +${cfg.names.length - 1} more` : cfg.names.join(" · ");
+          const nm = cfg.names.length > 2 ? (isZH() ? `${cfg.names[0]} 等 ${cfg.names.length} 个` : `${cfg.names[0]} +${cfg.names.length - 1} more`) : cfg.names.join(" · ");
           head = `<div><b>${nm}</b> <span class="muted">${gmLevelWord(cfg.lvl)}</span>` +
-                 `<div class="gm-metric">${CHORO_BY_ID[cfg.metric].label}</div></div>`;
+                 `<div class="gm-metric">${T(CHORO_BY_ID[cfg.metric].label)}</div></div>`;
           body = r.svg + r.notes.map(n => `<div class="gm-caveat">${n}</div>`).join("");
         }
         return `<div class="gm-tile gm-card"><div class="gm-card-head">${head}` +
-          `<button class="gm-remove" data-gi="${gi}" title="Remove this graph">&times;</button></div>${body}</div>`;
+          `<button class="gm-remove" data-gi="${gi}" title="${isZH() ? "移除此图" : "Remove this graph"}">&times;</button></div>${body}</div>`;
       }).join("");
       html += `<div class="gm-tile gm-addtile"><div class="gm-addwrap">` +
-        `<button class="gm-add" data-type="line">+ Zone chart</button>` +
-        `<button class="gm-add" data-type="scatter">+ All-zones scatter</button></div></div>`;
+        `<button class="gm-add" data-type="line">${isZH() ? "+ 分区图" : "+ Zone chart"}</button>` +
+        `<button class="gm-add" data-type="scatter">${isZH() ? "+ 全分区散点" : "+ All-zones scatter"}</button></div></div>`;
       const total = gmGraphs.length + 1;
       for (let i = total; i < 4; i++) html += `<div class="gm-tile gm-empty"></div>`;
       gmGrid.innerHTML = html;
     }
     function gmPickerHTML(type) {
+      const zh = isZH();
       const lvls = LEVELS.map(l => `<option value="${l}">${gmLevelWord(l)}</option>`).join("");
-      const mets = CHOROPLETH.map(m => `<option value="${m.id}">${m.label}</option>`).join("");
+      const mets = CHOROPLETH.map(m => `<option value="${m.id}">${T(m.label)}</option>`).join("");
       if (type === "scatter") {
         return `<div class="gm-form" data-type="scatter">` +
-          `<label>Level<select class="gm-level">${lvls}</select></label>` +
-          `<label>Event<select class="gm-event"><option value="2023">2023 rezoning ('18–'23 → now)</option>` +
-          `<option value="2018">2018 rezoning (pre-'18 → '18–'23)</option></select></label>` +
-          `<label>Measure X<select class="gm-mx">${mets}</select></label>` +
-          `<label>Measure Y<select class="gm-my">${mets}</select></label>` +
-          `<div class="gm-form-btns"><button class="gm-ok">Add</button><button class="gm-cancel">Cancel</button></div></div>`;
+          `<label>${zh ? "学段" : "Level"}<select class="gm-level">${lvls}</select></label>` +
+          `<label>${zh ? "事件" : "Event"}<select class="gm-event"><option value="2023">${zh ? "2023 年重划（'18–'23 → 今）" : "2023 rezoning ('18–'23 → now)"}</option>` +
+          `<option value="2018">${zh ? "2018 年重划（'18 前 → '18–'23）" : "2018 rezoning (pre-'18 → '18–'23)"}</option></select></label>` +
+          `<label>${zh ? "指标 X" : "Measure X"}<select class="gm-mx">${mets}</select></label>` +
+          `<label>${zh ? "指标 Y" : "Measure Y"}<select class="gm-my">${mets}</select></label>` +
+          `<div class="gm-form-btns"><button class="gm-ok">${zh ? "添加" : "Add"}</button><button class="gm-cancel">${zh ? "取消" : "Cancel"}</button></div></div>`;
       }
       const zones = gmZoneNames("elementary").map(n => `<option>${n}</option>`).join("");
       return `<div class="gm-form" data-type="line">` +
-        `<label>Level<select class="gm-level">${lvls}</select></label>` +
-        `<label>School zones <span class="gm-hint">(Ctrl-click for up to 4)</span>` +
+        `<label>${zh ? "学段" : "Level"}<select class="gm-level">${lvls}</select></label>` +
+        `<label>${zh ? "学校分区" : "School zones"} <span class="gm-hint">${zh ? "（Ctrl+点击可选最多 4 个）" : "(Ctrl-click for up to 4)"}</span>` +
         `<select class="gm-zone" multiple size="5">${zones}</select></label>` +
-        `<label>Measure<select class="gm-metric">${mets}</select></label>` +
-        `<div class="gm-form-btns"><button class="gm-ok">Add</button><button class="gm-cancel">Cancel</button></div></div>`;
+        `<label>${zh ? "指标" : "Measure"}<select class="gm-metric">${mets}</select></label>` +
+        `<div class="gm-form-btns"><button class="gm-ok">${zh ? "添加" : "Add"}</button><button class="gm-cancel">${zh ? "取消" : "Cancel"}</button></div></div>`;
     }
     gmGrid.addEventListener("click", (e) => {
       const add = e.target.closest(".gm-add");
@@ -2192,6 +2410,27 @@
       const zoneSel = lv.closest(".gm-form").querySelector(".gm-zone");
       if (zoneSel) zoneSel.innerHTML = gmZoneNames(lv.value).map(n => `<option>${n}</option>`).join("");
     });
+
+    /* ---- language switch: re-render every open dynamic surface in place ---- */
+    document.addEventListener("bsd-lang", () => {
+      if (!DATA) return;
+      document.getElementById("zone-legend-label").innerHTML = `${T(LEVEL_META[activeLevel].legend)}（${T(eraLabel())}）`;
+      applyChoropleth();                                     // metric/race/nbh legend text
+      if (currentZone) openDetail(currentZone.props, currentZone.lvl);
+      else if (districtOpen) openDistrict();
+      // school popups were rendered at creation — rebuild them in the new language
+      const redo = m => { if (m._props && m.getPopup()) m.getPopup().setHTML(schoolPopupHTML(m._props)); };
+      LEVELS.forEach(L => schoolMarkers[L].forEach(redo));
+      ["a", "b"].forEach(S => stateMarkers[S].forEach(redo));
+      userPins.forEach(p => renderUserPin(p, false));
+      if (routeMarkers) updateRoute();
+      if (!gmEl.hasAttribute("hidden")) gmRender();
+      addPinBtn.textContent = addingPin ? (isZH() ? "点击地图任意处……（取消）" : "Click anywhere on the map… (cancel)")
+        : (isZH() ? "……或点击地图放置图钉" : "…or click the map to place a pin");
+      if (routeOn) routeBtn.textContent = isZH() ? "移除路线标记" : "Remove the route markers";
+      else routeBtn.textContent = isZH() ? "测量路线（两个蓝色标记）" : "Measure a route (two blue markers)";
+    });
+
   </script>
 </body>
 </html>

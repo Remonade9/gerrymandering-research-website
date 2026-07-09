@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Boundary Changes — Bellevue School District</title>
   <meta name="description" content="Which territory switched elementary schools in Bellevue's 2018 and 2023 rezonings, and what changed for the people living there." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=128" />
-  <link rel="stylesheet" href="styles.css?v=128" />
-  <script src="vendor/maplibre-gl-csp.js?v=128"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=129" />
+  <link rel="stylesheet" href="styles.css?v=129" />
+  <script src="vendor/maplibre-gl-csp.js?v=129"></script>
 </head>
 <body class="chg-page">
   <div id="map"></div>
@@ -63,15 +63,50 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=128"></script>
+  <script src="intro.js?v=129"></script>
 
   <script>
     const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "128";
+    const DATA_VER = "129";
+
+    /* ---- in-place Chinese for the dynamic panels (same pattern as the map tool) ---- */
+    const isZH = () => (localStorage.getItem("bsd_lang") || "en") === "zh";
+    const ZHD = {
+      "Advanced Learning": "高阶学习项目",
+      "Olympic program": "Olympic 项目",
+      "Jing Mei (school moved)": "Jing Mei（学校迁址）",
+      "Wilburton building": "Wilburton 校舍",
+      "Opened fall 2018 to relieve elementary overcrowding; its zone was assembled from neighboring zones.":
+        "2018 年秋开办，以缓解小学拥挤；其分区由周边分区各划一块拼成。",
+      "Opened fall 2018; closed June 2023 in the consolidation. Final-year enrollment 350 (2022-23), capacity 650. The building now houses Jing Mei Elementary.":
+        "2018 年秋开办；2023 年 6 月在合并中关闭。最后一学年在校 350 人（2022–23），容量 650。校舍现为 Jing Mei 小学使用。",
+      "Closed June 2023 in the consolidation. Final-year enrollment 316 (2022-23), capacity 529. Hosted the Olympic program, which moved to Spiritridge.":
+        "2023 年 6 月在合并中关闭。最后一学年在校 316 人（2022–23），容量 529。曾设 Olympic 项目，该项目迁至 Spiritridge。",
+      "Polsby-Popper (shape)": "Polsby–Popper（形状）",
+      "Utilization": "使用率", "Mix gap": "构成差距", "Avg drive to school": "到校平均驾车",
+      "Road distance": "道路距离", "Driving time": "驾车时间", "Walking time": "步行时间",
+      "Dual-language immersion": "双语沉浸项目", "Site-based special ed": "定点特殊教育",
+      "White": "白人", "Asian": "亚裔", "Hispanic": "西语裔", "Black": "非裔"
+    };
+    const T = s => { if (!isZH()) return s; const v = ZHD[s]; return v != null ? v : s; };
+    const TIMELINES_ZH = {
+      "2023": [
+        ["2022 年 10 月", "学区发布合并分析（《Planning for the Future》报告）。"],
+        ["2023 年 2 月 9 日", "临时督学建议关闭三所学校；Ardmore 后经社区争取被保留。"],
+        ["2023 年 3 月 16 日", "委员会表决关闭 Wilburton 和 Eastgate（3 票赞成，2 票弃权）。"],
+        ["2023 年 6 月", "两校的最后一个上学日。"],
+        ["2023 年秋", "新的小学入学分区生效。"]
+      ],
+      "2018": [
+        ["2016 年 8 月", "委员会批准新学校的入学地图，由社区咨询委员会参与绘制。"],
+        ["2016–2018", "为缓解小学拥挤而建设 Wilburton 小学。"],
+        ["2018 年 9 月", "Wilburton 开学；其分区由周边分区各划一块拼成。"]
+      ]
+    };
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=128");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=129");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
@@ -373,9 +408,9 @@
       info.flows.forEach((f, i) => {
         if (seen.has(f.to)) return;
         seen.add(f.to);
-        rows.push(`<div class="chg-key-row"><span class="chg-swatch" style="background:${receiverColor(f.to, i)}"></span> moved to ${esc(f.to)}</div>`);
+        rows.push(`<div class="chg-key-row"><span class="chg-swatch" style="background:${receiverColor(f.to, i)}"></span> ${isZH() ? `划入 ${esc(f.to)}` : `moved to ${esc(f.to)}`}</div>`);
       });
-      rows.push(`<div class="chg-key-note">≈ numbers = children (5–17) living in the moved area</div>`);
+      rows.push(`<div class="chg-key-note">${isZH() ? "≈ 数字 = 居住在改划区域内的儿童（5–17 岁）" : "≈ numbers = children (5–17) living in the moved area"}</div>`);
       document.getElementById("chg-key-flows").innerHTML = rows.join("");
     }
 
@@ -394,7 +429,7 @@
         const mk = new maplibregl.Marker({ element: ghostEl(false), anchor: "center" })
           .setLngLat(g.xy)
           .setPopup(new maplibregl.Popup({ offset: 14, maxWidth: "300px" })
-            .setHTML(`<div class="chg-pop"><b>${esc(g.name)}</b> <span class="chg-closed-tag">closed</span><br/>${esc(g.note)}</div>`))
+            .setHTML(`<div class="chg-pop"><b>${esc(g.name)}</b> <span class="chg-closed-tag">${isZH() ? "已关闭" : "closed"}</span><br/>${esc(T(g.note))}</div>`))
           .addTo(map);
         mk.getElement().addEventListener("click", () => mk.togglePopup());
         ghostMarkers.push(mk);
@@ -403,7 +438,7 @@
         const mk = new maplibregl.Marker({ element: ghostEl(true), anchor: "center" })
           .setLngLat(g.xy)
           .setPopup(new maplibregl.Popup({ offset: 14, maxWidth: "300px" })
-            .setHTML(`<div class="chg-pop"><b>${esc(g.name)}</b> <span class="chg-open-tag">opened</span><br/>${esc(g.note)}</div>`))
+            .setHTML(`<div class="chg-pop"><b>${esc(g.name)}</b> <span class="chg-open-tag">${isZH() ? "新开办" : "opened"}</span><br/>${esc(T(g.note))}</div>`))
           .addTo(map);
         mk.getElement().addEventListener("click", () => mk.togglePopup());
         ghostMarkers.push(mk);
@@ -437,7 +472,7 @@
       ["Utilization", (m) => m.util == null ? "—" : Math.round(m.util) + "%"],
       ["Mix gap", (m) => fmt3(m.mix)],
       ["Avg drive to school", (m) => m.drive == null ? "—" : fmt1(m.drive) + " min"]
-    ];
+    ];   // labels pass through T() at render time
 
     function renderAZBody(ev, name) {
       const [bs, as] = EVENT_ERAS[ev];
@@ -446,16 +481,16 @@
       if (!el) return;
       if (pb && !pa) {
         const m = zoneMetrics(pb);
-        el.innerHTML = `<p class="chg-az-note">This zone <b>closed</b> in the change. Its last-era numbers:</p>` +
-          AZ_ROWS.map(([lbl, fn]) => `<div class="chg-pair"><span>${lbl}</span><b>${fn(m)}</b></div>`).join("");
+        el.innerHTML = `<p class="chg-az-note">${isZH() ? "该分区在这次变更中<b>被关闭</b>。其最后一个时期的数字：" : "This zone <b>closed</b> in the change. Its last-era numbers:"}</p>` +
+          AZ_ROWS.map(([lbl, fn]) => `<div class="chg-pair"><span>${T(lbl)}</span><b>${fn(m)}</b></div>`).join("");
       } else if (!pb && pa) {
         const m = zoneMetrics(pa);
-        el.innerHTML = `<p class="chg-az-note">This zone was <b>newly created</b> by the change. Its first-era numbers:</p>` +
-          AZ_ROWS.map(([lbl, fn]) => `<div class="chg-pair"><span>${lbl}</span><b>${fn(m)}</b></div>`).join("");
+        el.innerHTML = `<p class="chg-az-note">${isZH() ? "该分区由这次变更<b>新设立</b>。其第一个时期的数字：" : "This zone was <b>newly created</b> by the change. Its first-era numbers:"}</p>` +
+          AZ_ROWS.map(([lbl, fn]) => `<div class="chg-pair"><span>${T(lbl)}</span><b>${fn(m)}</b></div>`).join("");
       } else if (pb && pa) {
         const mb = zoneMetrics(pb), ma = zoneMetrics(pa);
         el.innerHTML = AZ_ROWS.map(([lbl, fn]) =>
-          `<div class="chg-pair"><span>${lbl}</span><b>${fn(mb)} <span class="chg-arrow">&rarr;</span> ${fn(ma)}</b></div>`).join("");
+          `<div class="chg-pair"><span>${T(lbl)}</span><b>${fn(mb)} <span class="chg-arrow">&rarr;</span> ${fn(ma)}</b></div>`).join("");
       } else {
         el.innerHTML = "";
       }
@@ -467,7 +502,13 @@
       if (!azSelected || !names.includes(azSelected)) azSelected = DATA.flows[ev].flows[0].to;
       const chips = names.map(n =>
         `<button class="chg-az-chip${n === azSelected ? " on" : ""}" data-zone="${esc(n)}">${esc(n)}</button>`).join("");
-      return `
+      return isZH() ? `
+        <h3 class="chg-h3">受影响的分区 <span class="chg-hint">（变更前 &rarr; 后）</span></h3>
+        <div class="chg-az-chips">${chips}</div>
+        <div id="chg-az-body"></div>
+        <p class="chg-az-links">每个影响类别各取一个数字；使用率用各时期自己的在校人数。
+        每个分区的全部指标都在<a class="tabs-link" href="index.html">地图工具</a>里
+        （其"图表模式"可自行对比）。</p>` : `
         <h3 class="chg-h3">Affected zones <span class="chg-hint">(before &rarr; after)</span></h3>
         <div class="chg-az-chips">${chips}</div>
         <div id="chg-az-body"></div>
@@ -486,19 +527,37 @@
 
     function renderSummary(ev) {
       const info = DATA.flows[ev];
-      const tl = TIMELINES[ev].map(([d, t]) =>
+      const tl = (isZH() ? TIMELINES_ZH : TIMELINES)[ev].map(([d, t]) =>
         `<div class="chg-tl-row"><span class="chg-tl-date">${d}</span><span>${t}</span></div>`).join("");
       const flows = info.flows.map((f, i) =>
         `<button class="chg-flow-row" data-i="${i}">
            <span class="chg-dot" style="background:${receiverColor(f.to, i)}"></span>
            <span class="chg-flow-names">${esc(f.from)} &rarr; ${esc(f.to)}</span>
-           <span class="chg-flow-kids">≈ ${f.kids.toLocaleString()} children</span>
+           <span class="chg-flow-kids">≈ ${f.kids.toLocaleString()} ${isZH() ? "名儿童" : "children"}</span>
          </button>`).join("");
       const progs = (info.program_moves || []).map(m =>
-        `<div class="chg-prog-row">${esc(m.label)}: ${esc(m.from)} &rarr; ${esc(m.to)}</div>`).join("");
+        `<div class="chg-prog-row">${esc(T(m.label))}: ${esc(m.from)} &rarr; ${esc(T(m.to))}</div>`).join("");
       const caveat2018 = ev === "2018"
-        ? `<p class="chg-caveat">Pre-2018 boundaries come from a different (federal) source, so exact edges are approximate; very small slivers were filtered out. Treat these pieces as close estimates.</p>` : "";
-      body.innerHTML = `
+        ? `<p class="chg-caveat">${isZH() ? "2018 年前的边界来自另一个（联邦）数据源，具体边缘是近似的；极小的碎片已被过滤。请把这些地块当作接近的估计。" : "Pre-2018 boundaries come from a different (federal) source, so exact edges are approximate; very small slivers were filtered out. Treat these pieces as close estimates."}</p>` : "";
+      const zh = isZH();
+      body.innerHTML = zh ? `
+        <h2 class="chg-h2">${ev === "2023" ? "2023 年合并" : "2018 年重划"}</h2>
+        <p class="chg-lede">${ev === "2023"
+          ? "Wilburton 和 Eastgate 两所小学关闭，其区域被划给三所邻近学校。有颜色的区域换了学校；浅色区域学校未变。"
+          : "Wilburton 小学开办，其分区由周边分区各划一块拼成。有颜色的区域换了学校；浅色区域学校未变。"}</p>
+        <div class="chg-totals">
+          <div><b>${info.totals.area_km2}</b> km&sup2; 被改划</div>
+          <div><b>≈ ${info.totals.kids.toLocaleString()}</b> 名儿童（5–17 岁）</div>
+          <div><b>${info.totals.pieces}</b> 个地块</div>
+        </div>
+        <h3 class="chg-h3">换了学校的区域 <span class="chg-hint">（数字 = 住在该区域的 5–17 岁儿童；点击行或地图）</span></h3>
+        <div class="chg-flows">${flows}</div>
+        ${progs ? `<h3 class="chg-h3">项目与学校搬迁</h3>${progs}` : ""}
+        ${azSection(ev)}
+        <h3 class="chg-h3">时间线</h3>
+        <div class="chg-tl">${tl}</div>
+        ${caveat2018}
+        <p class="chg-note">人口数字使用固定的 2020 年普查快照：它们估计的是住在改划区域内的人，不是在校人数。仅为描述 &mdash; 不含评判。</p>` : `
         <h2 class="chg-h2">${ev === "2023" ? "The 2023 consolidation" : "The 2018 rezoning"}</h2>
         <p class="chg-lede">${ev === "2023"
           ? "Wilburton and Eastgate elementaries closed, and their territory was reassigned to three neighboring schools. Colored areas switched schools; everything pale kept its school."
@@ -534,14 +593,14 @@
     }
 
     function raceBars(race, districtRace) {
-      const G = [["w", "White"], ["a", "Asian"], ["h", "Hispanic"], ["b", "Black"]];
+      const G = [["w", T("White")], ["a", T("Asian")], ["h", T("Hispanic")], ["b", T("Black")]];
       return G.map(([k, lbl]) => {
         const v = typeof race === "string" ? JSON.parse(race)[k] : race[k];
         const d = districtRace[k];
         if (v == null) return "";
         return `<div class="chg-race-row"><span class="chg-race-lbl">${lbl}</span>
           <div class="chg-race-track"><div class="chg-race-bar" style="width:${Math.min(100, v)}%"></div>
-          <div class="chg-race-tick" style="left:${Math.min(100, d)}%" title="district: ${d}%"></div></div>
+          <div class="chg-race-tick" style="left:${Math.min(100, d)}%" title="${isZH() ? `全学区：${d}%` : `district: ${d}%`}"></div></div>
           <b>${v}%</b></div>`;
       }).join("");
     }
@@ -556,12 +615,31 @@
         const pb = typeof p.programs_before === "string" ? JSON.parse(p.programs_before) : p.programs_before;
         const pa = typeof p.programs_after === "string" ? JSON.parse(p.programs_after) : p.programs_after;
         const CATS = [["advanced_learning", "Advanced Learning"], ["language_immersion", "Dual-language immersion"], ["special_education", "Site-based special ed"]];
-        progHTML = `<h3 class="chg-h3">Nearest program (road km, average)</h3>` + CATS.map(([k, lbl]) => {
+        progHTML = `<h3 class="chg-h3">${isZH() ? "最近项目（道路公里，平均）" : "Nearest program (road km, average)"}</h3>` + CATS.map(([k, lbl]) => {
           if (!pb[k] || pb[k].road_km == null) return "";
-          return pairRow(lbl, pb[k].road_km, pa[k].road_km, " km");
+          return pairRow(T(lbl), pb[k].road_km, pa[k].road_km, " km");
         }).join("");
       }
-      body.innerHTML = `
+      const zh = isZH();
+      body.innerHTML = zh ? `
+        <button class="chg-back" id="chg-back">&larr; 返回 ${p.event === "2023" ? "2023" : "2018"} 年总览</button>
+        <h2 class="chg-h2">${esc(p.from)} &rarr; ${esc(p.to)}</h2>
+        <p class="chg-lede">这片区域的住户在变更前划归 <b>${esc(p.from)}</b>，变更后划归 <b>${esc(p.to)}</b>。</p>
+        <div class="chg-totals">
+          <div><b>${p.area_km2}</b> km&sup2;</div>
+          <div><b>≈ ${(+p.kids).toLocaleString()}</b> 名儿童（5–17 岁）</div>
+          <div><b>${(+p.pop).toLocaleString()}</b> 名居民</div>
+        </div>
+        <h3 class="chg-h3">到指定学校的通勤（平均）</h3>
+        ${pairRow(T("Road distance"), tb.road_km, ta.road_km, " km")}
+        ${pairRow(T("Driving time"), tb.drive_min, ta.drive_min, " min")}
+        ${pairRow(T("Walking time"), tb.walk_min, ta.walk_min, " min")}
+        ${progHTML}
+        <h3 class="chg-h3">谁住在这里 <span class="chg-hint">（2020 年普查；刻度线 = 全学区比例）</span></h3>
+        ${raceBars(race, DATA.flows.district_race)}
+        ${nbhs && nbhs.length ? `<h3 class="chg-h3">社区</h3><p class="chg-nbhs">${nbhs.map(esc).join(" &middot; ")}</p>` : ""}
+        ${p.cross_source === true || p.cross_source === "true" ? `<p class="chg-caveat">2018 年前的边缘是近似的（跨数据源几何）；数字为接近的估计。</p>` : ""}
+        <p class="chg-note">平均值按学龄儿童的居住位置加权（2020 年普查街区）。仅为描述 &mdash; 不含评判。</p>` : `
         <button class="chg-back" id="chg-back">&larr; back to ${p.event === "2023" ? "2023" : "2018"} overview</button>
         <h2 class="chg-h2">${esc(p.from)} &rarr; ${esc(p.to)}</h2>
         <p class="chg-lede">Homes in this area were zoned to <b>${esc(p.from)}</b> before and <b>${esc(p.to)}</b> after the change.</p>
@@ -649,8 +727,8 @@
     }
     function travelLine(st, name) {
       const d = pinLookup("drive", st, name), w = pinLookup("walk", st, name);
-      if (!d) return "routing unavailable";
-      return `drive ${fmt1(d.min)} min &middot; walk ${w ? fmt1(w.min) : "—"} min (${fmt1(d.km)} km road)`;
+      if (!d) return isZH() ? "路线不可用" : "routing unavailable";
+      return isZH() ? `驾车 ${fmt1(d.min)} 分钟 &middot; 步行 ${w ? fmt1(w.min) : "—"} 分钟（道路 ${fmt1(d.km)} 公里）` : `drive ${fmt1(d.min)} min &middot; walk ${w ? fmt1(w.min) : "—"} min (${fmt1(d.km)} km road)`;
     }
     function nearestHostMin(st, cat) {
       const hosts = (DATA.flows.program_hosts[st] || {})[cat] || [];
@@ -666,31 +744,34 @@
       const [bs, as] = EVENT_ERAS[ev];
       const ll = userPin.getLngLat();
       const zb = zoneAt(bs, ll), za = zoneAt(as, ll);
-      const evName = ev === "2023" ? "2023 consolidation" : "2018 rezoning";
-      let html = `<div class="chg-pop"><b>This location &mdash; ${evName}</b><div class="chg-pin-rows">`;
+      const zh = isZH();
+      const evName = zh ? (ev === "2023" ? "2023 年合并" : "2018 年重划") : (ev === "2023" ? "2023 consolidation" : "2018 rezoning");
+      let html = `<div class="chg-pop"><b>${zh ? "这个位置" : "This location"} &mdash; ${evName}</b><div class="chg-pin-rows">`;
       if (!zb && !za) {
-        return html + `<div>Outside the district's elementary zones in both eras.</div></div></div>`;
+        return html + `<div>${zh ? "两个时期都在学区的小学分区之外。" : "Outside the district's elementary zones in both eras."}</div></div></div>`;
       }
       if (zb === za) {
-        html += `<div class="chg-pin-row"><span>Assigned school</span><b>${esc(zb || "—")} (unchanged)</b></div>`;
+        html += `<div class="chg-pin-row"><span>${zh ? "指定学校" : "Assigned school"}</span><b>${esc(zb || "—")}${zh ? "（未变）" : " (unchanged)"}</b></div>`;
         if (zb) html += `<div class="chg-pin-sub">${travelLine(as, zb)}</div>`;
       } else {
-        html += `<div class="chg-pin-row"><span>Assigned school</span><b>${esc(zb || "outside district")} &rarr; ${esc(za || "outside district")}</b></div>`;
-        if (zb) html += `<div class="chg-pin-sub">before: ${travelLine(bs, zb)}</div>`;
-        if (za) html += `<div class="chg-pin-sub">after: ${travelLine(as, za)}</div>`;
+        html += `<div class="chg-pin-row"><span>${zh ? "指定学校" : "Assigned school"}</span><b>${esc(zb || (zh ? "学区外" : "outside district"))} &rarr; ${esc(za || (zh ? "学区外" : "outside district"))}</b></div>`;
+        if (zb) html += `<div class="chg-pin-sub">${zh ? "变更前：" : "before: "}${travelLine(bs, zb)}</div>`;
+        if (za) html += `<div class="chg-pin-sub">${zh ? "变更后：" : "after: "}${travelLine(as, za)}</div>`;
       }
       if (ev === "2023" && DATA.flows.program_hosts) {
-        const CATS = [["advanced_learning", "Advanced Learning"], ["language_immersion", "Immersion"], ["special_education", "Site-based SPED"]];
+        const CATS = zh
+          ? [["advanced_learning", "高阶学习"], ["language_immersion", "沉浸项目"], ["special_education", "定点特教"]]
+          : [["advanced_learning", "Advanced Learning"], ["language_immersion", "Immersion"], ["special_education", "Site-based SPED"]];
         const rows = CATS.map(([k, lbl]) => {
           const b = nearestHostMin("b", k), a = nearestHostMin("c", k);
           if (b == null || a == null) return "";
-          return `<div class="chg-pin-row"><span>${lbl} (drive)</span><b>${fmt1(b)} &rarr; ${fmt1(a)} min</b></div>`;
+          return `<div class="chg-pin-row"><span>${lbl}${zh ? "（驾车）" : " (drive)"}</span><b>${fmt1(b)} &rarr; ${fmt1(a)} min</b></div>`;
         }).join("");
-        if (rows) html += `<div class="chg-pin-head">Nearest program, before &rarr; after</div>` + rows;
+        if (rows) html += `<div class="chg-pin-head">${zh ? "最近项目，变更前 &rarr; 后" : "Nearest program, before &rarr; after"}</div>` + rows;
       } else if (ev === "2018") {
-        html += `<div class="chg-pin-note">Program locations before 2018 aren't documented well enough to compare.</div>`;
+        html += `<div class="chg-pin-note">${zh ? "2018 年前的项目位置记录不足，无法比较。" : "Program locations before 2018 aren't documented well enough to compare."}</div>`;
       }
-      html += `</div><div class="chg-pin-note">Times are typical, traffic-free estimates. Drag the pin to move it.</div></div>`;
+      html += `</div><div class="chg-pin-note">${zh ? "时间为不含堵车的典型估计。可拖动图钉移动位置。" : "Times are typical, traffic-free estimates. Drag the pin to move it."}</div></div>`;
       return html;
     }
     function updatePinPopup(open) {
@@ -705,24 +786,24 @@
       el.className = "chg-user-pin";
       userPin = new maplibregl.Marker({ element: el, anchor: "center", draggable: true })
         .setLngLat(lngLat)
-        .setPopup(new maplibregl.Popup({ offset: 16, closeButton: true, maxWidth: "320px" }).setHTML("<div class='chg-pop'>Calculating&hellip;</div>"))
+        .setPopup(new maplibregl.Popup({ offset: 16, closeButton: true, maxWidth: "320px" }).setHTML(`<div class='chg-pop'>${isZH() ? "计算中" : "Calculating"}&hellip;</div>`))
         .addTo(map);
       userPin.togglePopup();
       el.addEventListener("click", (ev2) => { ev2.stopPropagation(); userPin.togglePopup(); });
-      userPin.on("dragend", () => { userPin.getPopup().setHTML("<div class='chg-pop'>Calculating&hellip;</div>"); computePin(); });
-      pinBtn.textContent = "Remove pin";
+      userPin.on("dragend", () => { userPin.getPopup().setHTML(`<div class='chg-pop'>${isZH() ? "计算中" : "Calculating"}&hellip;</div>`); computePin(); });
+      pinBtn.textContent = isZH() ? "移除图钉" : "Remove pin";
       pinBtn.classList.add("active");
       computePin();
     }
     pinBtn.addEventListener("click", () => {
       if (userPin) {
         userPin.remove(); userPin = null; pinResults = null;
-        pinBtn.innerHTML = "&hellip;or click the map to place a pin";
+        pinBtn.innerHTML = isZH() ? "……或点击地图放置图钉" : "&hellip;or click the map to place a pin";
         pinBtn.classList.remove("active");
         return;
       }
       placingPin = true;
-      pinBtn.textContent = "click the map…";
+      pinBtn.textContent = isZH() ? "请点击地图……" : "click the map…";
       map.getCanvas().style.cursor = "crosshair";
       map.once("click", (e) => {
         placingPin = false;
@@ -746,10 +827,10 @@
         // point to actually be inside our area
         const [bx0, by0, bx1, by1] = GEO_BBOX.split(",").map(Number);
         if (f && !(f.center[0] >= bx0 && f.center[0] <= bx1 && f.center[1] >= by0 && f.center[1] <= by1)) f = null;
-        if (!f) { inp.value = ""; inp.placeholder = "No match near Bellevue — try a fuller address…"; return; }
+        if (!f) { inp.value = ""; inp.placeholder = isZH() ? "贝尔维尤附近无匹配——请输入更完整的地址……" : "No match near Bellevue — try a fuller address…"; return; }
         placePinAt({ lng: f.center[0], lat: f.center[1] });
         map.flyTo({ center: f.center, zoom: Math.max(map.getZoom(), 13), duration: 900 });
-        inp.value = ""; inp.placeholder = "Type an address…";
+        inp.value = ""; inp.placeholder = isZH() ? "输入地址……" : "Type an address…";
       } catch (err) { console.error("geocode failed", err); }
     }
     document.getElementById("pin-addr-go").addEventListener("click", geocodePin);
@@ -827,6 +908,20 @@
     }
 
     document.getElementById("replay-btn").addEventListener("click", () => playAnimation(activeEvent));
+
+    /* language switch: re-render the dynamic panels in place */
+    document.addEventListener("bsd-lang", () => {
+      if (!DATA) return;
+      renderSummary(activeEvent);
+      renderKey(activeEvent);
+      placeGhosts(activeEvent);
+      if (userPin) {
+        updatePinPopup(false);
+        pinBtn.textContent = isZH() ? "移除图钉" : "Remove pin";
+      } else if (!placingPin) {
+        pinBtn.innerHTML = isZH() ? "……或点击地图放置图钉" : "&hellip;or click the map to place a pin";
+      }
+    });
 
     /* ---------- boot ---------- */
     async function boot() {
