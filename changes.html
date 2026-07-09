@@ -5,37 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Boundary Changes — Bellevue School District</title>
   <meta name="description" content="Which territory switched elementary schools in Bellevue's 2018 and 2023 rezonings, and what changed for the people living there." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=127" />
-  <link rel="stylesheet" href="styles.css?v=127" />
-  <script src="vendor/maplibre-gl-csp.js?v=127"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=128" />
+  <link rel="stylesheet" href="styles.css?v=128" />
+  <script src="vendor/maplibre-gl-csp.js?v=128"></script>
 </head>
 <body class="chg-page">
   <div id="map"></div>
 
   <!-- top-left: back + tabs -->
   <div class="tabs-launcher">
-    <button class="tabs-btn" id="tabs-btn" aria-expanded="false" aria-haspopup="true">More tabs <span class="tabs-caret">&#9662;</span></button>
+    <button class="tabs-btn" id="tabs-btn" aria-expanded="false" aria-haspopup="true"><span data-i18n="moretabs">More tabs</span> <span class="tabs-caret">&#9662;</span></button>
     <div class="tabs-menu" id="tabs-menu" hidden>
-      <a class="tabs-item tabs-link" href="index.html">Map tool</a>
-      <a class="tabs-item tabs-link" href="analysis.html">Analysis</a>
-      <a class="tabs-item tabs-link" href="methods.html">Methods &amp; sources</a>
-      <a class="tabs-item tabs-link" href="definitions.html">Definitions &amp; references</a>
+      <a class="tabs-item tabs-link" href="index.html" data-i18n="nav_map">Map tool</a>
+      <a class="tabs-item tabs-link" href="analysis.html" data-i18n="nav_analysis">Analysis</a>
+      <a class="tabs-item tabs-link" href="methods.html" data-i18n="nav_methods">Methods &amp; sources</a>
+      <a class="tabs-item tabs-link" href="definitions.html" data-i18n="nav_defs">Definitions &amp; references</a>
     </div>
   </div>
-  <div class="chg-title">Boundary changes</div>
+  <div class="chg-title" data-i18n="title_chg">Boundary changes</div>
 
   <!-- bottom-center: era slider -->
   <div class="chg-slider-wrap panel">
     <div class="chg-gap-labels">
-      <button class="chg-gap" id="gap-2018">2018 rezoning</button>
-      <button class="chg-gap" id="gap-2023">2023 consolidation</button>
+      <button class="chg-gap" id="gap-2018" data-i18n="gap18">2018 rezoning</button>
+      <button class="chg-gap" id="gap-2023" data-i18n="gap23">2023 consolidation</button>
     </div>
     <input type="range" id="era-slider" min="0" max="200" step="1" value="200" aria-label="Boundary era" />
     <div class="chg-stops">
-      <span>pre-2018</span><span>2018&ndash;2023</span><span>2023&ndash;now</span>
+      <span data-i18n="st_a">pre-2018</span><span data-i18n="st_b">2018&ndash;2023</span><span data-i18n="st_c">2023&ndash;now</span>
     </div>
     <div class="chg-slider-foot">
-      <button class="chg-replay" id="replay-btn" title="Replay the change animation">&#8635; Replay</button>
+      <button class="chg-replay" id="replay-btn" title="Replay the change animation" data-i18n="replay">&#8635; Replay</button>
+      <button class="chg-replay" id="panel-lang" title="Switch language">中文</button>
     </div>
   </div>
 
@@ -47,30 +48,30 @@
   <!-- lower-left stack: personal pin controls above the map key -->
   <div class="chg-left-stack">
     <div class="chg-pin-panel panel">
-      <span class="control-label">What changed for my address?</span>
+      <span class="control-label" data-i18n="chg_addr">What changed for my address?</span>
       <div class="addr-row">
-        <input type="text" id="pin-addr" placeholder="Type an address&hellip;" />
-        <button id="pin-addr-go" title="Find the address and drop the pin">Go</button>
+        <input type="text" id="pin-addr" data-i18n-ph="ph_addr2" placeholder="Type an address&hellip;" />
+        <button id="pin-addr-go" title="Find the address and drop the pin" data-i18n="go">Go</button>
       </div>
-      <button class="pin-btn ghost" id="pin-btn">&hellip;or click the map to place a pin</button>
+      <button class="pin-btn ghost" id="pin-btn" data-i18n="pin_click">&hellip;or click the map to place a pin</button>
     </div>
     <div class="chg-key panel">
       <div id="chg-key-flows"></div>
-      <div class="chg-key-row"><span class="ghost-pin ghost-open chg-key-pin">✦</span> school opened</div>
-      <div class="chg-key-row"><span class="ghost-pin chg-key-pin">×</span> school closed</div>
+      <div class="chg-key-row"><span class="ghost-pin ghost-open chg-key-pin">✦</span> <span data-i18n="key_open">school opened</span></div>
+      <div class="chg-key-row"><span class="ghost-pin chg-key-pin">×</span> <span data-i18n="key_close">school closed</span></div>
     </div>
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=127"></script>
+  <script src="intro.js?v=128"></script>
 
   <script>
     const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "127";
+    const DATA_VER = "128";
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=127");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=128");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =

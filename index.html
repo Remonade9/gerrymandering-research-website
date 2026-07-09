@@ -5,40 +5,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The 2023 Bellevue Elementary Rezoning</title>
   <meta name="description" content="An interactive map of how Bellevue School District's attendance-zone boundaries changed in 2023, and what changed with them." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=127" />
-  <link rel="stylesheet" href="styles.css?v=127" />
-  <script src="vendor/maplibre-gl-csp.js?v=127"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=128" />
+  <link rel="stylesheet" href="styles.css?v=128" />
+  <script src="vendor/maplibre-gl-csp.js?v=128"></script>
 </head>
 <body>
   <div id="map"></div>
 
   <!-- Deployed-version stamp. Bump on EVERY push: YYYY.MM.DD.NN (NN = nth push that day). -->
-  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.07.05.02</div>
+  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.07.08.06</div>
 
   <!-- More-tabs launcher, top-left -->
   <div class="tabs-launcher">
-    <button class="tabs-btn" id="tabs-btn" aria-expanded="false" aria-haspopup="true">More tabs <span class="tabs-caret">&#9662;</span></button>
+    <button class="tabs-btn" id="tabs-btn" aria-expanded="false" aria-haspopup="true"><span data-i18n="moretabs">More tabs</span> <span class="tabs-caret">&#9662;</span></button>
     <div class="tabs-menu" id="tabs-menu" hidden>
-      <a class="tabs-item tabs-link" href="changes.html">Boundary changes</a>
-      <a class="tabs-item tabs-link" href="analysis.html">Analysis</a>
-      <a class="tabs-item tabs-link" href="methods.html">Methods &amp; sources</a>
-      <a class="tabs-item tabs-link" href="definitions.html">Definitions &amp; references</a>
+      <a class="tabs-item tabs-link" href="changes.html" data-i18n="nav_changes">Boundary changes</a>
+      <a class="tabs-item tabs-link" href="analysis.html" data-i18n="nav_analysis">Analysis</a>
+      <a class="tabs-item tabs-link" href="methods.html" data-i18n="nav_methods">Methods &amp; sources</a>
+      <a class="tabs-item tabs-link" href="definitions.html" data-i18n="nav_defs">Definitions &amp; references</a>
     </div>
   </div>
 
   <!-- Floating layers / legend card -->
   <div class="panel panel-legend" id="legend-panel">
-    <button class="district-btn" id="district-btn">District overview</button>
-    <button class="district-btn" id="graph-btn">Graph mode</button>
+    <button class="district-btn" id="district-btn" data-i18n="ov">District overview</button>
+    <button class="district-btn" id="graph-btn" data-i18n="gm">Graph mode</button>
     <div class="level-tabs state-tabs" role="tablist" aria-label="District era">
-      <button class="level-tab state-tab" role="tab" aria-selected="false" data-state="a">pre-2018</button>
-      <button class="level-tab state-tab" role="tab" aria-selected="false" data-state="b">2018&ndash;2023</button>
-      <button class="level-tab state-tab is-active" role="tab" aria-selected="true" data-state="c">2023&ndash;now</button>
+      <button class="level-tab state-tab" role="tab" aria-selected="false" data-state="a" data-i18n="st_a">pre-2018</button>
+      <button class="level-tab state-tab" role="tab" aria-selected="false" data-state="b" data-i18n="st_b">2018&ndash;2023</button>
+      <button class="level-tab state-tab is-active" role="tab" aria-selected="true" data-state="c" data-i18n="st_c">2023&ndash;now</button>
     </div>
     <div class="level-tabs" role="tablist" aria-label="School level">
-      <button class="level-tab is-active" role="tab" aria-selected="true" data-level="elementary">Elementary</button>
-      <button class="level-tab" role="tab" aria-selected="false" data-level="middle">Middle</button>
-      <button class="level-tab" role="tab" aria-selected="false" data-level="high">High</button>
+      <button class="level-tab is-active" role="tab" aria-selected="true" data-level="elementary" data-i18n="lv_e">Elementary</button>
+      <button class="level-tab" role="tab" aria-selected="false" data-level="middle" data-i18n="lv_m">Middle</button>
+      <button class="level-tab" role="tab" aria-selected="false" data-level="high" data-i18n="lv_h">High</button>
     </div>
     <div class="legend-row">
       <span class="swatch swatch-zone"></span>
@@ -46,30 +46,30 @@
     </div>
     <div class="legend-row">
       <span class="swatch swatch-district"></span>
-      <span>School district boundary</span>
+      <span data-i18n="leg_district">School district boundary</span>
     </div>
     <div class="legend-row">
       <span class="pin-swatch pin-main"></span>
-      <span>Attendance-area school</span>
+      <span data-i18n="leg_main">Attendance-area school</span>
     </div>
     <div class="legend-row">
       <span class="pin-swatch pin-choice"></span>
-      <span>Choice school</span>
+      <span data-i18n="leg_choice">Choice school</span>
     </div>
-    <p class="map-hint">Click a zone for its metrics &middot; click a pin for the school</p>
+    <p class="map-hint" data-i18n="hint">Click a zone for its metrics &middot; click a pin for the school</p>
 
     <div class="choro-legend" id="choro-legend" hidden></div>
 
     <div class="panel-divider"></div>
     <div class="basemap-controls">
-      <span class="control-label">Layers</span>
-      <label class="chk"><input type="checkbox" id="chk-neighborhoods" /> <span class="nbh-swatch"></span>Neighborhoods</label>
-      <label class="chk"><input type="checkbox" id="chk-racelayer" /> Racial composition (blocks)</label>
+      <span class="control-label" data-i18n="lay">Layers</span>
+      <label class="chk"><input type="checkbox" id="chk-neighborhoods" /> <span class="nbh-swatch"></span><span data-i18n="nbh">Neighborhoods</span></label>
+      <label class="chk"><input type="checkbox" id="chk-racelayer" /> <span data-i18n="race">Racial composition (blocks)</span></label>
       <div class="pin-mode race-opts" id="race-opts" hidden>
-        <button class="pin-mode-btn race-grp on" data-grp="w">White</button>
-        <button class="pin-mode-btn race-grp" data-grp="a">Asian</button>
-        <button class="pin-mode-btn race-grp" data-grp="h">Hispanic</button>
-        <button class="pin-mode-btn race-grp" data-grp="b">Black</button>
+        <button class="pin-mode-btn race-grp on" data-grp="w" data-i18n="r_w">White</button>
+        <button class="pin-mode-btn race-grp" data-grp="a" data-i18n="r_a">Asian</button>
+        <button class="pin-mode-btn race-grp" data-grp="h" data-i18n="r_h">Hispanic</button>
+        <button class="pin-mode-btn race-grp" data-grp="b" data-i18n="r_b">Black</button>
       </div>
       <button class="info-btn" id="nbh-info-btn" aria-expanded="false" title="Why some areas have no neighborhood">i</button>
       <div class="metric-defs layer-info" id="nbh-info" hidden>
@@ -86,21 +86,21 @@
     </div>
     <div class="panel-divider"></div>
     <div class="basemap-controls">
-      <span class="control-label">Explore &mdash; what's my school?</span>
+      <span class="control-label" data-i18n="exp">Explore &mdash; what's my school?</span>
       <div class="addr-row">
-        <input type="text" id="addr-input" placeholder="Add a pin: type an address&hellip;" />
-        <button id="addr-go" title="Search the address and add a pin">Add</button>
+        <input type="text" id="addr-input" data-i18n-ph="ph_addr" placeholder="Add a pin: type an address&hellip;" />
+        <button id="addr-go" title="Search the address and add a pin" data-i18n="add">Add</button>
       </div>
-      <button class="pin-btn ghost" id="add-pin-btn">&hellip;or click the map to place a pin</button>
-      <button class="pin-btn ghost" id="route-btn">Measure a route (two blue markers)</button>
+      <button class="pin-btn ghost" id="add-pin-btn" data-i18n="pin_click">&hellip;or click the map to place a pin</button>
+      <button class="pin-btn ghost" id="route-btn" data-i18n="route">Measure a route (two blue markers)</button>
       <div class="route-info" id="route-info" hidden></div>
     </div>
     <div class="panel-divider"></div>
     <div class="basemap-controls">
-      <span class="control-label">Travel mode</span>
+      <span class="control-label" data-i18n="tm">Travel mode</span>
       <div class="pin-mode profile-mode">
-        <button class="pin-mode-btn profile-btn on" data-profile="drive">driving</button>
-        <button class="pin-mode-btn profile-btn" data-profile="walk">walking</button>
+        <button class="pin-mode-btn profile-btn on" data-profile="drive" data-i18n="drv">driving</button>
+        <button class="pin-mode-btn profile-btn" data-profile="walk" data-i18n="wlk">walking</button>
       </div>
     </div>
     <div class="panel-divider"></div>
@@ -128,7 +128,7 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=127"></script>
+  <script src="intro.js?v=128"></script>
 
   <script>
     (function () {
@@ -153,11 +153,11 @@
 
   <script>
     const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "127";   // cache-bust the data GeoJSON when it is regenerated
+    const DATA_VER = "128";   // cache-bust the data GeoJSON when it is regenerated
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=127");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=128");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
