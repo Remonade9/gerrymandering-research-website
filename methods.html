@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Methods &amp; Sources — Bellevue School District Boundaries</title>
   <meta name="description" content="How every number on this site was computed: data sources, formulas, design choices, limitations, and citations." />
-  <link rel="stylesheet" href="styles.css?v=124" />
+  <link rel="stylesheet" href="styles.css?v=125" />
 </head>
 <body class="an-page">
 
@@ -169,7 +169,12 @@
         zone's area is around its centroid, normalized so a circle scores 1; computed in
         closed form from the polygon.</li>
       </ul>
-      <p>All five are computed in a metric map projection (UTM zone 10N), and each zone also
+      <p>A note on how the measuring is done: raw map coordinates are latitude and longitude
+      &mdash; angles, not distances &mdash; so before measuring anything we convert to a flat
+      map "projection" whose coordinates are honest meters (UTM zone 10N, designed for our part
+      of the globe, where its distortion is negligible). Which projection you pick can silently
+      move compactness scores,<sup class="an-cite"><a href="#ref-6">6</a></sup> so ours is
+      stated. All five scores are computed in that projection, and each zone also
       gets a percentile rank among its own era's zones. Five scores are shown, not one,
       because <b>no single shape score is trustworthy alone</b> &mdash; scores can disagree, and
       implementation choices (projection, resolution, coastline handling) move
@@ -194,22 +199,25 @@
         <li><b>Race shares</b> &mdash; a zone's percentage in each group (six groups:
         non-Hispanic White, Asian, Black, two-or-more, other; Hispanic of any race), from 2020
         blocks.</li>
-        <li><b>Mix gap</b> &mdash; per zone, the Kullback&ndash;Leibler divergence of the
-        zone's six-group mix p from the district's mix q:
-        &Sigma;&nbsp;p<sub>k</sub>&nbsp;ln(p<sub>k</sub>/q<sub>k</sub>). Zero means identical
-        to the district; the district-wide index is the child-weighted average across zones.
-        It belongs to the same information-theory family as Theil's
-        H.<sup class="an-cite"><a href="#ref-4">4</a></sup></li>
-        <li><b>Dissimilarity index (D)</b> &mdash; district-wide, White vs. non-White:
-        D = &frac12;&nbsp;&Sigma;&nbsp;|w<sub>i</sub>/W &minus; n<sub>i</sub>/N| across
-        schools i &mdash; the share of one group that would need to switch schools for a
-        perfectly even spread.<sup class="an-cite"><a href="#ref-3">3</a></sup></li>
-        <li><b>Theil's H (entropy index)</b> &mdash; district-wide, all six groups: one minus
-        the enrollment-weighted average of school diversity relative to district diversity
-        (formula omitted here; it is the standard information-theory index). H is used because
-        it is the only multigroup index that both respects transfers and decomposes cleanly
-        &mdash; a reasoned choice, not a
-        convention.<sup class="an-cite"><a href="#ref-4">4</a></sup> Both D and H are computed
+        <li><b>Mix gap</b> &mdash; per zone: compare the zone's share of each of the six
+        groups to the district's share of that group, and add up how far off they are, with
+        bigger weight on the groups that make up more of the zone. Zero means the zone's mix
+        is identical to the district's; the district-wide index is the child-weighted average
+        across zones. (For the mathematically inclined: it is the Kullback&ndash;Leibler
+        divergence of the zone's mix from the district's &mdash; the same information-theory
+        family as Theil's H; see Reardon &amp; Firebaugh (2002)<sup class="an-cite"><a href="#ref-4">4</a></sup>
+        for that family of measures.)</li>
+        <li><b>Dissimilarity index (D)</b> &mdash; district-wide, White vs. non-White: the
+        share of one group that would need to switch schools for every school to have a
+        perfectly even mix. 0 = already even; 1 = totally separate. The full mathematics is in
+        Duncan &amp; Duncan (1955).<sup class="an-cite"><a href="#ref-3">3</a></sup></li>
+        <li><b>Theil's H (entropy index)</b> &mdash; district-wide, all six groups: how much
+        less diverse the average school is than the district as a whole. 0 = every school
+        mirrors the district; 1 = complete separation. Its formula is genuinely involved, so
+        we don't reproduce it here &mdash; the definition and its justification are in
+        Reardon &amp; Firebaugh (2002).<sup class="an-cite"><a href="#ref-4">4</a></sup> H is
+        used because it is the only multigroup index that both respects transfers and
+        decomposes cleanly &mdash; a reasoned choice, not a convention. Both D and H are computed
         on two bases: who <i>lives</i> in each zone (2020 blocks) and who <i>enrolls</i> at
         each zoned school (NCES 2023&ndash;24).</li>
         <li><b>Neighborhood splits</b> &mdash; for each official City of Bellevue neighborhood,
@@ -367,7 +375,7 @@
   </main>
 
   <!-- Entry screens + shared language state -->
-  <script src="intro.js?v=124"></script>
+  <script src="intro.js?v=125"></script>
 
   <script>
     (function () {
