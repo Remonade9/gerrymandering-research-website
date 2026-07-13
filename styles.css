@@ -245,6 +245,8 @@ html, body {
   font-size: 0.85rem;
 }
 .idx-row:last-child { border-bottom: none; }
+/* residential table carries a third value column (mix gap) */
+.idx-table.idx5 .idx-row { grid-template-columns: 1.1fr 0.9fr 0.9fr 0.9fr 0.7fr; }
 .idx-head { font-size: 0.7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
 .idx-level { font-weight: 600; }
 .idx-val { font-variant-numeric: tabular-nums; }

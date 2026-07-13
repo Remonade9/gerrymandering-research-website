@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Methods &amp; Sources — Bellevue School District Boundaries</title>
   <meta name="description" content="How every number on this site was computed: data sources, formulas, design choices, limitations, and citations." />
-  <link rel="stylesheet" href="styles.css?v=131" />
+  <link rel="stylesheet" href="styles.css?v=132" />
 </head>
 <body class="an-page">
 
@@ -234,8 +234,11 @@
         Reardon &amp; Firebaugh (2002).<sup class="an-cite"><a href="#ref-4">4</a></sup> H is
         used because it is the only multigroup index that both respects transfers and
         decomposes cleanly &mdash; a reasoned choice, not a convention. Both D and H are computed
-        on two bases: who <i>lives</i> in each zone (2020 blocks) and who <i>enrolls</i> at
-        each zoned school (NCES 2023&ndash;24).</li>
+        on two bases and <b>for each boundary era</b>: the residential basis uses the fixed 2020
+        population on that era's zones, and the enrollment basis uses actual per-school race
+        enrollment from each era's final school year (NCES: 2017&ndash;18, 2022&ndash;23,
+        2023&ndash;24). The District overview shows the active era's values, alongside the
+        district-wide mix gap (the child-weighted average of the per-zone values).</li>
         <li><b>Neighborhood splits</b> &mdash; for each official City of Bellevue neighborhood,
         the number of zones its school-age children divide across, per era; portions outside
         the district are reported separately and never counted as an extra school.</li>
@@ -406,7 +409,7 @@
   </main>
 
   <!-- Entry screens + shared language state -->
-  <script src="intro.js?v=131"></script>
+  <script src="intro.js?v=132"></script>
 
   <script>
     (function () {

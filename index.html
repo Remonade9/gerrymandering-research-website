@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The 2023 Bellevue Elementary Rezoning</title>
   <meta name="description" content="An interactive map of how Bellevue School District's attendance-zone boundaries changed in 2023, and what changed with them." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=131" />
-  <link rel="stylesheet" href="styles.css?v=131" />
-  <script src="vendor/maplibre-gl-csp.js?v=131"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=132" />
+  <link rel="stylesheet" href="styles.css?v=132" />
+  <script src="vendor/maplibre-gl-csp.js?v=132"></script>
 </head>
 <body>
   <div id="map"></div>
 
   <!-- Deployed-version stamp. Bump on EVERY push: YYYY.MM.DD.NN (NN = nth push that day). -->
-  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.07.09.02</div>
+  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.07.12.01</div>
 
   <!-- More-tabs launcher, top-left -->
   <div class="tabs-launcher">
@@ -128,7 +128,7 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=131"></script>
+  <script src="intro.js?v=132"></script>
 
   <script>
     (function () {
@@ -153,7 +153,7 @@
 
   <script>
     const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "131";   // cache-bust the data GeoJSON when it is regenerated
+    const DATA_VER = "132";   // cache-bust the data GeoJSON when it is regenerated
 
     /* ---- in-place Chinese for all dynamic panel content ----
      * T() looks a string up in ZHD when the shared language is Chinese and
@@ -279,7 +279,7 @@
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=131");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=132");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
@@ -1351,28 +1351,39 @@
       if (selected) { map.setFeatureState({ source: `zones-${selected.level}`, id: selected.id }, { selected: false }); selected = null; }
       currentZone = null;
       districtOpen = true;
-      const table = (basis, label) => {
+      // one era's numbers, chosen by the era tabs (only elementary differs across eras)
+      const E = st.eras && st.eras[activeState];
+      if (!E) return;
+      const lvlName = l => isZH() ? T(LEVEL_META[l].suffix) : LEVEL_META[l].suffix.replace(" School", "");
+      // basis = the era's residential or enrollment block; mg = per-level mix gap (residential table only)
+      const table = (basis, label, mg) => {
+        if (!basis) return "";
         const rows = LEVELS.map(l => {
-          const s = st[basis][l];
-          return `<div class="idx-row"><span class="idx-level">${isZH() ? T(LEVEL_META[l].suffix) : LEVEL_META[l].suffix.replace(" School", "")}</span>` +
+          const s = basis[l];
+          return `<div class="idx-row"><span class="idx-level">${lvlName(l)}</span>` +
             `<span class="idx-val">${s.D.toFixed(3)}</span><span class="idx-val">${s.H.toFixed(3)}</span>` +
+            (mg ? `<span class="idx-val">${mg[l] != null ? mg[l].toFixed(3) : "&mdash;"}</span>` : "") +
             `<span class="idx-n">${s.n} ${isZH() ? "所学校" : "schools"}</span></div>`;
         }).join("");
         return `<p class="idx-basis">${label}</p>` +
-          `<div class="idx-table"><div class="idx-row idx-head"><span class="idx-level"></span>` +
-          `<span class="idx-val">${isZH() ? "相异指数" : "Dissimilarity"}</span><span class="idx-val">${isZH() ? "熵指数 H" : "Theil's H"}</span><span class="idx-n"></span></div>${rows}</div>`;
+          `<div class="idx-table${mg ? " idx5" : ""}"><div class="idx-row idx-head"><span class="idx-level"></span>` +
+          `<span class="idx-val">${isZH() ? "相异指数" : "Dissimilarity"}</span><span class="idx-val">${isZH() ? "熵指数 H" : "Theil's H"}</span>` +
+          (mg ? `<span class="idx-val">${isZH() ? "构成差距" : "Mix gap"}</span>` : "") +
+          `<span class="idx-n"></span></div>${rows}</div>`;
       };
       const segDefs = isZH()
         ? `<dl>` +
           `<dt>相异指数（D）</dt><dd>比较白人与非白人。一个组别中需要换校的比例，换完后各校才会完全均匀。0 = 完全均匀，1 = 完全分离。</dd>` +
           `<dt>熵指数（Theil's H）</dt><dd>同时使用全部六个族裔组别。平均而言每所学校比全学区整体少多少多样性。0 = 每所学校与学区一致，1 = 完全分离。</dd>` +
-          `<dt>两种口径</dt><dd><b>实际就读</b> = 谁在每所划片学校就读（NCES 2023–24），是包含转学和项目安置的真实结果。<b>居住</b> = 谁住在每个分区内（2020 年普查），即仅凭边界线会产生的结果。两者之差就是选校、转学和项目的效应。</dd>` +
-          `<dt>注意</dt><dd>不含选校制学校（它们不是分区单位）。中学每学段只有 4–5 所学校，细小的差别没有意义。只覆盖现行（2023 年后）地图；前后对比要配合 2023 年前的边界看。</dd></dl>`
+          `<dt>构成差距（学区值）</dt><dd>各分区构成差距（见任一分区面板）按学龄儿童加权的平均值——分区与全学区构成的平均偏离。0 = 每个分区都与学区一致。仅按居住地计算。</dd>` +
+          `<dt>两种口径</dt><dd><b>实际就读</b> = 谁在每所划片学校就读（NCES 各时期最后一学年），是包含转学和项目安置的真实结果。<b>居住</b> = 谁住在每个分区内（固定的 2020 年普查人口），即仅凭边界线会产生的结果。两者之差就是选校、转学和项目的效应。</dd>` +
+          `<dt>注意</dt><dd>不含选校制学校（它们不是分区单位）。中学每学段只有 4–5 所学校，细小的差别没有意义。每个时期都在其自己的边界和学校名单上计算——用左上角的时期按钮切换即可前后对比；初中和高中的边界从未变化，因此其居住口径数值各时期相同。</dd></dl>`
         : `<dl>` +
           `<dt>Dissimilarity index (D)</dt><dd>Compares White vs non-White. The share of one group that would have to change schools for a perfectly even spread. 0 = perfectly even, 1 = totally separate.</dd>` +
           `<dt>Theil's H (entropy index)</dt><dd>Uses all six race groups at once. How much less diverse the average school is than the district overall. 0 = every school mirrors the district, 1 = total separation.</dd>` +
-          `<dt>Two bases</dt><dd><b>Actual enrollment</b> = who attends each zoned school (NCES 2023-24), the real outcome, including transfers and program placements. <b>Residential</b> = who lives inside each zone (2020 Census), what the boundary lines alone would produce. The gap between them is the effect of choice, transfers, and programs.</dd>` +
-          `<dt>Caveats</dt><dd>Choice schools excluded (not zone units). With few schools per level (4-5 at secondary), small differences are not meaningful. Current (post-2023) map only; the before/after comes with the pre-2023 boundaries.</dd></dl>`;
+          `<dt>Mix gap (district value)</dt><dd>The child-weighted average of every zone's mix gap (see any zone panel) &mdash; how far zones sit from the district's mix on average. 0 = every zone mirrors the district. Residential only.</dd>` +
+          `<dt>Two bases</dt><dd><b>Actual enrollment</b> = who attends each zoned school (NCES, each era's final school year), the real outcome, including transfers and program placements. <b>Residential</b> = who lives inside each zone (the fixed 2020 Census population), what the boundary lines alone would produce. The gap between them is the effect of choice, transfers, and programs.</dd>` +
+          `<dt>Caveats</dt><dd>Choice schools excluded (not zone units). With few schools per level (4-5 at secondary), small differences are not meaningful. Each era is computed on its own boundaries and school set &mdash; switch eras (top left) to compare before and after; middle- and high-school boundaries never changed, so their residential values are identical in every era.</dd></dl>`;
       const zf = DATA.levels[activeLevel].zones.features;
       let gEnr = 0, gCap = 0, gKids = 0, gN = 0;
       zf.forEach(f => {
@@ -1401,12 +1412,17 @@
         `<p class="detail-eyebrow">${zh ? "贝尔维尤学区" : "Bellevue School District"}</p>` +
         `<h2 class="detail-title">${zh ? "学区总览" : "District overview"}</h2>` +
         glance +
-        `<div class="section-head"><span class="detail-section-label">${zh ? "学校之间的隔离" : "Segregation across schools"}</span>` +
+        `<div class="section-head"><span class="detail-section-label">${zh ? `学校之间的隔离 &mdash; ${T(eraLabel())}` : `Segregation across schools &mdash; ${eraLabel()}`}</span>` +
           `<button class="info-btn toggle-btn" data-target="seg-idx-defs" aria-expanded="false" title="${zh ? "这些指数是什么意思" : "What these indices mean"}">i</button></div>` +
         `<div class="metric-defs" id="seg-idx-defs" hidden>${segDefs}</div>` +
-        table("enrollment", zh ? "实际就读（2023–24）" : "Actual school enrollment (2023–24)") +
-        table("residential", zh ? "居住（谁住在每个分区内，2020）" : "Residential (who lives in each zone, 2020)") +
-        `<p class="sub">${zh ? "全学区每个学段一个数字：族裔组别在该学段各学校之间分布得多不均匀。就读口径高于居住口径&mdash;&mdash;选校、转学和项目在边界之外又重新分拣了学生。两者都不是公平裁决。" : "One number per level for the whole district: how unevenly racial groups are spread across that level's schools. Enrollment runs higher than residential &mdash; choice, transfers, and programs re-sort students beyond what the lines do. Neither is a fairness verdict."}</p>` +
+        (E.enrollment
+          ? table(E.enrollment, zh
+              ? `实际就读（${E.enroll_year}${activeState === "c" ? "" : "，本时期最后一学年"}）`
+              : `Actual school enrollment (${E.enroll_year}${activeState === "c" ? "" : ", the era's final school year"})`)
+          : `<p class="idx-basis">${zh ? "本时期没有足够的分校族裔就读数据来计算就读口径。" : "Not enough per-school race enrollment data to compute the enrollment basis for this era."}</p>`) +
+        table(E.residential, zh ? "居住（谁住在每个分区内，固定 2020 年人口）" : "Residential (who lives in each zone, fixed 2020 population)", E.mix_gap) +
+        `<p class="sub">${zh ? "全学区每个学段一个数字：族裔组别在该学段各学校之间分布得多不均匀。就读口径高于居住口径&mdash;&mdash;选校、转学和项目在边界之外又重新分拣了学生。用左上角的时期按钮切换，即可对比各时期。任何数字都不是公平裁决。" : "One number per level for the whole district: how unevenly racial groups are spread across that level's schools. Enrollment runs higher than residential &mdash; choice, transfers, and programs re-sort students beyond what the lines do. Switch eras (top left) to compare. None of these is a fairness verdict."}</p>` +
+        (activeState === "a" ? `<p class="sub">${zh ? "2018 年前的分区几何是近似的（联邦 SABS 数据源）&mdash;&mdash;本时期的数值请视为接近的估计。" : "Pre-2018 zone geometry is approximate (federal SABS source) &mdash; treat this era's values as close estimates."}</p>` : "") +
         (zh ? (
         `<div class="impact-section"><div class="section-head"><span class="detail-section-label">参与（决策过程）</span></div>` +
           `<details class="ov-d"><summary>发生了什么，何时发生</summary><p class="district-text">2023 年的关校出自学区的<em>"Planning for the Future"（规划未来）</em>程序。学区表示它在 <b>2022 年 10 月</b>得出结论：入学人数不会回到疫情前水平。<sup class="an-cite"><a class="tabs-link" href="analysis.html#src-10">10</a></sup><b>2023 年 1 月中旬</b>，学区公布了七所面临合并的小学候选名单；<b>2 月 9 日</b>，临时督学建议关闭三所（Ardmore、Eastgate、Wilburton）；<b>3 月 9 日</b>建议修订为两所；<b>2023 年 3 月 16 日</b>，委员会表决关闭 Wilburton 和 Eastgate&mdash;&mdash;3 票赞成，2 票弃权。<sup class="an-cite"><a class="tabs-link" href="analysis.html#src-2">2</a>,<a class="tabs-link" href="analysis.html#src-3">3</a></sup>从名单公布到表决约八周。</p></details>` +
@@ -1665,6 +1681,7 @@
     function switchState(st) {
       if (st === activeState || !DATA || !DATA.states || !DATA.states[st]) return;
       if (hovered) { map.setFeatureState({ source: `zones-${hovered.level}`, id: hovered.id }, { hover: false }); hovered = null; }
+      const keepOverview = districtOpen;   // overview survives an era switch (its numbers are per-era)
       closeDetail();
       clearNbhSelected();
       activeState = st;
@@ -1685,6 +1702,7 @@
       });
       userPins.forEach(p => updateUserPin(p));   // assigned school changes with the era
       if (routeMarkers) updateRoute();
+      if (keepOverview) openDistrict();          // re-render the overview with this era's numbers
     }
 
     // Level tabs.

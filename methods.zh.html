@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>方法与来源 — 贝尔维尤学区边界</title>
   <meta name="description" content="本站每一个数字是怎么算出来的：数据来源、公式、设计取舍、局限与引用文献。" />
-  <link rel="stylesheet" href="styles.css?v=131" />
+  <link rel="stylesheet" href="styles.css?v=132" />
 </head>
 <body class="an-page">
 
@@ -187,8 +187,10 @@
         它的公式确实复杂，这里不再重现&mdash;&mdash;定义及其论证见
         Reardon &amp; Firebaugh（2002）。<sup class="an-cite"><a href="#ref-4">4</a></sup>
         选用 H 是因为它是唯一既尊重转移原则、又能干净分解的多组别指数&mdash;&mdash;这是一个有理由的选择，
-        不是随大流。D 和 H 都按两种口径计算：谁<i>住</i>在每个分区（2020 年街区数据），
-        以及谁<i>就读</i>于每所划片学校（NCES 2023&ndash;24）。</li>
+        不是随大流。D 和 H 都按两种口径、并<b>对每个边界时期分别</b>计算：居住口径使用固定的
+        2020 年人口套在该时期的分区上，就读口径使用各时期最后一学年的分校族裔就读数据
+        （NCES：2017&ndash;18、2022&ndash;23、2023&ndash;24）。"学区总览"显示当前时期的数值，
+        并同时列出全学区构成差距（各分区数值按儿童数加权的平均）。</li>
         <li><b>社区拆分</b>&mdash;&mdash;对贝尔维尤市官方划定的每个社区，统计其学龄儿童被分进几个分区，
         按时期分别统计；落在学区外的部分单独报告，绝不算作一所额外的学校。</li>
         <li><b>稳定性</b>&mdash;&mdash;每片区域的学校归属在三个时期中变了几次（零次、一次或两次），
@@ -335,7 +337,7 @@
   </main>
 
   <!-- Entry screens + shared language state -->
-  <script src="intro.js?v=131"></script>
+  <script src="intro.js?v=132"></script>
 
   <script>
     (function () {

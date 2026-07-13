@@ -1,41 +1,136 @@
 {
- "residential": {
-  "elementary": {
-   "D": 0.148,
-   "H": 0.023,
-   "n": 14
+ "eras": {
+  "a": {
+   "residential": {
+    "elementary": {
+     "D": 0.15,
+     "H": 0.024,
+     "n": 15
+    },
+    "middle": {
+     "D": 0.104,
+     "H": 0.009,
+     "n": 5
+    },
+    "high": {
+     "D": 0.077,
+     "H": 0.008,
+     "n": 4
+    }
+   },
+   "mix_gap": {
+    "elementary": 0.03,
+    "middle": 0.011,
+    "high": 0.009
+   },
+   "enrollment": {
+    "elementary": {
+     "D": 0.184,
+     "H": 0.079,
+     "n": 15
+    },
+    "middle": {
+     "D": 0.254,
+     "H": 0.059,
+     "n": 5
+    },
+    "high": {
+     "D": 0.129,
+     "H": 0.027,
+     "n": 4
+    }
+   },
+   "enroll_year": "2017\u201318"
   },
-  "middle": {
-   "D": 0.104,
-   "H": 0.009,
-   "n": 5
+  "b": {
+   "residential": {
+    "elementary": {
+     "D": 0.148,
+     "H": 0.024,
+     "n": 16
+    },
+    "middle": {
+     "D": 0.104,
+     "H": 0.009,
+     "n": 5
+    },
+    "high": {
+     "D": 0.077,
+     "H": 0.008,
+     "n": 4
+    }
+   },
+   "mix_gap": {
+    "elementary": 0.031,
+    "middle": 0.011,
+    "high": 0.009
+   },
+   "enrollment": {
+    "elementary": {
+     "D": 0.176,
+     "H": 0.089,
+     "n": 16
+    },
+    "middle": {
+     "D": 0.198,
+     "H": 0.072,
+     "n": 5
+    },
+    "high": {
+     "D": 0.141,
+     "H": 0.037,
+     "n": 4
+    }
+   },
+   "enroll_year": "2022\u201323"
   },
-  "high": {
-   "D": 0.077,
-   "H": 0.008,
-   "n": 4
-  }
- },
- "enrollment": {
-  "elementary": {
-   "D": 0.189,
-   "H": 0.095,
-   "n": 14
-  },
-  "middle": {
-   "D": 0.181,
-   "H": 0.081,
-   "n": 5
-  },
-  "high": {
-   "D": 0.145,
-   "H": 0.043,
-   "n": 4
+  "c": {
+   "residential": {
+    "elementary": {
+     "D": 0.148,
+     "H": 0.023,
+     "n": 14
+    },
+    "middle": {
+     "D": 0.104,
+     "H": 0.009,
+     "n": 5
+    },
+    "high": {
+     "D": 0.077,
+     "H": 0.008,
+     "n": 4
+    }
+   },
+   "mix_gap": {
+    "elementary": 0.028,
+    "middle": 0.011,
+    "high": 0.009
+   },
+   "enrollment": {
+    "elementary": {
+     "D": 0.189,
+     "H": 0.095,
+     "n": 14
+    },
+    "middle": {
+     "D": 0.181,
+     "H": 0.081,
+     "n": 5
+    },
+    "high": {
+     "D": 0.145,
+     "H": 0.043,
+     "n": 4
+    }
+   },
+   "enroll_year": "2023\u201324"
   }
  },
  "meta": {
-  "residential": "2020 census blocks aggregated to post-2023 zones",
-  "enrollment": "NCES CCD 2023-24 actual per-school race enrollment; zoned schools only (choice excluded)",
+  "residential": "2020 census blocks (frozen population) aggregated to each era's zones - the same per-zone counts the map displays",
+  "enrollment": "NCES CCD actual per-school race enrollment for each era's FINAL school year (a: 2017-18, b: 2022-23, c: 2023-24); zoned schools only",
+  "mix_gap": "district mix gap = child-weighted (5-17) average of the per-zone mix gap values",
   "groups": "White, Asian, Hispanic, Black, Two-plus, Other (combined)"
  }
 }
