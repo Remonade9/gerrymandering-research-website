@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The 2023 Bellevue Elementary Rezoning</title>
   <meta name="description" content="An interactive map of how Bellevue School District's attendance-zone boundaries changed in 2023, and what changed with them." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=130" />
-  <link rel="stylesheet" href="styles.css?v=130" />
-  <script src="vendor/maplibre-gl-csp.js?v=130"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=131" />
+  <link rel="stylesheet" href="styles.css?v=131" />
+  <script src="vendor/maplibre-gl-csp.js?v=131"></script>
 </head>
 <body>
   <div id="map"></div>
 
   <!-- Deployed-version stamp. Bump on EVERY push: YYYY.MM.DD.NN (NN = nth push that day). -->
-  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.07.09.01</div>
+  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.07.09.02</div>
 
   <!-- More-tabs launcher, top-left -->
   <div class="tabs-launcher">
@@ -128,7 +128,7 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=130"></script>
+  <script src="intro.js?v=131"></script>
 
   <script>
     (function () {
@@ -153,7 +153,7 @@
 
   <script>
     const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "130";   // cache-bust the data GeoJSON when it is regenerated
+    const DATA_VER = "131";   // cache-bust the data GeoJSON when it is regenerated
 
     /* ---- in-place Chinese for all dynamic panel content ----
      * T() looks a string up in ZHD when the shared language is Chinese and
@@ -279,7 +279,7 @@
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=130");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=131");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
@@ -1287,9 +1287,13 @@
       const unit = (travelMode === "min" && prof) ? "min" : "km";
       const kind = prof ? (prof === t.walk ? "walk" : "road") : "air";
       const stats = accessStats(t, travelMode, choroBox("travel_avg"), choroBox("travel_w3"));
+      const resDefs = isZH()
+        ? `这些数字描述的是<b>住在</b>这个分区里的儿童&mdash;&mdash;即居民到其指定学校的通勤。它们不是这所学校实际就读学生的通勤：每所学校还招收来自分区之外的学生（高阶学习等项目的安置面向全学区，另有转学生），有些学生甚至完全从学区外通勤入学（2023&ndash;24 学年全学区约 982 人）。这些学生的路程不在这里的任何数字之内&mdash;&mdash;下方的项目距离也一样。`
+        : `These figures describe children who <b>live</b> in this zone &mdash; residents' trips to their assigned school. They are not the actual student body's commutes: every school also enrolls students from outside its zone (program placements such as Advanced Learning draw from the whole district, plus transfers), and some students commute in from outside the district entirely (about 982 district-wide in 2023&ndash;24). Those students' trips are in none of the numbers here &mdash; including the program distances below.`;
       return `<div class="impact-section"><div class="section-head"><span class="detail-section-label">${isZH() ? "到指定学校的通勤" : "Travel to assigned school"}</span>` +
-        `<span class="head-btns">${modeAltBtn("travel", !!prof, travelMode)}` +
+        `<span class="head-btns"><button class="info-btn toggle-btn" data-target="travel-defs" aria-expanded="false" title="${isZH() ? "这些数字覆盖谁" : "Who these numbers cover"}">i</button>${modeAltBtn("travel", !!prof, travelMode)}` +
         `<button class="toggle-btn mini" data-target="travel-dist" aria-expanded="false">${T("distribution")}</button></span></div>` +
+        `<div class="metric-defs" id="travel-defs" hidden>${resDefs}</div>` +
         `<div class="stat-row">${stats}</div>` +
         `<div class="dist-box" id="travel-dist" hidden>${renderDist(s, unit, kind)}</div></div>`;
     }
