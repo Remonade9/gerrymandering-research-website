@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The 2023 Bellevue Elementary Rezoning</title>
   <meta name="description" content="An interactive map of how Bellevue School District's attendance-zone boundaries changed in 2023, and what changed with them." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=133" />
-  <link rel="stylesheet" href="styles.css?v=133" />
-  <script src="vendor/maplibre-gl-csp.js?v=133"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=134" />
+  <link rel="stylesheet" href="styles.css?v=134" />
+  <script src="vendor/maplibre-gl-csp.js?v=134"></script>
 </head>
 <body>
   <div id="map"></div>
 
   <!-- Deployed-version stamp. Bump on EVERY push: YYYY.MM.DD.NN (NN = nth push that day). -->
-  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.07.12.02</div>
+  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.07.12.03</div>
 
   <!-- More-tabs launcher, top-left -->
   <div class="tabs-launcher">
@@ -128,7 +128,7 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=133"></script>
+  <script src="intro.js?v=134"></script>
 
   <script>
     (function () {
@@ -153,7 +153,7 @@
 
   <script>
     const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "133";   // cache-bust the data GeoJSON when it is regenerated
+    const DATA_VER = "134";   // cache-bust the data GeoJSON when it is regenerated
 
     /* ---- in-place Chinese for all dynamic panel content ----
      * T() looks a string up in ZHD when the shared language is Chinese and
@@ -279,7 +279,7 @@
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=133");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=134");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
@@ -1000,7 +1000,7 @@
       { id: "income", label: "Median household income", get: p => p.housing && p.housing.income, fmt: money },
       { id: "home_value", label: "Median home value", get: p => p.housing && p.housing.home_value, fmt: money },
       { id: "limited", label: "Limited-English households %", get: p => p.language && p.language.limited_pct, getN: p => p.language && p.language.limited_n, fmt: fmtPct, invert: true },
-      { id: "kids", label: "School-age population (5–17)", get: p => p.kids_5_17, fmt: fmtInt },
+      { id: "kids", label: "School-age population (5–17)", get: p => p.kids_5_17, fmt: fmtInt, count: true },
       { id: "mix_gap", label: "Mix gap (difference from district mix)", get: p => p.mix_gap, fmt: fmtRatio, invert: true },
       { id: "enroll", label: "School enrollment (actual headcount)", get: p => p.cap && p.cap.enroll, fmt: fmtInt, noColor: true },
       { id: "capacity", label: "Building capacity (seats)", get: p => p.cap && p.cap.capacity, fmt: fmtInt, noColor: true },
@@ -1510,6 +1510,7 @@
         applyChoropleth();   // restore zone fills + whatever legend was active
         return;
       }
+      hidePropSymbols();
       for (const L of LEVELS) {
         if (map.getLayer(`fill-${L}`)) map.setPaintProperty(`fill-${L}`, "fill-opacity", 0);
       }
@@ -1552,6 +1553,7 @@
         applyChoropleth();                       // restores zone fills + the metric legend
         return;
       }
+      hidePropSymbols();
       for (const L of LEVELS) {
         if (map.getLayer(`fill-${L}`)) map.setPaintProperty(`fill-${L}`, "fill-opacity", 0);
       }
@@ -1581,6 +1583,93 @@
         `<div class="choro-ends"><span>${maxC} ${isZH() ? "所学校（拆分最多）" : "schools (most split)"}</span><span>${isZH() ? "1 所学校（完整）" : "1 school (whole)"}</span></div>`;
     }
 
+    // ----- Proportional symbols: COUNTS are drawn as sized circles, not shading -----
+    // (a choropleth of counts makes big zones read as big numbers; percents/medians
+    //  stay as choropleths - standard cartographic practice)
+    const PROP_SRC = "prop-circles";
+    const PROP_RMAX = 30;            // px radius of the largest circle; area ∝ value
+    function ensurePropLayer() {
+      if (!map.getSource(PROP_SRC)) map.addSource(PROP_SRC, { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+      if (!map.getLayer("prop-circles")) map.addLayer({
+        id: "prop-circles", type: "circle", source: PROP_SRC,
+        paint: {
+          "circle-radius": ["get", "r"],
+          "circle-color": "#6b7076",
+          "circle-opacity": 0.55,
+          "circle-stroke-color": "#ffffff",
+          "circle-stroke-width": 1.5
+        }
+      });
+    }
+    function hidePropSymbols() {
+      if (map.getLayer("prop-circles")) map.setLayoutProperty("prop-circles", "visibility", "none");
+    }
+    function applyPropSymbols(meta, feats, getV, fmtV, lvl) {
+      ensurePropLayer();
+      // neutral base - the counts live in the circles, not in the shading
+      const fill = `fill-${lvl}`;
+      map.setPaintProperty(fill, "fill-color", "#e9e5db");
+      map.setPaintProperty(fill, "fill-opacity", ["case",
+        ["boolean", ["feature-state", "hover"], false], 0.55,
+        ["boolean", ["feature-state", "selected"], false], 0.5,
+        0.3]);
+      const byName = {};
+      feats.forEach(f => { byName[f.properties.name] = getV(f.properties); });
+      const vals = Object.values(byName).filter(v => v != null && !isNaN(v) && v > 0);
+      const vmax = vals.length ? Math.max(...vals) : 0;
+      const rank = [];
+      const fc = { type: "FeatureCollection", features: [] };
+      ((DATA.levels[lvl].labels || {}).features || []).forEach(lf => {
+        const name = lf.properties.name;
+        const v = byName[name];
+        rank.push({ name, v: (v == null || isNaN(v)) ? null : v });
+        if (v == null || isNaN(v) || v <= 0 || !vmax) return;
+        fc.features.push({
+          type: "Feature",
+          properties: { name, v, r: Math.max(3, PROP_RMAX * Math.sqrt(v / vmax)) },
+          geometry: lf.geometry
+        });
+      });
+      map.getSource(PROP_SRC).setData(fc);
+      map.setLayoutProperty("prop-circles", "visibility", "visible");
+      rank.sort((a, b) => (b.v == null ? -1 : b.v) - (a.v == null ? -1 : a.v));
+      updatePropLegend(meta, vmax, fmtV, rank);
+    }
+    function updatePropLegend(meta, vmax, fmt, rank) {
+      const el = document.getElementById("choro-legend");
+      if (!el) return;
+      el.removeAttribute("hidden");
+      const zh = isZH();
+      const title = `<div class="choro-title">${zh ? `圆面积与 <b>${T(meta.label)}</b> 成正比` : `Circle area &prop; <b>${meta.label}</b>`}` +
+        `<button class="choro-clear" title="${zh ? "清除" : "Clear coloring"}">&times;</button></div>`;
+      if (!vmax) { el.innerHTML = title + `<div class="choro-ends"><span>${zh ? "此学段无数据" : "no data at this level"}</span></div>`; return; }
+      // nested reference circles at ~1x, ~1/4, ~1/16 of the max, rounded to friendly values
+      const nice = v => { const p = Math.pow(10, Math.floor(Math.log10(v))); const m = v / p; return (m >= 5 ? 5 : m >= 2 ? 2 : 1) * p; };
+      const refs = [...new Set([nice(vmax), nice(vmax / 4), nice(vmax / 16)])].filter(v => v >= 1 && v <= vmax);
+      const R = v => Math.max(3, PROP_RMAX * Math.sqrt(v / vmax));
+      const r0 = R(refs[0]), H = 2 * r0 + 10, W = 200, cx = r0 + 4;
+      let svg = `<svg viewBox="0 0 ${W} ${H}" style="width:${W}px;height:${H}px;display:block;margin:0.35rem 0 0.1rem;">`;
+      refs.forEach(v => {
+        const r = R(v), cy = H - 5 - r;
+        svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#6b7076" stroke-width="1.4"/>` +
+          `<line x1="${cx}" y1="${(cy - r).toFixed(1)}" x2="${cx + r0 + 14}" y2="${(cy - r).toFixed(1)}" stroke="#b9b3a6" stroke-dasharray="2 2"/>` +
+          `<text x="${cx + r0 + 17}" y="${(cy - r + 3.5).toFixed(1)}" style="font-size:10px;fill:#2c3338;">${fmt(v)}</text>`;
+      });
+      svg += `</svg>`;
+      let html = title + svg +
+        `<p class="map-hint">${zh ? "数量用圆圈而非底色表示——用底色的话，大分区会仅因面积大而显得数值也大。" : "Counts are drawn as circles, not shading &mdash; shading would make big zones look like big numbers."}</p>`;
+      if (rank && rank.some(r => r.v != null)) {
+        const rows = rank.map((r, i) =>
+          `<div class="rank-row"><span class="rank-n">${i + 1}</span>` +
+          `<span class="rank-dot" style="background:#6b7076"></span>` +
+          `<span class="rank-name">${r.name}</span>` +
+          `<span class="rank-val">${r.v == null ? "&mdash;" : fmt(r.v)}</span></div>`).join("");
+        html += `<button class="choro-rank-btn">${T(rankingOpen ? "Hide ranking" : "Ranking")}</button>` +
+          `<div class="choro-rank"${rankingOpen ? "" : " hidden"}>${rows}</div>`;
+      }
+      el.innerHTML = html;
+    }
+
     // Recolor the active level's zones by activeMetric (or revert to the categorical palette).
     function applyChoropleth() {
       if (raceLayerOn) { applyRaceLayer(); return; }
@@ -1592,6 +1681,7 @@
         ["boolean", ["feature-state", "selected"], false], on ? 0.82 : 0.68,
         on ? 0.7 : 0.42];
       if (!activeMetric) {
+        hidePropSymbols();
         map.setPaintProperty(fill, "fill-color", colorExpr(DATA.levels[lvl].labels));
         map.setPaintProperty(fill, "fill-opacity", OPACITY(false));
         updateChoroLegend(null);
@@ -1602,6 +1692,9 @@
       const useN = viewMode === "pop" && meta.getN;
       const getV = useN ? meta.getN : meta.get;
       const fmtV = useN ? fmtInt : meta.fmt;
+      // counts -> proportional symbols; percents, ratios, and medians -> choropleth
+      if (meta.count || useN) { applyPropSymbols(meta, feats, getV, fmtV, lvl); return; }
+      hidePropSymbols();
       const vals = feats.map(f => getV(f.properties)).filter(v => v != null && !isNaN(v));
       if (!vals.length) { updateChoroLegend(meta, null, null, fmtV); return; }
       const mn = Math.min(...vals), mx = Math.max(...vals);
