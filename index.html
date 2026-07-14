@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The 2023 Bellevue Elementary Rezoning</title>
   <meta name="description" content="An interactive map of how Bellevue School District's attendance-zone boundaries changed in 2023, and what changed with them." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=134" />
-  <link rel="stylesheet" href="styles.css?v=134" />
-  <script src="vendor/maplibre-gl-csp.js?v=134"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=135" />
+  <link rel="stylesheet" href="styles.css?v=135" />
+  <script src="vendor/maplibre-gl-csp.js?v=135"></script>
 </head>
 <body>
   <div id="map"></div>
 
   <!-- Deployed-version stamp. Bump on EVERY push: YYYY.MM.DD.NN (NN = nth push that day). -->
-  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.07.12.03</div>
+  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.07.12.04</div>
 
   <!-- More-tabs launcher, top-left -->
   <div class="tabs-launcher">
@@ -128,7 +128,7 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=134"></script>
+  <script src="intro.js?v=135"></script>
 
   <script>
     (function () {
@@ -153,7 +153,7 @@
 
   <script>
     const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "134";   // cache-bust the data GeoJSON when it is regenerated
+    const DATA_VER = "135";   // cache-bust the data GeoJSON when it is regenerated
 
     /* ---- in-place Chinese for all dynamic panel content ----
      * T() looks a string up in ZHD when the shared language is Chinese and
@@ -183,6 +183,14 @@
       "Within 3 km of special-ed": "距特教项目 3 公里内",
       "Avg. distance to IB (Interlake)": "到 IB（Interlake）的平均距离",
       "Within 3 km of IB (Interlake)": "距 IB（Interlake）3 公里内",
+      "White residents": "白人居民数", "Asian residents": "亚裔居民数",
+      "Hispanic residents": "西语裔居民数", "Black residents": "非裔居民数",
+      "Limited-English households": "英语能力有限的家庭户数",
+      "Children within 3 km of assigned school": "距指定学校 3 公里内的儿童数",
+      "Children within 3 km of Advanced Learning": "距高阶学习 3 公里内的儿童数",
+      "Children within 3 km of dual-language": "距双语沉浸 3 公里内的儿童数",
+      "Children within 3 km of special-ed": "距特教项目 3 公里内的儿童数",
+      "Children within 3 km of IB (Interlake)": "距 IB（Interlake）3 公里内的儿童数",
       /* metric hints */
       "4πA ÷ P², where A = area, P = perimeter. 1 = a perfect circle; lower = more contorted outline.":
         "4πA ÷ P²，其中 A 为面积，P 为周长。1 = 正圆；越低表示轮廓越曲折。",
@@ -279,7 +287,7 @@
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=134");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=135");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
@@ -993,28 +1001,28 @@
       { id: "convex_hull", label: "Convex hull ratio", get: p => p.convex_hull, fmt: fmtRatio },
       { id: "bounding_rect", label: "Min. rectangle ratio", get: p => p.bounding_rect, fmt: fmtRatio },
       { id: "moment_inertia", label: "Moment of inertia", get: p => p.moment_inertia, fmt: fmtRatio },
-      { id: "white", label: "White %", get: p => p.seg && p.seg.white, getN: p => p.seg && p.seg.white_n, fmt: fmtPct, diverge: () => districtShare("white"), midNote: "district-wide" },
-      { id: "asian", label: "Asian %", get: p => p.seg && p.seg.asian, getN: p => p.seg && p.seg.asian_n, fmt: fmtPct, diverge: () => districtShare("asian"), midNote: "district-wide" },
-      { id: "hispanic", label: "Hispanic %", get: p => p.seg && p.seg.hispanic, getN: p => p.seg && p.seg.hispanic_n, fmt: fmtPct, diverge: () => districtShare("hispanic"), midNote: "district-wide" },
-      { id: "black", label: "Black %", get: p => p.seg && p.seg.black, getN: p => p.seg && p.seg.black_n, fmt: fmtPct, diverge: () => districtShare("black"), midNote: "district-wide" },
+      { id: "white", label: "White %", labelN: "White residents", get: p => p.seg && p.seg.white, getN: p => p.seg && p.seg.white_n, fmt: fmtPct, diverge: () => districtShare("white"), midNote: "district-wide" },
+      { id: "asian", label: "Asian %", labelN: "Asian residents", get: p => p.seg && p.seg.asian, getN: p => p.seg && p.seg.asian_n, fmt: fmtPct, diverge: () => districtShare("asian"), midNote: "district-wide" },
+      { id: "hispanic", label: "Hispanic %", labelN: "Hispanic residents", get: p => p.seg && p.seg.hispanic, getN: p => p.seg && p.seg.hispanic_n, fmt: fmtPct, diverge: () => districtShare("hispanic"), midNote: "district-wide" },
+      { id: "black", label: "Black %", labelN: "Black residents", get: p => p.seg && p.seg.black, getN: p => p.seg && p.seg.black_n, fmt: fmtPct, diverge: () => districtShare("black"), midNote: "district-wide" },
       { id: "income", label: "Median household income", get: p => p.housing && p.housing.income, fmt: money },
       { id: "home_value", label: "Median home value", get: p => p.housing && p.housing.home_value, fmt: money },
-      { id: "limited", label: "Limited-English households %", get: p => p.language && p.language.limited_pct, getN: p => p.language && p.language.limited_n, fmt: fmtPct, invert: true },
+      { id: "limited", label: "Limited-English households %", labelN: "Limited-English households", get: p => p.language && p.language.limited_pct, getN: p => p.language && p.language.limited_n, fmt: fmtPct, invert: true },
       { id: "kids", label: "School-age population (5–17)", get: p => p.kids_5_17, fmt: fmtInt, count: true },
       { id: "mix_gap", label: "Mix gap (difference from district mix)", get: p => p.mix_gap, fmt: fmtRatio, invert: true },
       { id: "enroll", label: "School enrollment (actual headcount)", get: p => p.cap && p.cap.enroll, fmt: fmtInt, noColor: true },
       { id: "capacity", label: "Building capacity (seats)", get: p => p.cap && p.cap.capacity, fmt: fmtInt, noColor: true },
       { id: "utilization", label: "Utilization (% of capacity)", get: p => p.cap && p.cap.utilization, fmt: fmtPct, diverge: 100 },
       { id: "travel_avg", label: "Avg. distance to assigned school", get: p => tKm(p) && tKm(p).avg, fmt: fmtKm, invert: true },
-      { id: "travel_w3", label: "Within 3 km of assigned school", get: p => tKm(p) && tKm(p).within3, getN: p => w3n(tKm(p)), fmt: fmtPct },
+      { id: "travel_w3", label: "Within 3 km of assigned school", labelN: "Children within 3 km of assigned school", get: p => tKm(p) && tKm(p).within3, getN: p => w3n(tKm(p)), fmt: fmtPct },
       { id: "al_avg", label: "Avg. distance to Advanced Learning", get: p => pKm(p, "advanced_learning") && pKm(p, "advanced_learning").avg, fmt: fmtKm, invert: true },
-      { id: "al_w3", label: "Within 3 km of Advanced Learning", get: p => pKm(p, "advanced_learning") && pKm(p, "advanced_learning").within3, getN: p => w3n(pKm(p, "advanced_learning")), fmt: fmtPct },
+      { id: "al_w3", label: "Within 3 km of Advanced Learning", labelN: "Children within 3 km of Advanced Learning", get: p => pKm(p, "advanced_learning") && pKm(p, "advanced_learning").within3, getN: p => w3n(pKm(p, "advanced_learning")), fmt: fmtPct },
       { id: "imm_avg", label: "Avg. distance to dual-language", get: p => pKm(p, "language_immersion") && pKm(p, "language_immersion").avg, fmt: fmtKm, invert: true },
-      { id: "imm_w3", label: "Within 3 km of dual-language", get: p => pKm(p, "language_immersion") && pKm(p, "language_immersion").within3, getN: p => w3n(pKm(p, "language_immersion")), fmt: fmtPct },
+      { id: "imm_w3", label: "Within 3 km of dual-language", labelN: "Children within 3 km of dual-language", get: p => pKm(p, "language_immersion") && pKm(p, "language_immersion").within3, getN: p => w3n(pKm(p, "language_immersion")), fmt: fmtPct },
       { id: "sped_avg", label: "Avg. distance to special-ed", get: p => pKm(p, "special_education") && pKm(p, "special_education").avg, fmt: fmtKm, invert: true },
-      { id: "sped_w3", label: "Within 3 km of special-ed", get: p => pKm(p, "special_education") && pKm(p, "special_education").within3, getN: p => w3n(pKm(p, "special_education")), fmt: fmtPct },
+      { id: "sped_w3", label: "Within 3 km of special-ed", labelN: "Children within 3 km of special-ed", get: p => pKm(p, "special_education") && pKm(p, "special_education").within3, getN: p => w3n(pKm(p, "special_education")), fmt: fmtPct },
       { id: "ib_avg", label: "Avg. distance to IB (Interlake)", get: p => pKm(p, "ib") && pKm(p, "ib").avg, fmt: fmtKm, invert: true },
-      { id: "ib_w3", label: "Within 3 km of IB (Interlake)", get: p => pKm(p, "ib") && pKm(p, "ib").within3, getN: p => w3n(pKm(p, "ib")), fmt: fmtPct }
+      { id: "ib_w3", label: "Within 3 km of IB (Interlake)", labelN: "Children within 3 km of IB (Interlake)", get: p => pKm(p, "ib") && pKm(p, "ib").within3, getN: p => w3n(pKm(p, "ib")), fmt: fmtPct }
     ];
     const CHORO_BY_ID = Object.fromEntries(CHOROPLETH.map(m => [m.id, m]));
     const CHORO_RACE = { white: 1, asian: 1, hispanic: 1, black: 1 };
@@ -1693,7 +1701,11 @@
       const getV = useN ? meta.getN : meta.get;
       const fmtV = useN ? fmtInt : meta.fmt;
       // counts -> proportional symbols; percents, ratios, and medians -> choropleth
-      if (meta.count || useN) { applyPropSymbols(meta, feats, getV, fmtV, lvl); return; }
+      if (meta.count || useN) {
+        const cMeta = useN ? { ...meta, label: meta.labelN || meta.label.replace(/ ?%$/, "") } : meta;
+        applyPropSymbols(cMeta, feats, getV, fmtV, lvl);
+        return;
+      }
       hidePropSymbols();
       const vals = feats.map(f => getV(f.properties)).filter(v => v != null && !isNaN(v));
       if (!vals.length) { updateChoroLegend(meta, null, null, fmtV); return; }
