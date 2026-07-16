@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The 2023 Bellevue Elementary Rezoning</title>
   <meta name="description" content="An interactive map of how Bellevue School District's attendance-zone boundaries changed in 2023, and what changed with them." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=137" />
-  <link rel="stylesheet" href="styles.css?v=137" />
-  <script src="vendor/maplibre-gl-csp.js?v=137"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=138" />
+  <link rel="stylesheet" href="styles.css?v=138" />
+  <script src="vendor/maplibre-gl-csp.js?v=138"></script>
 </head>
 <body>
   <div id="map"></div>
 
   <!-- Deployed-version stamp. Bump on EVERY push: YYYY.MM.DD.NN (NN = nth push that day). -->
-  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.07.16.02</div>
+  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.07.16.03</div>
 
   <!-- More-tabs launcher, top-left -->
   <div class="tabs-launcher">
@@ -128,7 +128,7 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=137"></script>
+  <script src="intro.js?v=138"></script>
 
   <script>
     (function () {
@@ -153,7 +153,7 @@
 
   <script>
     const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "137";   // cache-bust the data GeoJSON when it is regenerated
+    const DATA_VER = "138";   // cache-bust the data GeoJSON when it is regenerated
 
     /* ---- in-place Chinese for all dynamic panel content ----
      * T() looks a string up in ZHD when the shared language is Chinese and
@@ -287,7 +287,7 @@
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=137");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=138");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
@@ -992,6 +992,7 @@
     const costColor = t => lerp3(SEQ_C, t);
     const GRAD_G = "linear-gradient(to right, rgb(247,252,245), rgb(65,171,93), rgb(0,68,27))";
     const GRAD_C = "linear-gradient(to right, rgb(255,255,204), rgb(253,141,60), rgb(128,0,38))";
+    const GRAD_C_REV = "linear-gradient(to left, rgb(255,255,204), rgb(253,141,60), rgb(128,0,38))";
     const GRAD_D = "linear-gradient(to right, rgb(140,81,10), rgb(245,245,245), rgb(1,102,94))";
     function divColor(t) {
       t = Math.max(-1, Math.min(1, t));
@@ -999,6 +1000,24 @@
       const from = NEU, to = t < 0 ? BRN : TEA, f = Math.abs(t);
       const c = from.map((v, i) => Math.round(v + (to[i] - v) * f));
       return `rgb(${c[0]},${c[1]},${c[2]})`;
+    }
+    // labeled ticks under a gradient bar, so mid-gradient colors are readable
+    // (not just the two ends); values must be evenly spaced along the bar
+    const rr = v => Math.abs(v) >= 100 ? Math.round(v)
+      : Math.abs(v) >= 10 ? Math.round(v * 10) / 10
+      : Math.abs(v) >= 1 ? Math.round(v * 100) / 100
+      : Math.round(v * 1000) / 1000;
+    function tickRow(vals, f, labels) {
+      const n = vals.length;
+      const marks = vals.map((_, i) =>
+        `<span class="choro-tickmark" style="left:${(i / (n - 1) * 100).toFixed(1)}%"></span>`).join("");
+      const labs = vals.map((v, i) => {
+        const text = labels ? labels[i] : f(rr(v));
+        const pos = i === 0 ? "left:0" : i === n - 1 ? "right:0"
+          : `left:${(i / (n - 1) * 100).toFixed(1)}%;transform:translateX(-50%)`;
+        return `<span class="choro-ticklab" style="${pos}">${text}</span>`;
+      }).join("");
+      return `<div class="choro-tickstrip">${marks}</div><div class="choro-tickrow">${labs}</div>`;
     }
     const fmtPct = v => `${v}%`, fmtKm = v => `${v} km`, fmtRatio = v => Number(v).toFixed(3);
     // choropleth accessors read the active profile's network km when routing exists, else straight-line
@@ -1043,15 +1062,15 @@
       { id: "capacity", label: "Building capacity (seats)", get: p => p.cap && p.cap.capacity, fmt: fmtInt, noColor: true },
       { id: "utilization", label: "Utilization (% of capacity)", get: p => p.cap && p.cap.utilization, fmt: fmtPct, diverge: 100 },
       { id: "travel_avg", label: "Avg. distance to assigned school", get: p => tKm(p) && tKm(p).avg, fmt: fmtKm, cost: true },
-      { id: "travel_w3", label: "Within 3 km of assigned school", labelN: "Children within 3 km of assigned school", get: p => tKm(p) && tKm(p).within3, getN: p => w3n(tKm(p)), fmt: fmtPct },
+      { id: "travel_w3", label: "Within 3 km of assigned school", labelN: "Children within 3 km of assigned school", get: p => tKm(p) && tKm(p).within3, getN: p => w3n(tKm(p)), fmt: fmtPct, cost: true, flip: true },
       { id: "al_avg", label: "Avg. distance to Advanced Learning", get: p => pKm(p, "advanced_learning") && pKm(p, "advanced_learning").avg, fmt: fmtKm, cost: true },
-      { id: "al_w3", label: "Within 3 km of Advanced Learning", labelN: "Children within 3 km of Advanced Learning", get: p => pKm(p, "advanced_learning") && pKm(p, "advanced_learning").within3, getN: p => w3n(pKm(p, "advanced_learning")), fmt: fmtPct },
+      { id: "al_w3", label: "Within 3 km of Advanced Learning", labelN: "Children within 3 km of Advanced Learning", get: p => pKm(p, "advanced_learning") && pKm(p, "advanced_learning").within3, getN: p => w3n(pKm(p, "advanced_learning")), fmt: fmtPct, cost: true, flip: true },
       { id: "imm_avg", label: "Avg. distance to dual-language", get: p => pKm(p, "language_immersion") && pKm(p, "language_immersion").avg, fmt: fmtKm, cost: true },
-      { id: "imm_w3", label: "Within 3 km of dual-language", labelN: "Children within 3 km of dual-language", get: p => pKm(p, "language_immersion") && pKm(p, "language_immersion").within3, getN: p => w3n(pKm(p, "language_immersion")), fmt: fmtPct },
+      { id: "imm_w3", label: "Within 3 km of dual-language", labelN: "Children within 3 km of dual-language", get: p => pKm(p, "language_immersion") && pKm(p, "language_immersion").within3, getN: p => w3n(pKm(p, "language_immersion")), fmt: fmtPct, cost: true, flip: true },
       { id: "sped_avg", label: "Avg. distance to special-ed", get: p => pKm(p, "special_education") && pKm(p, "special_education").avg, fmt: fmtKm, cost: true },
-      { id: "sped_w3", label: "Within 3 km of special-ed", labelN: "Children within 3 km of special-ed", get: p => pKm(p, "special_education") && pKm(p, "special_education").within3, getN: p => w3n(pKm(p, "special_education")), fmt: fmtPct },
+      { id: "sped_w3", label: "Within 3 km of special-ed", labelN: "Children within 3 km of special-ed", get: p => pKm(p, "special_education") && pKm(p, "special_education").within3, getN: p => w3n(pKm(p, "special_education")), fmt: fmtPct, cost: true, flip: true },
       { id: "ib_avg", label: "Avg. distance to IB (Interlake)", get: p => pKm(p, "ib") && pKm(p, "ib").avg, fmt: fmtKm, cost: true },
-      { id: "ib_w3", label: "Within 3 km of IB (Interlake)", labelN: "Children within 3 km of IB (Interlake)", get: p => pKm(p, "ib") && pKm(p, "ib").within3, getN: p => w3n(pKm(p, "ib")), fmt: fmtPct }
+      { id: "ib_w3", label: "Within 3 km of IB (Interlake)", labelN: "Children within 3 km of IB (Interlake)", get: p => pKm(p, "ib") && pKm(p, "ib").within3, getN: p => w3n(pKm(p, "ib")), fmt: fmtPct, cost: true, flip: true }
     ];
     const CHORO_BY_ID = Object.fromEntries(CHOROPLETH.map(m => [m.id, m]));
     const CHORO_RACE = { white: 1, asian: 1, hispanic: 1, black: 1 };
@@ -1654,8 +1673,9 @@
       el.removeAttribute("hidden");
       el.innerHTML = `<div class="choro-title">${isZH() ? `街区按 <b>${T(GRP_LABEL[raceGroup])}</b> 上色（居住地，2020）` : `Blocks colored by <b>${GRP_LABEL[raceGroup]}</b> (residential, 2020)`}</div>` +
         `<div class="choro-bar" style="background:${GRAD_D}"></div>` +
-        `<div class="choro-ends"><span>${Math.max(0, Math.round(mid - span))}%</span><span>${isZH() ? `全学区 ${mid}%` : `${mid}% district-wide`}</span><span>${Math.min(100, Math.round(mid + span))}%</span></div>` +
-        `<p class="map-hint">${isZH() ? `显示居住地而非就读学校。少于 ${MIN_BLOCK_POP} 名居民的街区置灰（噪音大）。` : `Where people live, not school enrollment. Blocks under ${MIN_BLOCK_POP} residents are greyed (noisy).`}</p>`;
+        tickRow([mid - span, mid - span / 2, mid, mid + span / 2, mid + span],
+          v => `${Math.max(0, Math.min(100, Math.round(v)))}%`) +
+        `<p class="map-hint">${isZH() ? `色带中点 = 全学区比例（${mid}%）。显示居住地而非就读学校。少于 ${MIN_BLOCK_POP} 名居民的街区置灰（噪音大）。` : `Center of the scale = the district-wide share (${mid}%). Where people live, not school enrollment. Blocks under ${MIN_BLOCK_POP} residents are greyed (noisy).`}</p>`;
     }
 
     // Neighborhood mode: zone fills go colorless; neighborhoods are colored by split count.
@@ -1693,7 +1713,11 @@
       el.removeAttribute("hidden");
       el.innerHTML = `<div class="choro-title">${isZH() ? "社区按<b>拆分学校数</b>上色" : "Neighborhoods colored by <b>schools split across</b>"}</div>` +
         `<div class="choro-bar" style="background:${GRAD_G}"></div>` +
-        `<div class="choro-ends"><span>${isZH() ? "1 所学校（完整）" : "1 school (whole)"}</span><span>${maxC} ${isZH() ? "所学校（拆分最多）" : "schools (most split)"}</span></div>`;
+        (maxC > 1
+          ? tickRow(Array.from({ length: maxC }, (_, i) => i + 1), String,
+              Array.from({ length: maxC }, (_, i) => i === 0 ? (isZH() ? "1（完整）" : "1 (whole)")
+                : i === maxC - 1 ? (isZH() ? `${maxC}（拆分最多）` : `${maxC} (most split)`) : String(i + 1)))
+          : `<div class="choro-ends"><span>${isZH() ? "1 所学校（完整）" : "1 school (whole)"}</span></div>`);
     }
 
     // ----- Proportional symbols: COUNTS are drawn as sized circles, not shading -----
@@ -1832,7 +1856,8 @@
           t = 1 - Math.abs(v - mid) / dspan;   // for ranking: closest to the midpoint first
         } else {
           t = (v - mn) / span;
-          color = (meta.cost ? costColor : seqColor)(t);   // darker = more
+          // cost family: darker red = worse; flip = "more of this is good" (within-X shares)
+          color = meta.cost ? costColor(meta.flip ? 1 - t : t) : seqColor(t);
         }
         expr.push(f.properties.name, color);
         rank.push({ name: f.properties.name, v: bad ? null : v, t, color });
@@ -1849,21 +1874,23 @@
       if (!meta) { el.setAttribute("hidden", ""); el.innerHTML = ""; return; }
       el.removeAttribute("hidden");
       const f = fmt || meta.fmt;
-      let barHtml, ends;
+      let scale;
       if (dspan != null && mn != null) {
         const mid = typeof meta.diverge === "function" ? meta.diverge() : meta.diverge;
-        const note = meta.midNote ? ` ${meta.midNote}` : "";
-        const r1v = Math.round((mid - dspan) * 10) / 10, r2v = Math.round((mid + dspan) * 10) / 10;
-        barHtml = `<div class="choro-bar" style="background:${GRAD_D}"></div>`;
-        ends = `<span>${f(r1v)}</span><span>${f(mid)}${note}</span><span>${f(r2v)}</span>`;
+        scale = `<div class="choro-bar" style="background:${GRAD_D}"></div>` +
+          tickRow([mid - dspan, mid - dspan / 2, mid, mid + dspan / 2, mid + dspan], f);
+      } else if (mn == null) {
+        scale = `<div class="choro-bar" style="background:${meta.cost ? GRAD_C : GRAD_G}"></div>` +
+          `<div class="choro-ends"><span>${isZH() ? "此学段无数据" : "no data at this level"}</span></div>`;
       } else {
-        barHtml = `<div class="choro-bar" style="background:${meta.cost ? GRAD_C : GRAD_G}"></div>`;
-        ends = (mn == null) ? `<span>${isZH() ? "此学段无数据" : "no data at this level"}</span>`
-          : `<span>${f(mn)}</span><span>${f(mx)}</span>`;
+        const grad = meta.cost ? (meta.flip ? GRAD_C_REV : GRAD_C) : GRAD_G;
+        const sp = mx - mn;
+        scale = `<div class="choro-bar" style="background:${grad}"></div>` +
+          tickRow([mn, mn + sp / 4, mn + sp / 2, mn + 3 * sp / 4, mx], f);
       }
       let html = `<div class="choro-title">${isZH() ? `分区按 <b>${T(meta.label)}</b> 上色` : `Zones colored by <b>${meta.label}</b>`}` +
         `<button class="choro-clear" title="${isZH() ? "清除上色" : "Clear coloring"}">&times;</button></div>` +
-        barHtml + `<div class="choro-ends">${ends}</div>` +
+        scale +
         (meta.ref && mn != null ? `<p class="map-hint">${isZH() ? `全学区：${f(meta.ref())}` : `District-wide: ${f(meta.ref())}`}</p>` : "");
       if (rank && rank.some(r => r.v != null)) {
         const rows = rank.map((r, i) =>

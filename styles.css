@@ -564,6 +564,10 @@ html, body {
   background: linear-gradient(to right, rgb(247,252,245), rgb(65,171,93), rgb(0,68,27));
 }
 .choro-ends { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--muted); }
+.choro-tickstrip { position: relative; height: 4px; margin-top: -2px; }
+.choro-tickstrip .choro-tickmark { position: absolute; top: 0; width: 1px; height: 4px; background: rgba(44, 51, 56, 0.5); }
+.choro-tickrow { position: relative; height: 1.05em; margin-top: 1px; font-size: 0.68rem; color: var(--muted); }
+.choro-tickrow .choro-ticklab { position: absolute; top: 0; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .choro-rank-btn {
   margin-top: 0.55rem; width: 100%;
   border: 1px solid var(--accent); background: var(--surface); color: var(--accent);
