@@ -561,7 +561,7 @@ html, body {
 .choro-clear:hover { color: var(--ink); }
 .choro-bar {
   height: 12px; border-radius: 3px; margin: 0.45rem 0 0.25rem;
-  background: linear-gradient(to right, rgb(215,48,39), rgb(254,224,80), rgb(26,152,80));
+  background: linear-gradient(to right, rgb(247,252,245), rgb(65,171,93), rgb(0,68,27));
 }
 .choro-ends { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--muted); }
 .choro-rank-btn {

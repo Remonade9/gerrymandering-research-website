@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The 2023 Bellevue Elementary Rezoning</title>
   <meta name="description" content="An interactive map of how Bellevue School District's attendance-zone boundaries changed in 2023, and what changed with them." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=136" />
-  <link rel="stylesheet" href="styles.css?v=136" />
-  <script src="vendor/maplibre-gl-csp.js?v=136"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=137" />
+  <link rel="stylesheet" href="styles.css?v=137" />
+  <script src="vendor/maplibre-gl-csp.js?v=137"></script>
 </head>
 <body>
   <div id="map"></div>
 
   <!-- Deployed-version stamp. Bump on EVERY push: YYYY.MM.DD.NN (NN = nth push that day). -->
-  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.07.16.01</div>
+  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.07.16.02</div>
 
   <!-- More-tabs launcher, top-left -->
   <div class="tabs-launcher">
@@ -128,7 +128,7 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=136"></script>
+  <script src="intro.js?v=137"></script>
 
   <script>
     (function () {
@@ -153,7 +153,7 @@
 
   <script>
     const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "136";   // cache-bust the data GeoJSON when it is regenerated
+    const DATA_VER = "137";   // cache-bust the data GeoJSON when it is regenerated
 
     /* ---- in-place Chinese for all dynamic panel content ----
      * T() looks a string up in ZHD when the shared language is Chinese and
@@ -287,7 +287,7 @@
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=136");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=137");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
@@ -973,19 +973,31 @@
     // ----- Choropleth: color the zones by a chosen metric (low = red, mid = yellow, high = green) -----
     let activeMetric = null;
     let rankingOpen = false;
-    const RYG = [[215, 48, 39], [254, 224, 80], [26, 152, 80]];
-    // diverging: blue (under) <- neutral -> red (over); t in [-1, 1]
-    function divColor(t) {
-      t = Math.max(-1, Math.min(1, t));
-      const NEU = [242, 237, 226], BLU = [43, 108, 176], RED = [192, 57, 43];
-      const from = NEU, to = t < 0 ? BLU : RED, f = Math.abs(t);
-      const c = from.map((v, i) => Math.round(v + (to[i] - v) * f));
-      return `rgb(${c[0]},${c[1]},${c[2]})`;
-    }
-    function rygColor(t) {
+    /* Three ramp families, one meaning each (standard cartographic practice):
+       - neutral sequential (white -> green): "more of the labeled thing", no valence
+       - cost sequential (pale yellow -> dark red): travel family ONLY, where less
+         is universally preferred; no green anywhere, colorblind-safe
+       - diverging (brown <-> teal around a neutral middle): true midpoints only
+         (utilization's 100%, the blocks layer's district share); both ends are
+         conditions, neither is "bad" */
+    const SEQ_G = [[247, 252, 245], [65, 171, 93], [0, 68, 27]];
+    const SEQ_C = [[255, 255, 204], [253, 141, 60], [128, 0, 38]];
+    function lerp3(stops, t) {
       t = Math.max(0, Math.min(1, t));
       const s = t < 0.5 ? 0 : 1, tt = t < 0.5 ? t / 0.5 : (t - 0.5) / 0.5;
-      const c = RYG[s].map((v, i) => Math.round(v + (RYG[s + 1][i] - v) * tt));
+      const c = stops[s].map((v, i) => Math.round(v + (stops[s + 1][i] - v) * tt));
+      return `rgb(${c[0]},${c[1]},${c[2]})`;
+    }
+    const seqColor = t => lerp3(SEQ_G, t);
+    const costColor = t => lerp3(SEQ_C, t);
+    const GRAD_G = "linear-gradient(to right, rgb(247,252,245), rgb(65,171,93), rgb(0,68,27))";
+    const GRAD_C = "linear-gradient(to right, rgb(255,255,204), rgb(253,141,60), rgb(128,0,38))";
+    const GRAD_D = "linear-gradient(to right, rgb(140,81,10), rgb(245,245,245), rgb(1,102,94))";
+    function divColor(t) {
+      t = Math.max(-1, Math.min(1, t));
+      const NEU = [245, 245, 245], BRN = [140, 81, 10], TEA = [1, 102, 94];
+      const from = NEU, to = t < 0 ? BRN : TEA, f = Math.abs(t);
+      const c = from.map((v, i) => Math.round(v + (to[i] - v) * f));
       return `rgb(${c[0]},${c[1]},${c[2]})`;
     }
     const fmtPct = v => `${v}%`, fmtKm = v => `${v} km`, fmtRatio = v => Number(v).toFixed(3);
@@ -1018,27 +1030,27 @@
       { id: "convex_hull", label: "Convex hull ratio", get: p => p.convex_hull, fmt: fmtRatio },
       { id: "bounding_rect", label: "Min. rectangle ratio", get: p => p.bounding_rect, fmt: fmtRatio },
       { id: "moment_inertia", label: "Moment of inertia", get: p => p.moment_inertia, fmt: fmtRatio },
-      { id: "white", label: "White %", labelN: "White residents", get: p => p.seg && p.seg.white, getN: p => p.seg && p.seg.white_n, fmt: fmtPct, diverge: () => districtShare("white"), midNote: "district-wide" },
-      { id: "asian", label: "Asian %", labelN: "Asian residents", get: p => p.seg && p.seg.asian, getN: p => p.seg && p.seg.asian_n, fmt: fmtPct, diverge: () => districtShare("asian"), midNote: "district-wide" },
-      { id: "hispanic", label: "Hispanic %", labelN: "Hispanic residents", get: p => p.seg && p.seg.hispanic, getN: p => p.seg && p.seg.hispanic_n, fmt: fmtPct, diverge: () => districtShare("hispanic"), midNote: "district-wide" },
-      { id: "black", label: "Black %", labelN: "Black residents", get: p => p.seg && p.seg.black, getN: p => p.seg && p.seg.black_n, fmt: fmtPct, diverge: () => districtShare("black"), midNote: "district-wide" },
+      { id: "white", label: "White %", labelN: "White residents", get: p => p.seg && p.seg.white, getN: p => p.seg && p.seg.white_n, fmt: fmtPct, ref: () => districtShare("white") },
+      { id: "asian", label: "Asian %", labelN: "Asian residents", get: p => p.seg && p.seg.asian, getN: p => p.seg && p.seg.asian_n, fmt: fmtPct, ref: () => districtShare("asian") },
+      { id: "hispanic", label: "Hispanic %", labelN: "Hispanic residents", get: p => p.seg && p.seg.hispanic, getN: p => p.seg && p.seg.hispanic_n, fmt: fmtPct, ref: () => districtShare("hispanic") },
+      { id: "black", label: "Black %", labelN: "Black residents", get: p => p.seg && p.seg.black, getN: p => p.seg && p.seg.black_n, fmt: fmtPct, ref: () => districtShare("black") },
       { id: "income", label: "Median household income", get: p => p.housing && p.housing.income, fmt: money },
       { id: "home_value", label: "Median home value", get: p => p.housing && p.housing.home_value, fmt: money },
-      { id: "limited", label: "Limited-English households %", labelN: "Limited-English households", get: p => p.language && p.language.limited_pct, getN: p => p.language && p.language.limited_n, fmt: fmtPct, invert: true },
+      { id: "limited", label: "Limited-English households %", labelN: "Limited-English households", get: p => p.language && p.language.limited_pct, getN: p => p.language && p.language.limited_n, fmt: fmtPct },
       { id: "kids", label: "School-age population (5–17)", get: p => p.kids_5_17, fmt: fmtInt, count: true },
-      { id: "mix_gap", label: "Mix gap (difference from district mix)", get: p => p.mix_gap, fmt: fmtRatio, invert: true },
+      { id: "mix_gap", label: "Mix gap (difference from district mix)", get: p => p.mix_gap, fmt: fmtRatio },
       { id: "enroll", label: "School enrollment (actual headcount)", get: p => p.cap && p.cap.enroll, fmt: fmtInt, noColor: true },
       { id: "capacity", label: "Building capacity (seats)", get: p => p.cap && p.cap.capacity, fmt: fmtInt, noColor: true },
       { id: "utilization", label: "Utilization (% of capacity)", get: p => p.cap && p.cap.utilization, fmt: fmtPct, diverge: 100 },
-      { id: "travel_avg", label: "Avg. distance to assigned school", get: p => tKm(p) && tKm(p).avg, fmt: fmtKm, invert: true },
+      { id: "travel_avg", label: "Avg. distance to assigned school", get: p => tKm(p) && tKm(p).avg, fmt: fmtKm, cost: true },
       { id: "travel_w3", label: "Within 3 km of assigned school", labelN: "Children within 3 km of assigned school", get: p => tKm(p) && tKm(p).within3, getN: p => w3n(tKm(p)), fmt: fmtPct },
-      { id: "al_avg", label: "Avg. distance to Advanced Learning", get: p => pKm(p, "advanced_learning") && pKm(p, "advanced_learning").avg, fmt: fmtKm, invert: true },
+      { id: "al_avg", label: "Avg. distance to Advanced Learning", get: p => pKm(p, "advanced_learning") && pKm(p, "advanced_learning").avg, fmt: fmtKm, cost: true },
       { id: "al_w3", label: "Within 3 km of Advanced Learning", labelN: "Children within 3 km of Advanced Learning", get: p => pKm(p, "advanced_learning") && pKm(p, "advanced_learning").within3, getN: p => w3n(pKm(p, "advanced_learning")), fmt: fmtPct },
-      { id: "imm_avg", label: "Avg. distance to dual-language", get: p => pKm(p, "language_immersion") && pKm(p, "language_immersion").avg, fmt: fmtKm, invert: true },
+      { id: "imm_avg", label: "Avg. distance to dual-language", get: p => pKm(p, "language_immersion") && pKm(p, "language_immersion").avg, fmt: fmtKm, cost: true },
       { id: "imm_w3", label: "Within 3 km of dual-language", labelN: "Children within 3 km of dual-language", get: p => pKm(p, "language_immersion") && pKm(p, "language_immersion").within3, getN: p => w3n(pKm(p, "language_immersion")), fmt: fmtPct },
-      { id: "sped_avg", label: "Avg. distance to special-ed", get: p => pKm(p, "special_education") && pKm(p, "special_education").avg, fmt: fmtKm, invert: true },
+      { id: "sped_avg", label: "Avg. distance to special-ed", get: p => pKm(p, "special_education") && pKm(p, "special_education").avg, fmt: fmtKm, cost: true },
       { id: "sped_w3", label: "Within 3 km of special-ed", labelN: "Children within 3 km of special-ed", get: p => pKm(p, "special_education") && pKm(p, "special_education").within3, getN: p => w3n(pKm(p, "special_education")), fmt: fmtPct },
-      { id: "ib_avg", label: "Avg. distance to IB (Interlake)", get: p => pKm(p, "ib") && pKm(p, "ib").avg, fmt: fmtKm, invert: true },
+      { id: "ib_avg", label: "Avg. distance to IB (Interlake)", get: p => pKm(p, "ib") && pKm(p, "ib").avg, fmt: fmtKm, cost: true },
       { id: "ib_w3", label: "Within 3 km of IB (Interlake)", labelN: "Children within 3 km of IB (Interlake)", get: p => pKm(p, "ib") && pKm(p, "ib").within3, getN: p => w3n(pKm(p, "ib")), fmt: fmtPct }
     ];
     const CHORO_BY_ID = Object.fromEntries(CHOROPLETH.map(m => [m.id, m]));
@@ -1630,9 +1642,9 @@
         "case",
         ["<", ["coalesce", ["get", "pop"], 0], MIN_BLOCK_POP], "rgba(180,180,180,0.35)",
         ["interpolate", ["linear"], ["coalesce", ["get", raceGroup], mid],
-          mid - span, "rgb(43,108,176)",
-          mid, "rgb(242,237,226)",
-          mid + span, "rgb(192,57,43)"]
+          mid - span, "rgb(140,81,10)",
+          mid, "rgb(245,245,245)",
+          mid + span, "rgb(1,102,94)"]
       ]);
       updateRaceLegend(mid, span);
     }
@@ -1641,7 +1653,7 @@
       if (!el) return;
       el.removeAttribute("hidden");
       el.innerHTML = `<div class="choro-title">${isZH() ? `街区按 <b>${T(GRP_LABEL[raceGroup])}</b> 上色（居住地，2020）` : `Blocks colored by <b>${GRP_LABEL[raceGroup]}</b> (residential, 2020)`}</div>` +
-        `<div class="choro-bar" style="background:linear-gradient(to right, rgb(43,108,176), rgb(242,237,226), rgb(192,57,43))"></div>` +
+        `<div class="choro-bar" style="background:${GRAD_D}"></div>` +
         `<div class="choro-ends"><span>${Math.max(0, Math.round(mid - span))}%</span><span>${isZH() ? `全学区 ${mid}%` : `${mid}% district-wide`}</span><span>${Math.min(100, Math.round(mid + span))}%</span></div>` +
         `<p class="map-hint">${isZH() ? `显示居住地而非就读学校。少于 ${MIN_BLOCK_POP} 名居民的街区置灰（噪音大）。` : `Where people live, not school enrollment. Blocks under ${MIN_BLOCK_POP} residents are greyed (noisy).`}</p>`;
     }
@@ -1669,7 +1681,7 @@
       });
       const expr = ["match", ["get", "name"]];
       Object.entries(counts).forEach(([n, c]) =>
-        expr.push(n, c === 0 ? "#cccccc" : rygColor(maxC > 1 ? 1 - (c - 1) / (maxC - 1) : 1)));
+        expr.push(n, c === 0 ? "#cccccc" : seqColor(maxC > 1 ? (c - 1) / (maxC - 1) : 0)));
       expr.push("#cccccc");
       map.setPaintProperty("nbh-fill", "fill-color", expr);
       map.setPaintProperty("nbh-fill", "fill-opacity", 0.55);
@@ -1680,8 +1692,8 @@
       if (!el) return;
       el.removeAttribute("hidden");
       el.innerHTML = `<div class="choro-title">${isZH() ? "社区按<b>拆分学校数</b>上色" : "Neighborhoods colored by <b>schools split across</b>"}</div>` +
-        `<div class="choro-bar"></div>` +
-        `<div class="choro-ends"><span>${maxC} ${isZH() ? "所学校（拆分最多）" : "schools (most split)"}</span><span>${isZH() ? "1 所学校（完整）" : "1 school (whole)"}</span></div>`;
+        `<div class="choro-bar" style="background:${GRAD_G}"></div>` +
+        `<div class="choro-ends"><span>${isZH() ? "1 所学校（完整）" : "1 school (whole)"}</span><span>${maxC} ${isZH() ? "所学校（拆分最多）" : "schools (most split)"}</span></div>`;
     }
 
     // ----- Proportional symbols: COUNTS are drawn as sized circles, not shading -----
@@ -1820,8 +1832,7 @@
           t = 1 - Math.abs(v - mid) / dspan;   // for ranking: closest to the midpoint first
         } else {
           t = (v - mn) / span;
-          if (meta.invert) t = 1 - t;   // e.g. distance: shorter = greener
-          color = rygColor(t);
+          color = (meta.cost ? costColor : seqColor)(t);   // darker = more
         }
         expr.push(f.properties.name, color);
         rank.push({ name: f.properties.name, v: bad ? null : v, t, color });
@@ -1843,17 +1854,17 @@
         const mid = typeof meta.diverge === "function" ? meta.diverge() : meta.diverge;
         const note = meta.midNote ? ` ${meta.midNote}` : "";
         const r1v = Math.round((mid - dspan) * 10) / 10, r2v = Math.round((mid + dspan) * 10) / 10;
-        barHtml = `<div class="choro-bar" style="background:linear-gradient(to right, rgb(43,108,176), rgb(242,237,226), rgb(192,57,43))"></div>`;
+        barHtml = `<div class="choro-bar" style="background:${GRAD_D}"></div>`;
         ends = `<span>${f(r1v)}</span><span>${f(mid)}${note}</span><span>${f(r2v)}</span>`;
       } else {
-        barHtml = `<div class="choro-bar"></div>`;
+        barHtml = `<div class="choro-bar" style="background:${meta.cost ? GRAD_C : GRAD_G}"></div>`;
         ends = (mn == null) ? `<span>${isZH() ? "此学段无数据" : "no data at this level"}</span>`
-          : meta.invert ? `<span>${f(mx)}</span><span>${f(mn)}</span>`
           : `<span>${f(mn)}</span><span>${f(mx)}</span>`;
       }
       let html = `<div class="choro-title">${isZH() ? `分区按 <b>${T(meta.label)}</b> 上色` : `Zones colored by <b>${meta.label}</b>`}` +
         `<button class="choro-clear" title="${isZH() ? "清除上色" : "Clear coloring"}">&times;</button></div>` +
-        barHtml + `<div class="choro-ends">${ends}</div>`;
+        barHtml + `<div class="choro-ends">${ends}</div>` +
+        (meta.ref && mn != null ? `<p class="map-hint">${isZH() ? `全学区：${f(meta.ref())}` : `District-wide: ${f(meta.ref())}`}</p>` : "");
       if (rank && rank.some(r => r.v != null)) {
         const rows = rank.map((r, i) =>
           `<div class="rank-row"><span class="rank-n">${i + 1}</span>` +
