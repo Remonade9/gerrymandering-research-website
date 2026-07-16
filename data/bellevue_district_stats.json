@@ -25,8 +25,8 @@
    },
    "enrollment": {
     "elementary": {
-     "D": 0.184,
-     "H": 0.079,
+     "D": 0.182,
+     "H": 0.075,
      "n": 15
     },
     "middle": {
@@ -67,8 +67,8 @@
    },
    "enrollment": {
     "elementary": {
-     "D": 0.176,
-     "H": 0.089,
+     "D": 0.174,
+     "H": 0.088,
      "n": 16
     },
     "middle": {
@@ -129,7 +129,7 @@
  },
  "meta": {
   "residential": "2020 census blocks (frozen population) aggregated to each era's zones - the same per-zone counts the map displays",
-  "enrollment": "NCES CCD actual per-school race enrollment for each era's FINAL school year (a: 2017-18, b: 2022-23, c: 2023-24); zoned schools only",
+  "enrollment": "Per-school race enrollment for each era's FINAL school year (a: 2017-18, b: 2022-23, c: 2023-24), zoned schools only. ELEMENTARY basis = WA OSPI (pre-K-5; reconciles to district counts; matches the school-pin demographics). MIDDLE/HIGH basis = NCES CCD (grade-99, all grades). Elementary switched CCD -> OSPI 2026-07-16; see Final_Data/ospi/enrollment_dh_ospi_vs_ccd.md.",
   "mix_gap": "district mix gap = child-weighted (5-17) average of the per-zone mix gap values",
   "groups": "White, Asian, Hispanic, Black, Two-plus, Other (combined)"
  }

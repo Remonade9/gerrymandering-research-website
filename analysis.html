@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Analysis — Bellevue School District Boundaries</title>
   <meta name="description" content="A guided reading of what Bellevue's 2018 and 2023 school boundary changes did — impact by impact, with every claim linked to the interactive maps." />
-  <link rel="stylesheet" href="styles.css?v=135" />
+  <link rel="stylesheet" href="styles.css?v=136" />
 </head>
 <body class="an-page">
 
@@ -153,22 +153,22 @@
           <span class="an-chip">measured</span>
         </summary>
         <p>This is the impact the district itself cited.<sup class="an-cite"><a href="#src-14">14</a></sup> In 2022&ndash;23, Wilburton had
-        <span class="u" data-n="350 of its 650 seats filled" data-pct="54% of its capacity in use"></span>
+        <span class="u" data-n="407 of its 650 seats filled" data-pct="63% of its capacity in use"></span>
         and Eastgate <span class="u" data-n="316 of 529" data-pct="60%"></span> &mdash; while
-        Spiritridge ran at <span class="u" data-n="582 students in a 529-seat building" data-pct="110% of capacity"></span>.</p>
+        Spiritridge ran at <span class="u" data-n="583 students in a 529-seat building" data-pct="110% of capacity"></span>.</p>
         <p>The district's own arithmetic, from its consolidation report: as of October 2022,
         <b>8 of its 18</b> elementaries enrolled fewer than 400 students; its forecast put that
         at <b>10 of 18</b> by 2023&ndash;24 &mdash; and <b>3 of 18</b> with the closures.<sup class="an-cite"><a href="#src-14">14</a></sup>
         (Those figures use the district's K&ndash;5 counts, which exclude preschoolers; the
         enrollment totals elsewhere on this site include them, so the same schools read
         slightly larger here.)</p>
-        <p>For scale: 110% means more students than the building has seats; 54% means nearly
-        half the building empty. After the consolidation, the extremes narrowed: Spiritridge
-        came down to <b><span class="u" data-pct="95%" data-n="546 students in 576 seats"></span></b>,
-        Enatai rose from <span class="u" data-pct="75 to 86%" data-n="433 of 575 seats to 518 of 600"></span>,
-        Clyde Hill from <span class="u" data-pct="71 to 92%" data-n="459 of 650 seats to 594 of 648"></span>
+        <p>For scale: 110% means more students than the building has seats; 63% means roughly
+        a third of the building empty. After the consolidation, the extremes narrowed: Spiritridge
+        came down to <b><span class="u" data-pct="98%" data-n="564 students in 576 seats"></span></b>,
+        Enatai rose from <span class="u" data-pct="75 to 86%" data-n="433 of 575 seats to 516 of 600"></span>,
+        Clyde Hill from <span class="u" data-pct="71 to 98%" data-n="459 of 650 seats to 637 of 648"></span>
         &mdash; and <b>Woodridge jumped from
-        <span class="u" data-pct="56% to 100%" data-n="297 students in its 529 seats to 554 in 552"></span></b>
+        <span class="u" data-pct="60% to 102%" data-n="316 students in its 529 seats to 561 in 552"></span></b>
         without its boundary moving at all, because the Advanced Learning program (and its
         students) moved in. Keep that last one in mind: it returns in <a href="#s4">Section 4</a>
         as the change no shape metric can see.</p>
@@ -243,6 +243,14 @@
         actually <i>enrolls</i> where, it's about <b>19 of every 100</b> &mdash; schools sort
         more than neighborhoods do, because choice schools and special programs pull the enrolled
         mix further apart than residence alone would.</p>
+        <p>You can now see that enrolled mix school by school: the District overview ranks every
+        school by the race of its <i>actually enrolled</i> students (and by low-income, English
+        learners, Advanced Learning, and special education). The clearest case of enrolled and
+        residential parting ways is <b>Woodridge</b>: its residents never changed, but when the
+        Advanced Learning center moved in for 2023, its enrolled student body shifted with the
+        district-wide students the program brought &mdash; a real change to who sits in the
+        building that no zone-boundary measure can see. Because this is school data, not
+        neighborhood data, it lives as a ranking, never as a color on the zone map.</p>
         <figure class="an-fig">
           <div class="an-map-wrap">
             <img src="img/analysis-mixgap-c.png" alt="Map: mix gap by zone, 2023–now"
@@ -878,7 +886,7 @@
   </div>
 
   <!-- Entry screens + shared language state -->
-  <script src="intro.js?v=135"></script>
+  <script src="intro.js?v=136"></script>
 
   <script>
     /* tabs menu */
@@ -928,7 +936,7 @@
   <!-- §4 live scatter: Δ shape score vs Δ human measure, 2023 event -->
   <script>
     (function () {
-      const V = "?v=135";
+      const V = "?v=136";
       const CHANGED = { "Spiritridge": 1, "Enatai": 1, "Clyde Hill": 1 };
       let DELTAS = null, PC = null, yMode = "drive";
       const EXHIBIT = { "Spiritridge": "①", "Woodridge": "②" };

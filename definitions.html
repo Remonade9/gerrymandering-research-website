@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Definitions &amp; References — Bellevue School District Boundaries</title>
   <meta name="description" content="Plain-language definitions of every program, term, and metric used on this site — plus yardsticks for reading the numbers." />
-  <link rel="stylesheet" href="styles.css?v=135" />
+  <link rel="stylesheet" href="styles.css?v=136" />
 </head>
 <body class="an-page">
 
@@ -99,7 +99,46 @@
         <dt>Limited-English household</dt>
         <dd>The census definition: a household where no one aged 14 or older speaks English
         "very well." These are the households for whom school communication &mdash; letters,
-        meetings, deadlines &mdash; is hardest to navigate.</dd>
+        meetings, deadlines &mdash; is hardest to navigate. This counts <b>residents of a
+        zone</b>; a separate figure, "English learners" (below), counts <b>students enrolled
+        at a school</b> &mdash; a different universe that can rank the same neighborhood
+        differently.</dd>
+
+        <dt>Enrolled-student data (OSPI) &mdash; the school rankings</dt>
+        <dd>The school pins and the District Overview rankings describe who is actually
+        <i>enrolled</i> at each school: their race, and the share who are low-income, English
+        learners, Advanced Learning, or in special education. It comes from Washington State's
+        OSPI school report card. This is the school's students, <b>not</b> the neighborhood's
+        residents &mdash; a school's roll includes children bused in for programs and students
+        from outside the district, and not every child living in a zone attends that zone's
+        school. That is why it is shown as rankings, never as colors on the zone map: painting
+        the zones with school data would mix the two.</dd>
+
+        <dt>Low-income (free/reduced-price meals)</dt>
+        <dd>The share of a school's enrolled students who qualify for free or reduced-price
+        meals &mdash; the standard measure of student poverty in US schools (a family qualifies
+        by income). Because it counts enrolled students, it is not the same as a zone's median
+        household income from the census, which counts residents.</dd>
+
+        <dt>Highly Capable</dt>
+        <dd>Washington's official name for students identified as gifted; in Bellevue they are
+        served through Advanced Learning (above). A student earns the label by testing, and the
+        state requires the district to serve them wherever they attend &mdash; so every school
+        has a few. The Advanced Learning host schools have far more, because identified students
+        from across the district are gathered there. So a host school's high share reflects that
+        gathering, not its own neighborhood.</dd>
+
+        <dt>English learners</dt>
+        <dd>Enrolled students getting extra support because English is not their first language.
+        This counts <b>students at a school</b> &mdash; different from a "Limited-English
+        household" (above), which counts <b>residents of a zone</b> from the census. The two
+        measure different things and can rank the same neighborhood differently.</dd>
+
+        <dt>Special education (share)</dt>
+        <dd>The share of a school's enrolled students who have an IEP (above). Most special
+        education follows the child to their own neighborhood school, so it is spread across
+        every school &mdash; unlike the site-based programs (Olympic, Pacific, Cascade), whose
+        locations this site tracks by distance.</dd>
       </dl>
     </section>
 
@@ -218,7 +257,7 @@
   </main>
 
   <!-- Entry screens + shared language state -->
-  <script src="intro.js?v=135"></script>
+  <script src="intro.js?v=136"></script>
 
   <script>
     (function () {

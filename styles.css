@@ -721,6 +721,53 @@ html, body {
 .sch-prog { font-size: 0.8rem; font-weight: 600; margin-bottom: 0.3rem; }
 .prog-note { display: block; font-weight: 400; font-size: 0.72rem; color: var(--accent); font-style: italic; }
 
+/* District overview — school rankings (OSPI enrolled-student data) */
+.ov-rk-metrics { display: flex; flex-wrap: wrap; gap: 0.3rem; margin: 0.3rem 0 0.5rem; }
+.ov-rk-mbtn {
+  font-size: 0.74rem; padding: 0.2rem 0.5rem; border-radius: 999px;
+  border: 1px solid var(--border); background: var(--surface); color: var(--muted);
+  cursor: pointer; white-space: nowrap; line-height: 1.3;
+}
+.ov-rk-mbtn:hover { border-color: var(--accent); color: var(--accent); }
+.ov-rk-mbtn.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.ov-rk-modes { display: flex; align-items: center; gap: 0.35rem; margin-bottom: 0.5rem; }
+.ov-rk-modelab { font-size: 0.74rem; color: var(--muted); }
+.ov-rk-modebtn {
+  font-size: 0.74rem; padding: 0.15rem 0.55rem; border-radius: 5px;
+  border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer;
+}
+.ov-rk-modebtn.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-weight: 600; }
+.ov-rk-list { display: flex; flex-direction: column; gap: 0.2rem; }
+.ov-rk-row { display: grid; grid-template-columns: 1.3rem minmax(5.5rem, 1fr) 1fr auto; align-items: center; gap: 0.5rem; font-size: 0.82rem; }
+.ov-rk-i { color: var(--muted); font-variant-numeric: tabular-nums; text-align: right; font-size: 0.76rem; }
+.ov-rk-nm { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ov-rk-tag {
+  margin-left: 0.35rem; font-size: 0.62rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--muted); background: var(--accent-soft);
+  padding: 0.05rem 0.3rem; border-radius: 4px; vertical-align: middle;
+}
+.ov-rk-bar { height: 9px; background: var(--accent-soft); border-radius: 5px; overflow: hidden; }
+.ov-rk-bar span { display: block; height: 100%; background: var(--accent); border-radius: 5px; }
+.ov-rk-v { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ov-rk-sub { display: block; font-weight: 400; font-size: 0.68rem; color: var(--muted); }
+
+/* school pin — enrolled-student demographics (OSPI) */
+.sch-demo { margin-top: 0.6rem; border-top: 1px solid var(--border); padding-top: 0.5rem; }
+.race-bar.mini { height: 12px; }
+.sd-race {
+  display: flex; flex-wrap: wrap; gap: 0.12rem 0.6rem;
+  margin-top: 0.45rem; font-size: 0.76rem; color: var(--muted);
+}
+.sd-race .sd-r { display: inline-flex; align-items: center; gap: 0.3rem; }
+.sd-race .dot { width: 9px; height: 9px; }
+.sd-stats {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0.25rem 0.9rem; margin-top: 0.55rem; font-size: 0.8rem;
+}
+.sd-stats .sd-s { display: flex; justify-content: space-between; gap: 0.4rem; }
+.sd-stats .sd-s b { font-weight: 700; }
+.sd-note { margin-top: 0.5rem; font-size: 0.71rem; color: var(--muted); font-style: italic; }
+
 /* School pins */
 .school-pin {
   cursor: pointer;

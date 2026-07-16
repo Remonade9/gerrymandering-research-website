@@ -195,15 +195,27 @@ def _base(nm):
     return nm
 _enr = pd.read_csv(os.path.join(FDATA, "enrollment", "enrollment_wide.csv"))
 _enr["key"] = _enr["school_name"].map(_base).str.title()
+# OSPI enrollment override (era C = 2023-24, consistent pre-K-5 basis; elementary only).
+# 2023-24 (first post-consolidation year) replaces the shipped 2024-25 to drop a year of
+# enrollment drift; middle/high fall through to NCES. See Final_Data/ospi/.
+_OSPI_C = {}
+with open(os.path.join(FDATA, "ospi", "ospi_elementary.csv"), encoding="utf-8") as _f:
+    import csv as _csv
+    for _r in _csv.DictReader(_f):
+        if _r["year"] == "2023-24" and _r["all_students_prek5"]:
+            _OSPI_C[_r["school"].strip().title()] = int(_r["all_students_prek5"])
 _cap = pd.read_csv(os.path.join(FDATA, "capacity", "school_capacity_by_state.csv"))
 _cap = _cap[_cap["state"] == "post_2023"]
 _capby = {(str(r["school"]).strip().title(), str(r["level"]).strip()): r for r in _cap.to_dict("records")}
 _LVLCODE = {"elementary": 1, "middle": 2, "high": 3}
 def zone_capacity(nm, level):
     out = {}
-    er = _enr[(_enr["key"] == nm) & (_enr["school_level"] == _LVLCODE[level])]
-    if len(er) and pd.notna(er.iloc[0].get("2024-25")):
-        out["enroll"] = int(er.iloc[0]["2024-25"]); out["enroll_year"] = "2024-25"
+    if level == "elementary" and nm in _OSPI_C:
+        out["enroll"] = _OSPI_C[nm]; out["enroll_year"] = "2023-24"
+    else:
+        er = _enr[(_enr["key"] == nm) & (_enr["school_level"] == _LVLCODE[level])]
+        if len(er) and pd.notna(er.iloc[0].get("2024-25")):
+            out["enroll"] = int(er.iloc[0]["2024-25"]); out["enroll_year"] = "2024-25"
     cr = _capby.get((nm, level))
     if cr is not None and pd.notna(cr.get("permanent_capacity")):
         out["capacity"] = int(cr["permanent_capacity"])

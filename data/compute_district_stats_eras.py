@@ -145,6 +145,27 @@ with open(os.path.join(FDATA, "enrollment", "enrollment_wide.csv"), encoding="ut
         dirinfo[str(row["ncessch"]).zfill(12)] = (base_name(row["school_name"]).title(),
                                                   int(float(row["school_level"])) if row["school_level"] else None)
 
+# OSPI per-school race (elementary only) — the committed source for the ELEMENTARY
+# enrollment-basis indices (consistent with the OSPI school pins; reconciles to district
+# counts). Middle/high stay on CCD. CCD elementary is still computed below, only to report
+# the OSPI-vs-CCD difference. Switched 2026-07-16.
+OSPI_YEAR = {2017: "2017-18", 2022: "2022-23", 2023: "2023-24"}
+_ORMAP = {"white": "white", "asian": "asian", "hispanic": "hispanic",
+          "black": "black", "two_or_more": "twoplus", "other": "other"}
+def ospi_race(year_label):
+    out = {}
+    with open(os.path.join(FDATA, "ospi", "ospi_elementary.csv"), encoding="utf-8") as fo:
+        for r in csv.DictReader(fo):
+            if r["year"] != year_label or not r["all_students_prek5"]:
+                continue
+            rec = {g: 0 for g in GROUPS}
+            for src, g in _ORMAP.items():
+                rec[g] += int(r[src] or 0)
+            rec["total"] = sum(rec[g] for g in GROUPS)
+            out[r["school"].strip().title()] = rec
+    return out
+DIFFS = []  # (era, D_ccd, H_ccd, n_ccd, D_ospi, H_ospi, n_ospi) for the elementary comparison record
+
 # per-era zoned-school sets
 main_sets = {}
 for era, fn in SCHOOLS.items():
@@ -179,24 +200,40 @@ for era in ["a", "b", "c"]:
         rec[g] += e
     ok = True
     enr = {}
+    o_race = ospi_race(OSPI_YEAR[year])
     for lvl in LEVELS:
         want = main_sets[era][lvl]
-        sub = []
-        found = set()
+        # CCD subset for this level (committed source for middle/high; comparison-only for elementary)
+        sub_ccd = []
+        found_ccd = set()
         for (name, lvlcode), rec in piv.items():
             if lvlcode == LVL_CODE[lvl] and name in want:
                 total = sum(rec.values())
                 if total > 0:
-                    sub.append({**rec, "total": total})
-                    found.add(name)
-        missing = want - found
-        if missing:
-            print(f"era {era} {lvl}: MISSING from CCD {year}: {sorted(missing)} - enrollment basis omitted for this era")
-            ok = False
-            break
-        D, H, n = indices(sub)
-        enr[lvl] = {"D": D, "H": H, "n": n}
-        print(f"era {era} enrollment {lvl:11} ({year}-{year+1-2000}): D={D} H={H} n={n}")
+                    sub_ccd.append({**rec, "total": total})
+                    found_ccd.add(name)
+        if lvl == "elementary":
+            found_o = {nm for nm in want if nm in o_race and o_race[nm]["total"] > 0}
+            missing = want - found_o
+            if missing:
+                print(f"era {era} elementary: MISSING from OSPI: {sorted(missing)} - enrollment basis omitted")
+                ok = False
+                break
+            D, H, n = indices([dict(o_race[nm]) for nm in found_o])            # committed: OSPI
+            Dc, Hc, nc = indices(sub_ccd) if sub_ccd else (None, None, 0)       # comparison: CCD
+            DIFFS.append((era, Dc, Hc, nc, D, H, n))
+            print(f"era {era} enrollment elementary ({OSPI_YEAR[year]}): "
+                  f"CCD D={Dc} H={Hc} n={nc}  ->  OSPI D={D} H={H} n={n}")
+            enr[lvl] = {"D": D, "H": H, "n": n}
+        else:
+            missing = want - found_ccd
+            if missing:
+                print(f"era {era} {lvl}: MISSING from CCD {year}: {sorted(missing)} - enrollment basis omitted for this era")
+                ok = False
+                break
+            D, H, n = indices(sub_ccd)
+            enr[lvl] = {"D": D, "H": H, "n": n}
+            print(f"era {era} enrollment {lvl:11} ({year}): D={D} H={H} n={n} (CCD)")
     if ok:
         eras[era]["enrollment"] = enr
         eras[era]["enroll_year"] = f"{year}–{str(year + 1)[2:]}"
@@ -216,10 +253,33 @@ out = {
     "eras": eras,
     "meta": {
         "residential": "2020 census blocks (frozen population) aggregated to each era's zones - the same per-zone counts the map displays",
-        "enrollment": "NCES CCD actual per-school race enrollment for each era's FINAL school year (a: 2017-18, b: 2022-23, c: 2023-24); zoned schools only",
+        "enrollment": "Per-school race enrollment for each era's FINAL school year (a: 2017-18, b: 2022-23, c: 2023-24), zoned schools only. ELEMENTARY basis = WA OSPI (pre-K-5; reconciles to district counts; matches the school-pin demographics). MIDDLE/HIGH basis = NCES CCD (grade-99, all grades). Elementary switched CCD -> OSPI 2026-07-16; see Final_Data/ospi/enrollment_dh_ospi_vs_ccd.md.",
         "mix_gap": "district mix gap = child-weighted (5-17) average of the per-zone mix gap values",
         "groups": "White, Asian, Hispanic, Black, Two-plus, Other (combined)",
     },
 }
 json.dump(out, open(os.path.join(WEB, "bellevue_district_stats.json"), "w"), indent=1)
 print("SAVED bellevue_district_stats.json (new per-era schema)")
+
+# ---------- persistent record of the elementary OSPI-vs-CCD difference ----------
+rec_lines = [
+    "# Elementary enrollment-basis D / H — OSPI vs NCES CCD",
+    "",
+    "The committed source for the ELEMENTARY enrollment-basis segregation indices was",
+    "switched from NCES CCD to WA OSPI on 2026-07-16 — for consistency with the OSPI",
+    "school-pin demographics, and because OSPI reconciles to the district's own counts.",
+    "Middle/high remain on CCD. OSPI is pre-K-5; CCD grade-99 is all-grades, which is part",
+    "of the small gap below. D = dissimilarity (White vs non-White), H = Theil's multigroup",
+    "entropy index; both on the enrollment basis, zoned elementaries only.",
+    "",
+    "| era | year | D (CCD) | D (OSPI) | ΔD | H (CCD) | H (OSPI) | ΔH | n |",
+    "|-----|------|--------:|---------:|---:|--------:|---------:|---:|--:|",
+]
+for era, Dc, Hc, nc, Do, Ho, no in DIFFS:
+    dD = f"{Do - Dc:+.3f}" if Dc is not None else "n/a"
+    dH = f"{Ho - Hc:+.3f}" if Hc is not None else "n/a"
+    rec_lines.append(f"| {era} | {OSPI_YEAR[ENROLL_YEAR[era]]} | {Dc} | {Do} | {dD} | {Hc} | {Ho} | {dH} | {no} |")
+rec_path = os.path.join(FDATA, "ospi", "enrollment_dh_ospi_vs_ccd.md")
+open(rec_path, "w", encoding="utf-8").write("\n".join(rec_lines) + "\n")
+print("\n" + "\n".join(rec_lines))
+print(f"\nSAVED {rec_path}")

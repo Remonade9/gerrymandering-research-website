@@ -236,14 +236,41 @@ def era_programs(sub):
 enr = pd.read_csv(os.path.join(FDATA, "enrollment", "enrollment_wide.csv"))
 enr["key"] = enr["school_name"].map(base_name).str.title()
 enr_by = {r["key"]: r for r in enr[enr["school_level"] == 1].to_dict("records")}
+# OSPI enrollment override: consistent pre-K-5 basis (elementary only; NCES is inconsistent
+# on Pre-K, which had made Wilburton look falsely "emptiest"). Non-elementary schools are
+# absent from the OSPI file, so they fall through to the NCES record. See Final_Data/ospi/.
+import csv as _csv
+_ospi = {}
+_RACE6 = {"white": "white", "asian": "asian", "hispanic": "hispanic",
+          "black": "black", "two_or_more": "twoplus", "other": "other"}
+with open(os.path.join(FDATA, "ospi", "ospi_elementary.csv"), encoding="utf-8") as _f:
+    for _r in _csv.DictReader(_f):
+        if _r["year"] == ENR_COL and _r["all_students_prek5"]:
+            _ospi[_r["school"].strip().title()] = {
+                "year": ENR_COL,
+                "n": int(_r["all_students_prek5"]),
+                "race": {v: int(_r[k] or 0) for k, v in _RACE6.items()},
+                "low_income": int(_r["low_income"] or 0),
+                "ell": int(_r["ell"] or 0),
+                "highly_capable": int(_r["highly_capable"] or 0),
+                "iep": int(_r["iep_swd"] or 0),
+            }
+def era_enroll(nm):
+    """(enroll, year): OSPI pre-K-5 total preferred, NCES fallback."""
+    if nm in _ospi:
+        return _ospi[nm]["n"], ENR_COL
+    er = enr_by.get(nm)
+    if er is not None and pd.notna(er.get(ENR_COL)):
+        return int(er[ENR_COL]), ENR_COL
+    return None, None
 cap = pd.read_csv(os.path.join(FDATA, "capacity", "school_capacity_by_state.csv"))
 cap = cap[(cap["state"] == CAP_ERA) & (cap["level"] == "elementary")]
 cap_by = {str(r["school"]).strip().title(): r for r in cap.to_dict("records")}
 def zone_capacity(nm):
     out = {}
-    er = enr_by.get(nm)
-    if er is not None and pd.notna(er.get(ENR_COL)):
-        out["enroll"] = int(er[ENR_COL]); out["enroll_year"] = ENR_COL
+    en, yr = era_enroll(nm)
+    if en is not None:
+        out["enroll"] = en; out["enroll_year"] = yr
     cr = cap_by.get(nm)
     if cr is not None and pd.notna(cr.get("permanent_capacity")):
         out["capacity"] = int(cr["permanent_capacity"])
@@ -325,9 +352,11 @@ def school_feat(nm, kind, display, type_label):
     ll = ccd.get(nm)
     if not ll: return None
     info = {"programs": []}
-    er = enr_by.get(nm)
-    if er is not None and pd.notna(er.get(ENR_COL)):
-        info["enroll_current"] = int(er[ENR_COL]); info["enroll_year"] = ENR_COL
+    en, yr = era_enroll(nm)
+    if en is not None:
+        info["enroll_current"] = en; info["enroll_year"] = yr
+    if nm in _ospi:
+        info["ospi"] = _ospi[nm]   # enrolled-student demographics for the pin
     cr = cap_by.get(nm)
     if cr is not None and pd.notna(cr.get("permanent_capacity")):
         info["capacity"] = int(cr["permanent_capacity"])

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Methods &amp; Sources — Bellevue School District Boundaries</title>
   <meta name="description" content="How every number on this site was computed: data sources, formulas, design choices, limitations, and citations." />
-  <link rel="stylesheet" href="styles.css?v=135" />
+  <link rel="stylesheet" href="styles.css?v=136" />
 </head>
 <body class="an-page">
 
@@ -125,12 +125,14 @@
       household" follows the census definition: no member aged 14+ speaks English very
       well.</p>
       <h3 class="an-h3">Enrollment and capacity</h3>
-      <p>Enrollment comes from NCES Common Core of Data per-school
-      counts (plus the district's own October snapshots where cited); building capacity from
-      district facilities documents (2023 consolidation report for elementaries; 2019
-      assessments for secondary schools &mdash; vintages are stated wherever they mix). One
-      counting rule applied everywhere: <b>NCES totals include preschoolers, the district's K-5
-      counts don't</b>, so any quoted enrollment states whose count it is.</p>
+      <p>Elementary enrollment comes from Washington OSPI's school report card; middle- and
+      high-school enrollment from NCES Common Core of Data (plus the district's own October
+      snapshots where cited). Building capacity comes from district facilities documents (2023
+      consolidation report for elementaries; 2019 assessments for secondary schools &mdash;
+      vintages are stated wherever they mix). One counting rule applies everywhere: OSPI reports
+      <i>per grade</i>, so elementary counts here reconcile to the district's own October K-5
+      figures once preschool is subtracted, while NCES totals include preschoolers and the
+      district's K-5 counts don't &mdash; so any quoted enrollment states whose count it is.</p>
       <h3 class="an-h3">Travel</h3>
       <p>Travel is computed on <b>the real road network</b>: for every block, the driving and
       walking distance and time to each relevant school were precomputed with the
@@ -161,9 +163,10 @@
         residential segregation indices.</li>
         <li><b>Households (ACS)</b> &mdash; income, home value, rent, and limited-English
         shares.</li>
-        <li><b>Enrolled students (per year)</b> &mdash; enrollment, capacity, utilization, and
-        the enrollment-based segregation indices (which also exclude choice schools, since
-        they have no zone).</li>
+        <li><b>Enrolled students (per year)</b> &mdash; enrollment, capacity, utilization, the
+        enrollment-based segregation indices (which also exclude choice schools, since they have
+        no zone), and the per-school demographic rankings (race, low-income, English learners,
+        Advanced Learning, special education) from OSPI.</li>
       </ul>
     </section>
 
@@ -236,9 +239,10 @@
         decomposes cleanly &mdash; a reasoned choice, not a convention. Both D and H are computed
         on two bases and <b>for each boundary era</b>: the residential basis uses the fixed 2020
         population on that era's zones, and the enrollment basis uses actual per-school race
-        enrollment from each era's final school year (NCES: 2017&ndash;18, 2022&ndash;23,
-        2023&ndash;24). The District overview shows the active era's values, alongside the
-        district-wide mix gap (the child-weighted average of the per-zone values).</li>
+        enrollment from each era's final school year (2017&ndash;18, 2022&ndash;23,
+        2023&ndash;24 &mdash; elementary from Washington OSPI, middle/high from NCES). The
+        District overview shows the active era's values, alongside the district-wide mix gap
+        (the child-weighted average of the per-zone values).</li>
         <li><b>Neighborhood splits</b> &mdash; for each official City of Bellevue neighborhood,
         the number of zones its school-age children divide across, per era; portions outside
         the district are reported separately and never counted as an extra school.</li>
@@ -339,11 +343,12 @@
     <section class="an-section" id="m7">
       <p class="an-secnum">Section 7</p>
       <h2>Credits &amp; reproducibility</h2>
-      <p><b>Data:</b> U.S. Census Bureau (2020 decennial census; ACS 2019&ndash;2023); NCES
-      (Common Core of Data; School Attendance Boundary Survey); City of Bellevue open GIS
-      data; Bellevue School District reports and program pages (archived copies where the
-      originals were removed); Zillow ZHVI (city-level home-value series, market context
-      only). News and district records quoted on the Analysis page are cited
+      <p><b>Data:</b> U.S. Census Bureau (2020 decennial census; ACS 2019&ndash;2023);
+      Washington OSPI (school report card: elementary enrollment and per-school student
+      demographics); NCES (Common Core of Data; School Attendance Boundary Survey); City of
+      Bellevue open GIS data; Bellevue School District reports and program pages (archived
+      copies where the originals were removed); Zillow ZHVI (city-level home-value series,
+      market context only). News and district records quoted on the Analysis page are cited
       <a class="tabs-link" href="analysis.html#s7">there</a>.</p>
       <p><b>Maps &amp; routing:</b> basemap &copy; <a href="https://www.maptiler.com/copyright/">MapTiler</a>
       &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>;
@@ -409,7 +414,7 @@
   </main>
 
   <!-- Entry screens + shared language state -->
-  <script src="intro.js?v=135"></script>
+  <script src="intro.js?v=136"></script>
 
   <script>
     (function () {
