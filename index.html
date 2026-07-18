@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The 2023 Bellevue Elementary Rezoning</title>
   <meta name="description" content="An interactive map of how Bellevue School District's attendance-zone boundaries changed in 2023, and what changed with them." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=138" />
-  <link rel="stylesheet" href="styles.css?v=138" />
-  <script src="vendor/maplibre-gl-csp.js?v=138"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=139" />
+  <link rel="stylesheet" href="styles.css?v=139" />
+  <script src="vendor/maplibre-gl-csp.js?v=139"></script>
 </head>
 <body>
   <div id="map"></div>
 
   <!-- Deployed-version stamp. Bump on EVERY push: YYYY.MM.DD.NN (NN = nth push that day). -->
-  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.07.16.03</div>
+  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.07.18.01</div>
 
   <!-- More-tabs launcher, top-left -->
   <div class="tabs-launcher">
@@ -128,7 +128,7 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=138"></script>
+  <script src="intro.js?v=139"></script>
 
   <script>
     (function () {
@@ -153,7 +153,7 @@
 
   <script>
     const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "138";   // cache-bust the data GeoJSON when it is regenerated
+    const DATA_VER = "139";   // cache-bust the data GeoJSON when it is regenerated
 
     /* ---- in-place Chinese for all dynamic panel content ----
      * T() looks a string up in ZHD when the shared language is Chinese and
@@ -287,7 +287,7 @@
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=138");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=139");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
@@ -1444,11 +1444,17 @@
       }).join("");
       const mbtns = OV_METRICS.map(x =>
         `<button class="ov-rk-mbtn${x.id === ovRankMetric ? " on" : ""}" data-ovm="${x.id}">${zh ? x.zh : x.label}</button>`).join("");
+      const iepNote = (m.id === "iep")
+        ? `<div class="ov-rk-note">${zh
+            ? "注意：特殊教育人数主要取决于哪些学校设有特教学前班和定点特教项目，而非社区特征。设有特教学前班的学校（如 Phantom Lake）在此人数会偏高。特殊教育是法定权利，不是负担。"
+            : "Heads up: special-education counts track which schools host special-ed preschools and site-based programs, not the neighborhood. Schools with a special-ed preschool (e.g. Phantom Lake) read high here. Special ed is a legal right, not a burden."}</div>`
+        : "";
       body.innerHTML =
         `<div class="ov-rk-metrics">${mbtns}</div>` +
         `<div class="ov-rk-modes"><span class="ov-rk-modelab">${zh ? "按" : "by"}</span>` +
           `<button class="ov-rk-modebtn${ovRankMode === "pct" ? " on" : ""}" data-ovmode="pct">${zh ? "占比" : "share"}</button>` +
           `<button class="ov-rk-modebtn${ovRankMode === "count" ? " on" : ""}" data-ovmode="count">${zh ? "人数" : "count"}</button></div>` +
+        iepNote +
         `<div class="ov-rk-list">${list}</div>`;
     }
 
@@ -1543,8 +1549,8 @@
           return `<div class="impact-section"><div class="section-head"><span class="detail-section-label">${zh ? `学校排名 &mdash; 在校学生（${rkYear}）` : `School rankings &mdash; enrolled students (${rkYear})`}</span>` +
             `<button class="info-btn toggle-btn" data-target="ov-rank-info" aria-expanded="false" title="${zh ? "这些排名是什么" : "what these rankings are"}">i</button></div>` +
             `<div class="metric-defs" id="ov-rank-info" hidden>${zh
-              ? `按每所学校<b>实际就读学生</b>的构成排名（华盛顿州 OSPI）。这是就读口径的数据，描述的是学校，<b>不是</b>分区居民&mdash;&mdash;所以它以排名呈现，不上地图（给各分区按学校数据上色会把两种口径混在一起）。<b>占比</b> = 占全校的百分比；<b>人数</b> = 学生数（负担的大小）。高阶学习中心把全学区经甄别的学生集中到少数几所学校&mdash;&mdash;所以中心的占比很高，反映的是项目安置，不是某个社区。`
-              : `Ranks schools by their <b>actually enrolled students</b> (WA OSPI). This is enrollment-basis data about the schools, <b>not</b> zone residents &mdash; which is why it is a ranking, not a map (coloring zones by school data would mix the two). <b>Share</b> = percent of the school; <b>count</b> = number of students (the size of the load). Advanced Learning centers concentrate district-wide identified students into a few schools &mdash; so a center's high share reflects program placement, not one neighborhood.`}</div>` +
+              ? `按每所学校<b>实际就读学生</b>的构成排名（华盛顿州 OSPI）。这是就读口径的数据，描述的是学校，<b>不是</b>分区居民&mdash;&mdash;所以它以排名呈现，不上地图（给各分区按学校数据上色会把两种口径混在一起）。<b>占比</b> = 占全校的百分比；<b>人数</b> = 学生数（负担的大小）。高阶学习中心把全学区经甄别的学生集中到少数几所学校&mdash;&mdash;所以中心的占比很高，反映的是项目安置，不是某个社区。特殊教育同理：这些人数主要取决于哪些学校设有特教学前班和定点项目，所以特殊教育人数高（例如设有全学区最大特教学前班的 Phantom Lake）反映的是项目安置，而非社区；特殊教育是法定权利，不是负担。`
+              : `Ranks schools by their <b>actually enrolled students</b> (WA OSPI). This is enrollment-basis data about the schools, <b>not</b> zone residents &mdash; which is why it is a ranking, not a map (coloring zones by school data would mix the two). <b>Share</b> = percent of the school; <b>count</b> = number of students (the size of the load). Advanced Learning centers concentrate district-wide identified students into a few schools &mdash; so a center's high share reflects program placement, not one neighborhood. The same holds for special education: those counts are dominated by which schools host special-ed preschools and site-based programs, so a high special-ed count (e.g. Phantom Lake, the district's largest special-ed preschool) reflects program placement, not the neighborhood &mdash; and special education is a legal right, not a burden.`}</div>` +
             `<details class="ov-d" open><summary>${zh ? "按类别给各校排名" : "Rank schools by group"}</summary>` +
             `<div id="ov-rank-body"></div>` +
             `<p class="sub">${subNote}</p>` +

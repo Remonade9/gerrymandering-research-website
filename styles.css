@@ -754,6 +754,16 @@ html, body {
 .ov-rk-bar span { display: block; height: 100%; background: var(--accent); border-radius: 5px; }
 .ov-rk-v { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .ov-rk-sub { display: block; font-weight: 400; font-size: 0.68rem; color: var(--muted); }
+.ov-rk-note {
+  font-size: 0.74rem;
+  color: var(--ink);
+  background: var(--accent-soft);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  padding: 0.4rem 0.55rem;
+  margin: 0 0 0.55rem;
+  line-height: 1.4;
+}
 
 /* school pin — enrolled-student demographics (OSPI) */
 .sch-demo { margin-top: 0.6rem; border-top: 1px solid var(--border); padding-top: 0.5rem; }
