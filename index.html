@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The 2023 Bellevue Elementary Rezoning</title>
   <meta name="description" content="An interactive map of how Bellevue School District's attendance-zone boundaries changed in 2023, and what changed with them." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=139" />
-  <link rel="stylesheet" href="styles.css?v=139" />
-  <script src="vendor/maplibre-gl-csp.js?v=139"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=140" />
+  <link rel="stylesheet" href="styles.css?v=140" />
+  <script src="vendor/maplibre-gl-csp.js?v=140"></script>
 </head>
 <body>
   <div id="map"></div>
 
   <!-- Deployed-version stamp. Bump on EVERY push: YYYY.MM.DD.NN (NN = nth push that day). -->
-  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.07.18.01</div>
+  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.07.18.02</div>
 
   <!-- More-tabs launcher, top-left -->
   <div class="tabs-launcher">
@@ -128,7 +128,7 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=139"></script>
+  <script src="intro.js?v=140"></script>
 
   <script>
     (function () {
@@ -153,7 +153,7 @@
 
   <script>
     const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "139";   // cache-bust the data GeoJSON when it is regenerated
+    const DATA_VER = "140";   // cache-bust the data GeoJSON when it is regenerated
 
     /* ---- in-place Chinese for all dynamic panel content ----
      * T() looks a string up in ZHD when the shared language is Chinese and
@@ -287,7 +287,7 @@
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=139");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=140");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
@@ -1458,6 +1458,81 @@
         `<div class="ov-rk-list">${list}</div>`;
     }
 
+    // ----- District composition: race on BOTH universes + wealth range (the yardsticks
+    // every zone panel's ranks are measured against). Computed client-side from the
+    // already-loaded zone + school features, so no data rebuild is needed. -----
+    const COMP_GROUPS = [
+      { id: "white",    label: "White",       zh: "白人" },
+      { id: "asian",    label: "Asian",       zh: "亚裔" },
+      { id: "hispanic", label: "Hispanic",    zh: "西语裔" },
+      { id: "black",    label: "Black",       zh: "非裔" },
+      { id: "twoplus",  label: "Two or more", zh: "两个及以上族裔" },
+      { id: "other",    label: "Other",       zh: "其他" }
+    ];
+    const COMP_WEALTH = [
+      { id: "income",     label: "Median household income", zh: "家庭收入中位数", fmt: v => "$" + Math.round(v / 1000) + "k" },
+      { id: "home_value", label: "Median home value",       zh: "房屋价值中位数", fmt: v => v >= 1e6 ? "$" + (v / 1e6).toFixed(2) + "M" : "$" + Math.round(v / 1000) + "k" },
+      { id: "rent",       label: "Median gross rent",       zh: "租金中位数",     fmt: v => "$" + fmtInt(Math.round(v)) }
+    ];
+    function districtCompHTML() {
+      const zh = isZH();
+      const zf = (DATA.levels[activeLevel] && DATA.levels[activeLevel].zones.features) || [];
+      // residents (fixed 2020 census); fold AIAN + NHPI into "Other" to match the site's Other definition
+      const res = {}; COMP_GROUPS.forEach(g => res[g.id] = 0);
+      let resN = 0;
+      zf.forEach(f => {
+        const s = f.properties.seg; if (!s) return;
+        resN += s.total_pop || 0;
+        res.white += s.white_n || 0; res.asian += s.asian_n || 0;
+        res.hispanic += s.hispanic_n || 0; res.black += s.black_n || 0;
+        res.twoplus += s.twoplus_n || 0;
+        res.other += (s.other_n || 0) + (s.aian_n || 0) + (s.nhpi_n || 0);
+      });
+      // enrolled (OSPI, this era) — ZONED schools only, so both sides describe the same universe
+      const enr = {}; COMP_GROUPS.forEach(g => enr[g.id] = 0);
+      let enrN = 0, enrYr = null;
+      ovRankRows().forEach(r => {
+        if (r.choice) return;
+        enrN += r.o.n || 0; enrYr = r.o.year || enrYr;
+        COMP_GROUPS.forEach(g => { enr[g.id] += (r.o.race && r.o.race[g.id]) || 0; });
+      });
+      if (!resN && !enrN) return "";
+      const pct = (v, n) => n ? (100 * v / n) : null;
+      const show = v => v == null ? "&mdash;" : v.toFixed(1) + "%";
+      const rows = COMP_GROUPS.map(g => {
+        const a = pct(res[g.id], resN), b = enrN ? pct(enr[g.id], enrN) : null;
+        const d = (a != null && b != null) ? (b - a) : null;
+        const dTxt = d == null ? "" : (d > 0 ? "+" : "") + d.toFixed(1);
+        const dCls = d == null ? "" : (Math.abs(d) >= 5 ? " comp-d-big" : "");
+        return `<div class="comp-row"><span class="comp-g">${zh ? g.zh : g.label}</span>` +
+          `<span class="comp-v">${show(a)}</span><span class="comp-v">${show(b)}</span>` +
+          `<span class="comp-v comp-d${dCls}">${dTxt}</span></div>`;
+      }).join("");
+      const wealth = COMP_WEALTH.map(w => {
+        const vals = zf.map(f => ({ n: f.properties.name, v: (f.properties.housing || {})[w.id] }))
+                       .filter(x => x.v != null).sort((a, b) => b.v - a.v);
+        if (!vals.length) return "";
+        const hi = vals[0], lo = vals[vals.length - 1];
+        return `<div class="wealth-row"><span class="wealth-lab">${zh ? w.zh : w.label}</span>` +
+          `<span class="wealth-val">${w.fmt(hi.v)} <span class="wealth-zone">${hi.n}</span>` +
+          ` &rarr; ${w.fmt(lo.v)} <span class="wealth-zone">${lo.n}</span></span></div>`;
+      }).join("");
+      return `<div class="section-head"><span class="detail-section-label">${zh
+          ? `学区人口构成 &mdash; ${T(eraLabel())}` : `District composition &mdash; ${eraLabel()}`}</span>` +
+        `<button class="info-btn toggle-btn" data-target="dist-comp-info" aria-expanded="false" title="${zh ? "这些数字是什么" : "what these are"}">i</button></div>` +
+        `<div class="metric-defs" id="dist-comp-info" hidden>${zh
+          ? `这是全学区的基准&mdash;&mdash;各分区面板里的排名都是相对它而言的。族裔按<b>两种口径</b>并列：<b>居民</b> = 住在各分区内的人（固定的 2020 年普查人口）；<b>在校学生</b> = 实际在划片学校就读的人（华盛顿州 OSPI，本时期学年）。两者之差就是选校、转学和项目的效应&mdash;&mdash;与隔离指数表用的是同一组区分。两侧都不含选校制学校，以保证口径一致。财富显示为各分区的<b>区间</b>，而不是学区中位数：把各分区的中位数再平均并不能得到有效的学区中位数，所以这里给出最高和最低的分区作为参照。`
+          : `The district-wide baseline &mdash; the yardstick every zone panel's ranks are measured against. Race is shown on <b>both universes</b>: <b>residents</b> = who lives inside the zones (fixed 2020 Census), <b>enrolled</b> = who actually attends the zoned schools (WA OSPI, this era's school year). The gap between them is the effect of choice, transfers, and programs &mdash; the same distinction the segregation table uses. Choice schools are excluded from both sides so the two universes match. Wealth is shown as a <b>range across zones</b>, not a district median: averaging zone medians does not produce a valid district median, so the highest and lowest zone are given as the yardstick.`}</div>` +
+        `<p class="idx-basis">${zh ? `族裔&mdash;&mdash;居民 vs 在校学生${enrYr ? `（${enrYr}）` : ""}` : `Race &mdash; residents vs enrolled students${enrYr ? ` (${enrYr})` : ""}`}</p>` +
+        `<div class="comp-table"><div class="comp-row comp-head"><span></span>` +
+          `<span class="comp-v">${zh ? "居民" : "Residents"}</span>` +
+          `<span class="comp-v">${zh ? "在校" : "Enrolled"}</span>` +
+          `<span class="comp-v">${zh ? "差值" : "Gap"}</span></div>${rows}</div>` +
+        `<p class="idx-basis">${zh ? "财富&mdash;&mdash;各分区区间（最高 → 最低）" : "Wealth &mdash; range across zones (highest &rarr; lowest)"}</p>` +
+        `<div class="wealth-table">${wealth}</div>` +
+        `<p class="sub">${zh ? "居民为固定的 2020 年快照；在校学生为该时期的实际统计。两者不一致本身就是一项发现，而不是误差。" : "Residents are the fixed 2020 snapshot; enrolled students are this era's real headcount. The mismatch between them is itself a finding, not an error."}</p>`;
+    }
+
     // ----- District overview (the two district-wide impacts: segregation index + participation) -----
     let districtOpen = false;
     function openDistrict() {
@@ -1527,6 +1602,7 @@
         `<p class="detail-eyebrow">${zh ? "贝尔维尤学区" : "Bellevue School District"}</p>` +
         `<h2 class="detail-title">${zh ? "学区总览" : "District overview"}</h2>` +
         glance +
+        districtCompHTML() +
         `<div class="section-head"><span class="detail-section-label">${zh ? `学校之间的隔离 &mdash; ${T(eraLabel())}` : `Segregation across schools &mdash; ${eraLabel()}`}</span>` +
           `<button class="info-btn toggle-btn" data-target="seg-idx-defs" aria-expanded="false" title="${zh ? "这些指数是什么意思" : "What these indices mean"}">i</button></div>` +
         `<div class="metric-defs" id="seg-idx-defs" hidden>${segDefs}</div>` +
