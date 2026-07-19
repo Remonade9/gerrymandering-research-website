@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>方法与来源 — 贝尔维尤学区边界</title>
   <meta name="description" content="本站每一个数字是怎么算出来的：数据来源、公式、设计取舍、局限与引用文献。" />
-  <link rel="stylesheet" href="styles.css?v=140" />
+  <link rel="stylesheet" href="styles.css?v=141" />
 </head>
 <body class="an-page">
 
@@ -177,9 +177,9 @@
         两个及以上族裔、其他；西语裔不分种族），来自 2020 年街区数据。</li>
         <li><b>构成差距（mix gap）</b>&mdash;&mdash;按分区计算：把分区内六个组别各自的比例与全学区
         该组别的比例逐一比较，把偏差累加起来，占分区人口越多的组别权重越大。
-        零表示分区构成与全学区完全一致；全学区指数是各分区按儿童数加权的平均值。
-        （面向数学爱好者：它是分区构成相对全学区构成的 Kullback&ndash;Leibler 散度
-        &mdash;&mdash;与熵指数 H 同属信息论家族；这一家族的测量见
+        零表示分区构成与全学区完全一致；全学区汇总是<b>互信息指数（M）</b>，即各分区按儿童数加权的平均值。
+        （面向数学爱好者：单个分区的构成差距是相对全学区构成的 Kullback&ndash;Leibler 散度，M 就是它们之和
+        &mdash;&mdash;与熵指数 H 同属信息论家族，H 不过是归一化后的 M（H = M ÷ 全学区多样性）；这一家族的测量见
         Reardon &amp; Firebaugh（2002）<sup class="an-cite"><a href="#ref-4">4</a></sup>。）</li>
         <li><b>相异指数（D）</b>&mdash;&mdash;全学区口径，白人与非白人两分：一个组别中需要换校的比例，
         换完之后每所学校的构成才会完全均匀。0 表示已经均匀；1 表示完全分离。完整数学见
@@ -193,7 +193,7 @@
         2020 年人口套在该时期的分区上，就读口径使用各时期最后一学年的分校族裔就读数据
         （2017&ndash;18、2022&ndash;23、2023&ndash;24&mdash;&mdash;小学来自华盛顿州 OSPI，
         初中高中来自 NCES）。"学区总览"显示当前时期的数值，
-        并同时列出全学区构成差距（各分区数值按儿童数加权的平均）。</li>
+        并同时列出全学区互信息指数（M）（各分区构成差距按儿童数加权的平均）。</li>
         <li><b>社区拆分</b>&mdash;&mdash;对贝尔维尤市官方划定的每个社区，统计其学龄儿童被分进几个分区，
         按时期分别统计；落在学区外的部分单独报告，绝不算作一所额外的学校。</li>
         <li><b>稳定性</b>&mdash;&mdash;每片区域的学校归属在三个时期中变了几次（零次、一次或两次），
@@ -341,7 +341,7 @@
   </main>
 
   <!-- Entry screens + shared language state -->
-  <script src="intro.js?v=140"></script>
+  <script src="intro.js?v=141"></script>
 
   <script>
     (function () {

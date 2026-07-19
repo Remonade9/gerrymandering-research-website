@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Methods &amp; Sources — Bellevue School District Boundaries</title>
   <meta name="description" content="How every number on this site was computed: data sources, formulas, design choices, limitations, and citations." />
-  <link rel="stylesheet" href="styles.css?v=140" />
+  <link rel="stylesheet" href="styles.css?v=141" />
 </head>
 <body class="an-page">
 
@@ -221,10 +221,12 @@
         <li><b>Mix gap</b> &mdash; per zone: compare the zone's share of each of the six
         groups to the district's share of that group, and add up how far off they are, with
         bigger weight on the groups that make up more of the zone. Zero means the zone's mix
-        is identical to the district's; the district-wide index is the child-weighted average
-        across zones. (For the mathematically inclined: it is the Kullback&ndash;Leibler
-        divergence of the zone's mix from the district's &mdash; the same information-theory
-        family as Theil's H; see Reardon &amp; Firebaugh (2002)<sup class="an-cite"><a href="#ref-4">4</a></sup>
+        is identical to the district's; the district-wide roll-up is the <b>Mutual Information
+        index (M)</b>, the child-weighted average across zones. (For the mathematically inclined:
+        the per-zone mix gap is the Kullback&ndash;Leibler divergence of the zone's mix from the
+        district's, and M is the sum of those &mdash; the same information-theory family as
+        Theil's H, which is simply M normalized (H = M &divide; the district's diversity); see
+        Reardon &amp; Firebaugh (2002)<sup class="an-cite"><a href="#ref-4">4</a></sup>
         for that family of measures.)</li>
         <li><b>Dissimilarity index (D)</b> &mdash; district-wide, White vs. non-White: the
         share of one group that would need to switch schools for every school to have a
@@ -241,8 +243,8 @@
         population on that era's zones, and the enrollment basis uses actual per-school race
         enrollment from each era's final school year (2017&ndash;18, 2022&ndash;23,
         2023&ndash;24 &mdash; elementary from Washington OSPI, middle/high from NCES). The
-        District overview shows the active era's values, alongside the district-wide mix gap
-        (the child-weighted average of the per-zone values).</li>
+        District overview shows the active era's values, alongside the district-wide Mutual
+        Information index (M) (the child-weighted average of the per-zone mix gaps).</li>
         <li><b>Neighborhood splits</b> &mdash; for each official City of Bellevue neighborhood,
         the number of zones its school-age children divide across, per era; portions outside
         the district are reported separately and never counted as an extra school.</li>
@@ -414,7 +416,7 @@
   </main>
 
   <!-- Entry screens + shared language state -->
-  <script src="intro.js?v=140"></script>
+  <script src="intro.js?v=141"></script>
 
   <script>
     (function () {

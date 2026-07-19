@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Definitions &amp; References — Bellevue School District Boundaries</title>
   <meta name="description" content="Plain-language definitions of every program, term, and metric used on this site — plus yardsticks for reading the numbers." />
-  <link rel="stylesheet" href="styles.css?v=140" />
+  <link rel="stylesheet" href="styles.css?v=141" />
 </head>
 <body class="an-page">
 
@@ -176,7 +176,10 @@
         <dt>Mix gap</dt>
         <dd>Our per-zone measure of demographic distinctiveness: how far a zone's mix of
         residents (six groups: White, Asian, Hispanic, Black, two-or-more, other) sits from
-        the district's overall mix. 0 = identical to the district.</dd>
+        the district's overall mix. 0 = identical to the district. Added up across all zones
+        (child-weighted), the per-zone gaps become the district-wide <b>Mutual Information
+        index (M)</b> &mdash; the un-normalized form of Theil's H (below). So a single zone has
+        a mix gap; the district as a whole has M.</dd>
 
         <dt>Dissimilarity index (D)</dt>
         <dd>A standard segregation measure. Intuition: out of every 100 children, how many
@@ -268,7 +271,7 @@
   </main>
 
   <!-- Entry screens + shared language state -->
-  <script src="intro.js?v=140"></script>
+  <script src="intro.js?v=141"></script>
 
   <script>
     (function () {

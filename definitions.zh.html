@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>定义与参考 — 贝尔维尤学区边界</title>
   <meta name="description" content="用平实的语言解释本站使用的每一个项目、术语和指标，并为每个数值尺度提供参照。" />
-  <link rel="stylesheet" href="styles.css?v=140" />
+  <link rel="stylesheet" href="styles.css?v=141" />
 </head>
 <body class="an-page">
 
@@ -146,8 +146,10 @@
         <dd>在校人数除以校舍容量。100% 表示学生数正好等于座位数。</dd>
 
         <dt>构成差距（Mix gap）</dt>
-        <dd>本站自建的分区人口独特性指标：一个分区的居民构成（六个组别：白人、亚裔、西语裔、非裔、
-        两个及以上族裔、其他）与全学区整体构成相差多远。0 表示与全学区完全一致。</dd>
+        <dd>本站的分区人口独特性指标：一个分区的居民构成（六个组别：白人、亚裔、西语裔、非裔、
+        两个及以上族裔、其他）与全学区整体构成相差多远。0 表示与全学区完全一致。把各分区的构成差距
+        按儿童数加权汇总，就得到全学区的<b>互信息指数（M，Mutual Information）</b>&mdash;&mdash;
+        它是熵指数 Theil's H（见下）的未归一化形式。所以单个分区看&ldquo;构成差距&rdquo;，全学区看 M。</dd>
 
         <dt>相异指数（Dissimilarity index，D）</dt>
         <dd>一个标准的隔离测量。直观理解：每 100 个孩子中，需要多少人换学校，
@@ -223,7 +225,7 @@
   </main>
 
   <!-- Entry screens + shared language state -->
-  <script src="intro.js?v=140"></script>
+  <script src="intro.js?v=141"></script>
 
   <script>
     (function () {

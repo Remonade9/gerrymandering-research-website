@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The 2023 Bellevue Elementary Rezoning</title>
   <meta name="description" content="An interactive map of how Bellevue School District's attendance-zone boundaries changed in 2023, and what changed with them." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=140" />
-  <link rel="stylesheet" href="styles.css?v=140" />
-  <script src="vendor/maplibre-gl-csp.js?v=140"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=141" />
+  <link rel="stylesheet" href="styles.css?v=141" />
+  <script src="vendor/maplibre-gl-csp.js?v=141"></script>
 </head>
 <body>
   <div id="map"></div>
 
   <!-- Deployed-version stamp. Bump on EVERY push: YYYY.MM.DD.NN (NN = nth push that day). -->
-  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.07.18.02</div>
+  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.07.18.03</div>
 
   <!-- More-tabs launcher, top-left -->
   <div class="tabs-launcher">
@@ -128,7 +128,7 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=140"></script>
+  <script src="intro.js?v=141"></script>
 
   <script>
     (function () {
@@ -153,7 +153,7 @@
 
   <script>
     const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "140";   // cache-bust the data GeoJSON when it is regenerated
+    const DATA_VER = "141";   // cache-bust the data GeoJSON when it is regenerated
 
     /* ---- in-place Chinese for all dynamic panel content ----
      * T() looks a string up in ZHD when the shared language is Chinese and
@@ -287,7 +287,7 @@
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=140");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=141");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
@@ -1558,20 +1558,20 @@
         return `<p class="idx-basis">${label}</p>` +
           `<div class="idx-table${mg ? " idx5" : ""}"><div class="idx-row idx-head"><span class="idx-level"></span>` +
           `<span class="idx-val">${isZH() ? "相异指数" : "Dissimilarity"}</span><span class="idx-val">${isZH() ? "熵指数 H" : "Theil's H"}</span>` +
-          (mg ? `<span class="idx-val">${isZH() ? "构成差距" : "Mix gap"}</span>` : "") +
+          (mg ? `<span class="idx-val">${isZH() ? "互信息（M）" : "Mutual info (M)"}</span>` : "") +
           `<span class="idx-n"></span></div>${rows}</div>`;
       };
       const segDefs = isZH()
         ? `<dl>` +
           `<dt>相异指数（D）</dt><dd>比较白人与非白人。一个组别中需要换校的比例，换完后各校才会完全均匀。0 = 完全均匀，1 = 完全分离。</dd>` +
           `<dt>熵指数（Theil's H）</dt><dd>同时使用全部六个族裔组别。平均而言每所学校比全学区整体少多少多样性。0 = 每所学校与学区一致，1 = 完全分离。</dd>` +
-          `<dt>构成差距（学区值）</dt><dd>各分区构成差距（见任一分区面板）按学龄儿童加权的平均值——分区与全学区构成的平均偏离。0 = 每个分区都与学区一致。仅按居住地计算。</dd>` +
+          `<dt>互信息指数（M）</dt><dd>各分区构成差距在全学区的汇总——按学龄儿童加权的各分区构成差距平均值（见任一分区面板）。它是熵指数 Theil's H 的未归一化形式（H = M ÷ 全学区多样性）——所以单个分区看&ldquo;构成差距&rdquo;，全学区看 M。0 = 每个分区都与学区一致。仅按居住地计算。</dd>` +
           `<dt>两种口径</dt><dd><b>实际就读</b> = 谁在每所划片学校就读（NCES 各时期最后一学年），是包含转学和项目安置的真实结果。<b>居住</b> = 谁住在每个分区内（固定的 2020 年普查人口），即仅凭边界线会产生的结果。两者之差就是选校、转学和项目的效应。</dd>` +
           `<dt>注意</dt><dd>不含选校制学校（它们不是分区单位）。中学每学段只有 4–5 所学校，细小的差别没有意义。每个时期都在其自己的边界和学校名单上计算——用左上角的时期按钮切换即可前后对比；初中和高中的边界从未变化，因此其居住口径数值各时期相同。</dd></dl>`
         : `<dl>` +
           `<dt>Dissimilarity index (D)</dt><dd>Compares White vs non-White. The share of one group that would have to change schools for a perfectly even spread. 0 = perfectly even, 1 = totally separate.</dd>` +
           `<dt>Theil's H (entropy index)</dt><dd>Uses all six race groups at once. How much less diverse the average school is than the district overall. 0 = every school mirrors the district, 1 = total separation.</dd>` +
-          `<dt>Mix gap (district value)</dt><dd>The child-weighted average of every zone's mix gap (see any zone panel) &mdash; how far zones sit from the district's mix on average. 0 = every zone mirrors the district. Residential only.</dd>` +
+          `<dt>Mutual Information index (M)</dt><dd>The district-wide roll-up of the zone mix gaps &mdash; the child-weighted average of every zone's mix gap (see any zone panel). It is the un-normalized form of Theil's H (H = M &divide; the district's diversity), so a single zone shows a &ldquo;mix gap&rdquo; and the district shows M. 0 = every zone mirrors the district. Residential only.</dd>` +
           `<dt>Two bases</dt><dd><b>Actual enrollment</b> = who attends each zoned school (NCES, each era's final school year), the real outcome, including transfers and program placements. <b>Residential</b> = who lives inside each zone (the fixed 2020 Census population), what the boundary lines alone would produce. The gap between them is the effect of choice, transfers, and programs.</dd>` +
           `<dt>Caveats</dt><dd>Choice schools excluded (not zone units). With few schools per level (4-5 at secondary), small differences are not meaningful. Each era is computed on its own boundaries and school set &mdash; switch eras (top left) to compare before and after; middle- and high-school boundaries never changed, so their residential values are identical in every era.</dd></dl>`;
       const zf = DATA.levels[activeLevel].zones.features;
