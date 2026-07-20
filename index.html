@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The 2023 Bellevue Elementary Rezoning</title>
   <meta name="description" content="An interactive map of how Bellevue School District's attendance-zone boundaries changed in 2023, and what changed with them." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=141" />
-  <link rel="stylesheet" href="styles.css?v=141" />
-  <script src="vendor/maplibre-gl-csp.js?v=141"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=142" />
+  <link rel="stylesheet" href="styles.css?v=142" />
+  <script src="vendor/maplibre-gl-csp.js?v=142"></script>
 </head>
 <body>
   <div id="map"></div>
 
   <!-- Deployed-version stamp. Bump on EVERY push: YYYY.MM.DD.NN (NN = nth push that day). -->
-  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.07.18.03</div>
+  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.07.18.04</div>
 
   <!-- More-tabs launcher, top-left -->
   <div class="tabs-launcher">
@@ -128,7 +128,7 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=141"></script>
+  <script src="intro.js?v=142"></script>
 
   <script>
     (function () {
@@ -153,7 +153,7 @@
 
   <script>
     const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "141";   // cache-bust the data GeoJSON when it is regenerated
+    const DATA_VER = "142";   // cache-bust the data GeoJSON when it is regenerated
 
     /* ---- in-place Chinese for all dynamic panel content ----
      * T() looks a string up in ZHD when the shared language is Chinese and
@@ -287,7 +287,7 @@
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=141");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=142");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
@@ -1199,18 +1199,22 @@
       const c = props.cap; if (!c) return "";
       const zh = isZH();
       const defs = zh
-        ? `<dl><dt>在校人数</dt><dd>该时期学年在这所学校就读的真实学生数——是实际统计，因此时期之间的变化混合了边界效应与入学漂移（不同于固定 2020 年的人口数据）。</dd>` +
-          `<dt>容量</dt><dd>学区自己给出的该时期校舍容量。不同时期、不同学段的定义与年份不同（见"方法"）——跨时期的使用率比较请视为近似。</dd></dl>`
-        : `<dl><dt>Enrollment</dt><dd>Actual students at this zone's school in the era's school year — a real headcount, so era-to-era changes mix boundary effects with enrollment drift (unlike the fixed-2020 demographics).</dd>` +
-          `<dt>Capacity</dt><dd>The district's own building-capacity figure for the era. Definitions and vintages differ by era and level (see Methods) — treat cross-era utilization comparisons as approximate.</dd></dl>`;
+        ? `<dl><dt>在校人数（pre-K-5）</dt><dd>该时期学年在这所学校就读的真实学生数（含学前班）——是实际统计，因此时期之间的变化混合了边界效应与入学漂移（不同于固定 2020 年的人口数据）。</dd>` +
+          `<dt>容量</dt><dd>学区自己给出的该时期校舍容量。不同时期、不同学段的定义与年份不同（见"方法"）——跨时期的使用率比较请视为近似。</dd>` +
+          `<dt>K-5 在校人数（仅用于使用率）</dt><dd>计算使用率所用的在校人数，只算幼儿园到五年级，以便与只按 K-5 教室计算的容量对齐。本站其他所有数据（上面的在校人数、人口构成、隔离指数）都用 pre-K-5（含学前班）。</dd></dl>`
+        : `<dl><dt>Enrollment (pre-K-5)</dt><dd>Actual students at this zone's school in the era's school year (includes preschoolers) — a real headcount, so era-to-era changes mix boundary effects with enrollment drift (unlike the fixed-2020 demographics).</dd>` +
+          `<dt>Capacity</dt><dd>The district's own building-capacity figure for the era. Definitions and vintages differ by era and level (see Methods) — treat cross-era utilization comparisons as approximate.</dd>` +
+          `<dt>K-5 enrollment (utilization only)</dt><dd>The enrollment used to compute utilization &mdash; kindergarten through grade 5, so it matches the capacity, which counts K-5 classrooms. Everything else on this site (the enrollment above, demographics, segregation) uses pre-K-5, which includes preschoolers.</dd></dl>`;
       return `<div class="impact-section"><div class="section-head"><span class="detail-section-label">${zh ? `学校容量（${c.enroll_year || ""}）` : `School capacity (${c.enroll_year || ""})`}</span>` +
         `<button class="info-btn toggle-btn" data-target="cap-defs" aria-expanded="false" title="${zh ? "这些是什么意思" : "What these mean"}">i</button></div>` +
         `<div class="metric-defs" id="cap-defs" hidden>${defs}</div>` +
         `<div class="stat-row three">` +
-        `<div class="stat">${choroBox("enroll")}<div class="stat-val">${c.enroll != null ? fmtInt(c.enroll) : "&mdash;"}</div><div class="stat-lab">${T("Enrollment")}</div></div>` +
+        `<div class="stat">${choroBox("enroll")}<div class="stat-val">${c.enroll != null ? fmtInt(c.enroll) : "&mdash;"}</div><div class="stat-lab">${T("Enrollment")} <span class="muted">${zh ? "（pre-K-5）" : "(pre-K-5)"}</span></div></div>` +
         `<div class="stat">${choroBox("capacity")}<div class="stat-val">${c.capacity != null ? fmtInt(c.capacity) : "&mdash;"}</div><div class="stat-lab">${T("Building capacity")}</div></div>` +
         `<div class="stat">${choroBox("utilization")}<div class="stat-val">${c.utilization != null ? c.utilization + '<span class="metric-unit">%</span>' : "&mdash;"}</div><div class="stat-lab">${T("Utilization")}</div></div>` +
-        `</div></div>`;
+        `</div>` +
+        (c.k5 != null ? `<p class="sub cap-k5note">${zh ? `使用率按 <b>K-5 在校人数（${fmtInt(c.k5)}）</b>计算，以与只算 K-5 教室的容量口径一致；上面的在校人数以及本站其他所有数据均为 pre-K-5（含学前班）。` : `Utilization uses <b>K-5 enrollment (${fmtInt(c.k5)})</b> to match the K-5 capacity; the enrollment above and everything else on this site is pre-K-5 (includes preschoolers).`}</p>` : "") +
+        `</div>`;
     }
 
     function sectionSeg(props) {
@@ -1575,14 +1579,15 @@
           `<dt>Two bases</dt><dd><b>Actual enrollment</b> = who attends each zoned school (NCES, each era's final school year), the real outcome, including transfers and program placements. <b>Residential</b> = who lives inside each zone (the fixed 2020 Census population), what the boundary lines alone would produce. The gap between them is the effect of choice, transfers, and programs.</dd>` +
           `<dt>Caveats</dt><dd>Choice schools excluded (not zone units). With few schools per level (4-5 at secondary), small differences are not meaningful. Each era is computed on its own boundaries and school set &mdash; switch eras (top left) to compare before and after; middle- and high-school boundaries never changed, so their residential values are identical in every era.</dd></dl>`;
       const zf = DATA.levels[activeLevel].zones.features;
-      let gEnr = 0, gCap = 0, gKids = 0, gN = 0;
+      let gEnr = 0, gCap = 0, gKids = 0, gN = 0, gK5 = 0;
       zf.forEach(f => {
         const p = f.properties, c = p.cap || {};
         gKids += p.kids_5_17 || 0; gN++;
         if (c.enroll != null) gEnr += c.enroll;
+        if (c.k5 != null) gK5 += c.k5;
         if (c.capacity != null) gCap += c.capacity;
       });
-      const gUtil = gCap > 0 ? Math.round(100 * gEnr / gCap) : null;
+      const gUtil = gCap > 0 ? Math.round(100 * gK5 / gCap) : null;
       const zh = isZH();
       const glance =
         `<div class="section-head"><span class="detail-section-label">${zh ? `一览 &mdash; ${T(LEVEL_META[activeLevel].legend)}，${T(eraLabel())}` : `At a glance &mdash; ${LEVEL_META[activeLevel].legend}s, ${eraLabel()}`}</span>` +

@@ -249,6 +249,7 @@ with open(os.path.join(FDATA, "ospi", "ospi_elementary.csv"), encoding="utf-8") 
             _ospi[_r["school"].strip().title()] = {
                 "year": ENR_COL,
                 "n": int(_r["all_students_prek5"]),
+                "k5": int(_r["k5"] or 0),
                 "race": {v: int(_r[k] or 0) for k, v in _RACE6.items()},
                 "low_income": int(_r["low_income"] or 0),
                 "ell": int(_r["ell"] or 0),
@@ -271,10 +272,15 @@ def zone_capacity(nm):
     en, yr = era_enroll(nm)
     if en is not None:
         out["enroll"] = en; out["enroll_year"] = yr
+    # utilization uses K-5 (matches the K-5 capacity); enroll stays pre-K-5 for display + all else
+    k5v = _ospi.get(nm, {}).get("k5")
+    if k5v is not None:
+        out["k5"] = k5v
     cr = cap_by.get(nm)
     if cr is not None and pd.notna(cr.get("permanent_capacity")):
         out["capacity"] = int(cr["permanent_capacity"])
-        if out.get("enroll"): out["utilization"] = round(out["enroll"] / out["capacity"] * 100)
+        basis = k5v if k5v is not None else out.get("enroll")
+        if basis: out["utilization"] = round(basis / out["capacity"] * 100)
     return out or None
 
 feats = []
