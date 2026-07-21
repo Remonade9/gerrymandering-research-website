@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Boundary Changes — Bellevue School District</title>
   <meta name="description" content="Which territory switched elementary schools in Bellevue's 2018 and 2023 rezonings, and what changed for the people living there." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=135" />
-  <link rel="stylesheet" href="styles.css?v=135" />
-  <script src="vendor/maplibre-gl-csp.js?v=135"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=143" />
+  <link rel="stylesheet" href="styles.css?v=143" />
+  <script src="vendor/maplibre-gl-csp.js?v=143"></script>
 </head>
 <body class="chg-page">
   <div id="map"></div>
@@ -63,11 +63,11 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=135"></script>
+  <script src="intro.js?v=143"></script>
 
   <script>
     const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "135";
+    const DATA_VER = "143";
 
     /* ---- in-place Chinese for the dynamic panels (same pattern as the map tool) ---- */
     const isZH = () => (localStorage.getItem("bsd_lang") || "en") === "zh";
@@ -75,6 +75,7 @@
       "Advanced Learning": "高阶学习项目",
       "Olympic program": "Olympic 项目",
       "Jing Mei (school moved)": "Jing Mei（学校迁址）",
+      "Puesta del Sol (school moved)": "Puesta del Sol（学校迁址）",
       "Wilburton building": "Wilburton 校舍",
       "Opened fall 2018 to relieve elementary overcrowding; its zone was assembled from neighboring zones.":
         "2018 年秋开办，以缓解小学拥挤；其分区由周边分区各划一块拼成。",
@@ -106,7 +107,7 @@
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=135");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=143");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
