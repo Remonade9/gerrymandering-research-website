@@ -54,6 +54,8 @@
     route: ["Measure a route (two blue markers)", "测量路线（两个蓝色标记）"],
     tm: ["Travel mode", "出行方式"],
     drv: ["driving", "驾车"], wlk: ["walking", "步行"],
+    du: ["Distance units", "距离单位"],
+    u_mi: ["miles", "英里"], u_km: ["km", "公里"],
     title_chg: ["Boundary changes", "边界变更"],
     gap18: ["2018 rezoning", "2018 年重划"],
     gap23: ["2023 consolidation", "2023 年合并"],

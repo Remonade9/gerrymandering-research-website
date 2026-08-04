@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Boundary Changes — Bellevue School District</title>
   <meta name="description" content="Which territory switched elementary schools in Bellevue's 2018 and 2023 rezonings, and what changed for the people living there." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=143" />
-  <link rel="stylesheet" href="styles.css?v=143" />
-  <script src="vendor/maplibre-gl-csp.js?v=143"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=144" />
+  <link rel="stylesheet" href="styles.css?v=144" />
+  <script src="vendor/maplibre-gl-csp.js?v=144"></script>
 </head>
 <body class="chg-page">
   <div id="map"></div>
@@ -36,6 +36,7 @@
     </div>
     <div class="chg-slider-foot">
       <button class="chg-replay" id="replay-btn" title="Replay the change animation" data-i18n="replay">&#8635; Replay</button>
+      <span class="pin-mode seg-sm chg-unit-seg"><button class="pin-mode-btn chg-unit-btn" data-unit="mi">mi</button><button class="pin-mode-btn chg-unit-btn" data-unit="km">km</button></span>
       <button class="chg-replay" id="panel-lang" title="Switch language">中文</button>
     </div>
   </div>
@@ -63,11 +64,11 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=143"></script>
+  <script src="intro.js?v=144"></script>
 
   <script>
     const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "143";
+    const DATA_VER = "144";
 
     /* ---- in-place Chinese for the dynamic panels (same pattern as the map tool) ---- */
     const isZH = () => (localStorage.getItem("bsd_lang") || "en") === "zh";
@@ -90,6 +91,15 @@
       "White": "白人", "Asian": "亚裔", "Hispanic": "西语裔", "Black": "非裔"
     };
     const T = s => { if (!isZH()) return s; const v = ZHD[s]; return v != null ? v : s; };
+    /* ---- distance units: mi (default, US) or km; shared with the map tool via localStorage ---- */
+    const KM_PER_MI = 1.609344;
+    let distUnit = localStorage.getItem("bsd_dist_unit") || "mi";
+    const uConv = km => distUnit === "mi" ? km / KM_PER_MI : km;
+    const uName = () => distUnit;
+    const uNameZh = () => distUnit === "mi" ? "英里" : "公里";
+    const uNum = km => { const v = uConv(km); return v < 1 ? v.toFixed(2) : v.toFixed(1); };
+    const uAreaStr = km2 => distUnit === "km" ? km2 : ((v => v < 10 ? v.toFixed(2) : v.toFixed(1))(km2 / (KM_PER_MI * KM_PER_MI)));
+    const uAreaLbl = () => distUnit === "mi" ? "mi&sup2;" : "km&sup2;";
     const TIMELINES_ZH = {
       "2023": [
         ["2022 年 10 月", "学区发布合并分析（《Planning for the Future》报告）。"],
@@ -107,7 +117,7 @@
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=143");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=144");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
@@ -522,8 +532,11 @@
     const body = document.getElementById("detail-body");
 
     function pairRow(label, before, after, unit) {
+      const conv = unit === " km" && distUnit === "mi";
+      const fv = v => v == null ? "—" : (conv ? uNum(v) : fmt1(v));
+      const ul = unit === " km" ? " " + uName() : unit;
       return `<div class="chg-pair"><span>${label}</span>
-        <b>${fmt1(before)}${unit} <span class="chg-arrow">&rarr;</span> ${fmt1(after)}${unit}</b></div>`;
+        <b>${fv(before)}${ul} <span class="chg-arrow">&rarr;</span> ${fv(after)}${ul}</b></div>`;
     }
 
     function renderSummary(ev) {
@@ -547,7 +560,7 @@
           ? "Wilburton 和 Eastgate 两所小学关闭，其区域被划给三所邻近学校。有颜色的区域换了学校；浅色区域学校未变。"
           : "Wilburton 小学开办，其分区由周边分区各划一块拼成。有颜色的区域换了学校；浅色区域学校未变。"}</p>
         <div class="chg-totals">
-          <div><b>${info.totals.area_km2}</b> km&sup2; 被改划</div>
+          <div><b>${uAreaStr(info.totals.area_km2)}</b> ${uAreaLbl()} 被改划</div>
           <div><b>≈ ${info.totals.kids.toLocaleString()}</b> 名儿童（5–17 岁）</div>
           <div><b>${info.totals.pieces}</b> 个地块</div>
         </div>
@@ -564,7 +577,7 @@
           ? "Wilburton and Eastgate elementaries closed, and their territory was reassigned to three neighboring schools. Colored areas switched schools; everything pale kept its school."
           : "Wilburton Elementary opened, and a zone for it was assembled from neighboring zones. Colored areas switched schools; everything pale kept its school."}</p>
         <div class="chg-totals">
-          <div><b>${info.totals.area_km2}</b> km&sup2; moved</div>
+          <div><b>${uAreaStr(info.totals.area_km2)}</b> ${uAreaLbl()} moved</div>
           <div><b>≈ ${info.totals.kids.toLocaleString()}</b> children (5–17)</div>
           <div><b>${info.totals.pieces}</b> pieces</div>
         </div>
@@ -616,7 +629,7 @@
         const pb = typeof p.programs_before === "string" ? JSON.parse(p.programs_before) : p.programs_before;
         const pa = typeof p.programs_after === "string" ? JSON.parse(p.programs_after) : p.programs_after;
         const CATS = [["advanced_learning", "Advanced Learning"], ["language_immersion", "Dual-language immersion"], ["special_education", "Site-based special ed"]];
-        progHTML = `<h3 class="chg-h3">${isZH() ? "最近项目（道路公里，平均）" : "Nearest program (road km, average)"}</h3>` + CATS.map(([k, lbl]) => {
+        progHTML = `<h3 class="chg-h3">${isZH() ? `最近项目（道路${uNameZh()}，平均）` : `Nearest program (road ${uName()}, average)`}</h3>` + CATS.map(([k, lbl]) => {
           if (!pb[k] || pb[k].road_km == null) return "";
           return pairRow(T(lbl), pb[k].road_km, pa[k].road_km, " km");
         }).join("");
@@ -627,7 +640,7 @@
         <h2 class="chg-h2">${esc(p.from)} &rarr; ${esc(p.to)}</h2>
         <p class="chg-lede">这片区域的住户在变更前划归 <b>${esc(p.from)}</b>，变更后划归 <b>${esc(p.to)}</b>。</p>
         <div class="chg-totals">
-          <div><b>${p.area_km2}</b> km&sup2;</div>
+          <div><b>${uAreaStr(p.area_km2)}</b> ${uAreaLbl()}</div>
           <div><b>≈ ${(+p.kids).toLocaleString()}</b> 名儿童（5–17 岁）</div>
           <div><b>${(+p.pop).toLocaleString()}</b> 名居民</div>
         </div>
@@ -645,7 +658,7 @@
         <h2 class="chg-h2">${esc(p.from)} &rarr; ${esc(p.to)}</h2>
         <p class="chg-lede">Homes in this area were zoned to <b>${esc(p.from)}</b> before and <b>${esc(p.to)}</b> after the change.</p>
         <div class="chg-totals">
-          <div><b>${p.area_km2}</b> km&sup2;</div>
+          <div><b>${uAreaStr(p.area_km2)}</b> ${uAreaLbl()}</div>
           <div><b>≈ ${(+p.kids).toLocaleString()}</b> children (5–17)</div>
           <div><b>${(+p.pop).toLocaleString()}</b> residents</div>
         </div>
@@ -729,7 +742,7 @@
     function travelLine(st, name) {
       const d = pinLookup("drive", st, name), w = pinLookup("walk", st, name);
       if (!d) return isZH() ? "路线不可用" : "routing unavailable";
-      return isZH() ? `驾车 ${fmt1(d.min)} 分钟 &middot; 步行 ${w ? fmt1(w.min) : "—"} 分钟（道路 ${fmt1(d.km)} 公里）` : `drive ${fmt1(d.min)} min &middot; walk ${w ? fmt1(w.min) : "—"} min (${fmt1(d.km)} km road)`;
+      return isZH() ? `驾车 ${fmt1(d.min)} 分钟 &middot; 步行 ${w ? fmt1(w.min) : "—"} 分钟（道路 ${uNum(d.km)} ${uNameZh()}）` : `drive ${fmt1(d.min)} min &middot; walk ${w ? fmt1(w.min) : "—"} min (${uNum(d.km)} ${uName()} road)`;
     }
     function nearestHostMin(st, cat) {
       const hosts = (DATA.flows.program_hosts[st] || {})[cat] || [];
@@ -911,7 +924,7 @@
     document.getElementById("replay-btn").addEventListener("click", () => playAnimation(activeEvent));
 
     /* language switch: re-render the dynamic panels in place */
-    document.addEventListener("bsd-lang", () => {
+    function rerenderPanels() {
       if (!DATA) return;
       renderSummary(activeEvent);
       renderKey(activeEvent);
@@ -922,6 +935,19 @@
       } else if (!placingPin) {
         pinBtn.innerHTML = isZH() ? "……或点击地图放置图钉" : "&hellip;or click the map to place a pin";
       }
+    }
+    document.addEventListener("bsd-lang", rerenderPanels);
+
+    /* distance-unit toggle (mi | km) */
+    document.querySelectorAll(".chg-unit-btn").forEach(b => {
+      b.classList.toggle("on", b.dataset.unit === distUnit);
+      b.addEventListener("click", () => {
+        if (b.dataset.unit === distUnit) return;
+        distUnit = b.dataset.unit;
+        localStorage.setItem("bsd_dist_unit", distUnit);
+        document.querySelectorAll(".chg-unit-btn").forEach(x => x.classList.toggle("on", x.dataset.unit === distUnit));
+        rerenderPanels();
+      });
     });
 
     /* ---------- boot ---------- */

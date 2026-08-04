@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The 2023 Bellevue Elementary Rezoning</title>
   <meta name="description" content="An interactive map of how Bellevue School District's attendance-zone boundaries changed in 2023, and what changed with them." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=143" />
-  <link rel="stylesheet" href="styles.css?v=143" />
-  <script src="vendor/maplibre-gl-csp.js?v=143"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=144" />
+  <link rel="stylesheet" href="styles.css?v=144" />
+  <script src="vendor/maplibre-gl-csp.js?v=144"></script>
 </head>
 <body>
   <div id="map"></div>
 
   <!-- Deployed-version stamp. Bump on EVERY push: YYYY.MM.DD.NN (NN = nth push that day). -->
-  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.07.20.01</div>
+  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.07.20.02</div>
 
   <!-- More-tabs launcher, top-left -->
   <div class="tabs-launcher">
@@ -104,6 +104,14 @@
       </div>
     </div>
     <div class="panel-divider"></div>
+    <div class="basemap-controls">
+      <span class="control-label" data-i18n="du">Distance units</span>
+      <div class="pin-mode unit-mode">
+        <button class="pin-mode-btn unit-btn" data-unit="mi" data-i18n="u_mi">miles</button>
+        <button class="pin-mode-btn unit-btn" data-unit="km" data-i18n="u_km">km</button>
+      </div>
+    </div>
+    <div class="panel-divider"></div>
     <button class="lang-btn" id="panel-lang" title="Switch language">中文</button>
   </div>
 
@@ -128,7 +136,7 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=143"></script>
+  <script src="intro.js?v=144"></script>
 
   <script>
     (function () {
@@ -153,7 +161,7 @@
 
   <script>
     const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "143";   // cache-bust the data GeoJSON when it is regenerated
+    const DATA_VER = "144";   // cache-bust the data GeoJSON when it is regenerated
 
     /* ---- in-place Chinese for all dynamic panel content ----
      * T() looks a string up in ZHD when the shared language is Chinese and
@@ -287,7 +295,7 @@
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=143");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=144");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
@@ -891,8 +899,8 @@
         const modeWord = zh ? (travelProfile === "walk" ? "步行" : "经道路")
           : (travelProfile === "walk" ? "on foot" : "by road");
         bits.push(zh
-          ? `到指定学校的平均路程为 <b>${t.km.avg} 公里</b>（${modeWord}，约 ${Math.round(t.min.avg)} 分钟），在 ${rk.n} 个分区中排第 ${rk.r} 短。`
-          : `The average trip to the assigned school is <b>${t.km.avg} km</b> ${modeWord} (about ${Math.round(t.min.avg)} min), the ${ordinal(rk.r)}-shortest of ${rk.n}.`);
+          ? `到指定学校的平均路程为 <b>${uNum(t.km.avg)} ${uNameZh()}</b>（${modeWord}，约 ${Math.round(t.min.avg)} 分钟），在 ${rk.n} 个分区中排第 ${rk.r} 短。`
+          : `The average trip to the assigned school is <b>${uNum(t.km.avg)} ${uName()}</b> ${modeWord} (about ${Math.round(t.min.avg)} min), the ${ordinal(rk.r)}-shortest of ${rk.n}.`);
       }
       // demographics: plurality group + income rank
       const s = props.seg;
@@ -921,8 +929,8 @@
       if (far) {
         const pName = T((PROG_LABELS[far.c] || far.c)).replace(" (IB)", "");
         bits.push(zh
-          ? `在所跟踪的项目中，平均而言最远的是<b>${pName}</b>（${far.avg} 公里）。`
-          : `Of the tracked programs, <b>${pName}</b> is the farthest to reach on average (${far.avg} km).`);
+          ? `在所跟踪的项目中，平均而言最远的是<b>${pName}</b>（${uNum(far.avg)} ${uNameZh()}）。`
+          : `Of the tracked programs, <b>${pName}</b> is the farthest to reach on average (${uNum(far.avg)} ${uName()}).`);
       }
       if (!bits.length) return "";
       return `<div class="zone-summary"><span class="zs-tag">${T("At a glance")}</span>${bits.join(" ")}` +
@@ -1019,7 +1027,17 @@
       }).join("");
       return `<div class="choro-tickstrip">${marks}</div><div class="choro-tickrow">${labs}</div>`;
     }
-    const fmtPct = v => `${v}%`, fmtKm = v => `${v} km`, fmtRatio = v => Number(v).toFixed(3);
+    /* ---- distance units: mi (default, US) or km, toggled in the left panel ---- */
+    const KM_PER_MI = 1.609344;
+    let distUnit = localStorage.getItem("bsd_dist_unit") || "mi";
+    const uConv = km => distUnit === "mi" ? km / KM_PER_MI : km;   // a km number -> active unit
+    const uName = () => distUnit;                                  // "mi" | "km"
+    const uNameZh = () => distUnit === "mi" ? "英里" : "公里";
+    const uNum = km => { const v = uConv(km); return v < 1 ? v.toFixed(2) : v.toFixed(1); };
+    const uNum2 = km => { const v = uConv(km); return v < 10 ? v.toFixed(2) : v.toFixed(1); };
+    // relabel a fixed "3 km" access threshold into the active unit (3 km ≈ 1.9 mi)
+    const uThresh = t => distUnit === "km" ? t : t.replace(/3 km/g, "1.9 mi").replace(/3 公里/g, "1.9 英里");
+    const fmtPct = v => `${v}%`, fmtKm = v => `${uNum(v)} ${uName()}`, fmtRatio = v => Number(v).toFixed(3);
     // choropleth accessors read the active profile's network km when routing exists, else straight-line
     const cKm = d => { if (!d) return null; const p = profOf(d); return p ? p.km : d; };
     const tKm = p => cKm(p.travel);
@@ -1099,18 +1117,21 @@
         return `<line class="grid" x1="${g.x0}" y1="${py(v)}" x2="${g.x1}" y2="${py(v)}"/>` +
           `<text class="ax" x="${g.x0 - 5}" y="${py(v) + 3}" text-anchor="end">${lab}</text>`;
       }).join("");
+      const isDist = unit === "km";
+      const dispMax = isDist ? uConv(cdf.max) : cdf.max;
+      const ulab = isDist ? uName() : unit;
       const xt = [0, 0.5, 1].map(f =>
-        `<text class="ax" x="${g.x0 + f * g.pw}" y="${g.y0 + 16}" text-anchor="middle">${(cdf.max * f).toFixed(cdf.max < 10 ? 1 : 0)}</text>`).join("");
+        `<text class="ax" x="${g.x0 + f * g.pw}" y="${g.y0 + 16}" text-anchor="middle">${(dispMax * f).toFixed(dispMax < 10 ? 1 : 0)}</text>`).join("");
       const capY = isZH() ? (viewMode === "pct" ? "该距离内学生 %" : "该距离内学生数")
         : (viewMode === "pct" ? "% of students within" : "students within");
-      return `<svg class="dist-chart" viewBox="0 0 ${CHART.w} ${CHART.h}" data-max="${cdf.max}" data-unit="${unit}" data-n="${n}" data-mode="${viewMode}" data-y="${cdf.y.join(",")}">` +
+      return `<svg class="dist-chart" viewBox="0 0 ${CHART.w} ${CHART.h}" data-max="${dispMax}" data-unit="${ulab}" data-n="${n}" data-mode="${viewMode}" data-y="${cdf.y.join(",")}">` +
         yg + xt +
         `<polygon class="area" points="${area}"/><polyline class="line" points="${pts}"/>` +
         `<line class="guide" y1="${g.y1}" y2="${g.y0}" style="display:none"/>` +
         `<circle class="cmark" r="3.2" style="display:none"/>` +
         `<rect class="hit" x="${g.x0}" y="${g.y1}" width="${g.pw}" height="${g.ph}" fill="transparent"/>` +
         `<text class="ctip" text-anchor="middle" style="display:none"></text></svg>` +
-        `<div class="chart-cap">Y: ${capY} &nbsp;·&nbsp; X: ${isZH() ? "距离" : "distance"} (${unit})</div>`;
+        `<div class="chart-cap">Y: ${capY} &nbsp;·&nbsp; X: ${isZH() ? "距离" : "distance"} (${ulab})</div>`;
     }
     function wireCharts(root) {
       root.querySelectorAll(".dist-chart:not(.time-chart)").forEach(svg => {
@@ -1141,21 +1162,24 @@
     function renderDist(d, unit, kind) {
       if (!d) return `<p class="dist-empty">${isZH() ? "无数据。" : "No data."}</p>`;
       const zh = isZH();
+      const isDist = unit === "km";
+      const ulab = isDist ? uName() : unit;
+      const uv = x => isDist ? uNum(x) : x;
       const note = zh
         ? (kind === "road"
           ? `驾车经道路、不含堵车（OpenRouteService），按学龄儿童加权。由街区级数据估算（非常接近的近似）。`
           : kind === "walk"
           ? `步行经街道与步道（OpenRouteService），按学龄儿童加权。由街区级数据估算（非常接近的近似）。`
-          : `由街区级数据估算（非常接近的近似）。直线${unit}，按学龄儿童加权。`)
+          : `由街区级数据估算（非常接近的近似）。直线${ulab}，按学龄儿童加权。`)
         : (kind === "road"
           ? `Driving via roads, no traffic (OpenRouteService), weighted by school-age children. Estimated from block-level data (a very close approximation).`
           : kind === "walk"
           ? `Walking via streets &amp; paths (OpenRouteService), weighted by school-age children. Estimated from block-level data (a very close approximation).`
-          : `Estimated from block-level data (a very close approximation). Straight-line ${unit}, weighted by school-age children.`);
+          : `Estimated from block-level data (a very close approximation). Straight-line ${ulab}, weighted by school-age children.`);
       return buildChart(d, unit) +
         (zh
-          ? `<p class="dist-stats">最小 ${d.min} · Q1 ${d.q1} · <b>中位 ${d.med}</b> · Q3 ${d.q3} · 最大 ${d.max} ${unit}</p>`
-          : `<p class="dist-stats">min ${d.min} · Q1 ${d.q1} · <b>median ${d.med}</b> · Q3 ${d.q3} · max ${d.max} ${unit}</p>`) +
+          ? `<p class="dist-stats">最小 ${uv(d.min)} · Q1 ${uv(d.q1)} · <b>中位 ${uv(d.med)}</b> · Q3 ${uv(d.q3)} · 最大 ${uv(d.max)} ${ulab}</p>`
+          : `<p class="dist-stats">min ${uv(d.min)} · Q1 ${uv(d.q1)} · <b>median ${uv(d.med)}</b> · Q3 ${uv(d.q3)} · max ${uv(d.max)} ${ulab}</p>`) +
         `<p class="dist-note">${note}</p>`;
     }
     const modeAltBtn = (scope, has, mode) => has
@@ -1169,13 +1193,14 @@
       const isMin = mode === "min" && prof;
       const s = isMin ? prof.min : (prof ? prof.km : d);
       if (!s) return "";
-      const unit = isMin ? " min" : " km";
+      const avgStr = isMin ? `${s.avg}<span class="metric-unit"> min</span>`
+                           : `${uNum(s.avg)}<span class="metric-unit"> ${uName()}</span>`;
       const label1 = T(isMin ? (walk ? "Avg. walk time" : "Avg. drive time")
         : prof ? (walk ? "Avg. walking distance" : "Avg. road distance") : "Avg. straight-line distance");
       const thr = isMin
         ? (walk ? { v: s.within20, lab: T("Within 20 min walk") } : { v: s.within10, lab: T("Within 10 min drive") })
-        : { v: s.within3, lab: T("Within 3 km") };
-      return `<div class="stat">${box1 || ""}<div class="stat-val">${s.avg}<span class="metric-unit">${unit}</span></div><div class="stat-lab">${label1}</div></div>` +
+        : { v: s.within3, lab: uThresh(T("Within 3 km")) };
+      return `<div class="stat">${box1 || ""}<div class="stat-val">${avgStr}</div><div class="stat-lab">${label1}</div></div>` +
         `<div class="stat">${box2 || ""}<div class="stat-val">${pctOrN(thr.v, Math.round(thr.v / 100 * s.n))}</div><div class="stat-lab">${thr.lab}</div></div>`;
     }
 
@@ -1184,7 +1209,15 @@
         const raw = props[m.key];
         const val = (raw == null || Number.isNaN(Number(raw))) ? "&mdash;"
           : m.pct  ? `${Math.round(raw)}<span class="metric-unit">%</span>`
-          : m.unit ? `${raw}<span class="metric-unit"> ${m.unit}</span>`
+          : m.unit ? (() => {
+              let rv = raw, ru = m.unit;
+              if (distUnit === "mi") {
+                if (m.key === "area_km2") { rv = raw / (KM_PER_MI * KM_PER_MI); ru = "mi²"; }
+                else if (m.key === "perimeter_km") { rv = raw / KM_PER_MI; ru = "mi"; }
+                rv = rv < 10 ? rv.toFixed(2) : rv.toFixed(1);
+              }
+              return `${rv}<span class="metric-unit"> ${ru}</span>`;
+            })()
           : Number(raw).toFixed(3);
         return `<div class="metric-card">${CHORO_BY_ID[m.key] ? choroBox(m.key) : ""}<div class="metric-val">${val}</div><div class="metric-label">${T(m.label)}</div></div>`;
       }).join("");
@@ -1864,7 +1897,7 @@
       if (!el) return;
       el.removeAttribute("hidden");
       const zh = isZH();
-      const title = `<div class="choro-title">${zh ? `圆面积与 <b>${T(meta.label)}</b> 成正比` : `Circle area &prop; <b>${meta.label}</b>`}` +
+      const title = `<div class="choro-title">${zh ? `圆面积与 <b>${uThresh(T(meta.label))}</b> 成正比` : `Circle area &prop; <b>${uThresh(meta.label)}</b>`}` +
         `<button class="choro-clear" title="${zh ? "清除" : "Clear coloring"}">&times;</button></div>`;
       if (!vmax) { el.innerHTML = title + `<div class="choro-ends"><span>${zh ? "此学段无数据" : "no data at this level"}</span></div>`; return; }
       // nested reference circles at ~1x, ~1/4, ~1/16 of the max, rounded to friendly values
@@ -1975,7 +2008,7 @@
         scale = `<div class="choro-bar" style="background:${grad}"></div>` +
           tickRow([mn, mn + sp / 4, mn + sp / 2, mn + 3 * sp / 4, mx], f);
       }
-      let html = `<div class="choro-title">${isZH() ? `分区按 <b>${T(meta.label)}</b> 上色` : `Zones colored by <b>${meta.label}</b>`}` +
+      let html = `<div class="choro-title">${isZH() ? `分区按 <b>${uThresh(T(meta.label))}</b> 上色` : `Zones colored by <b>${uThresh(meta.label)}</b>`}` +
         `<button class="choro-clear" title="${isZH() ? "清除上色" : "Clear coloring"}">&times;</button></div>` +
         scale +
         (meta.ref && mn != null ? `<p class="map-hint">${isZH() ? `全学区：${f(meta.ref())}` : `District-wide: ${f(meta.ref())}`}</p>` : "");
@@ -2112,7 +2145,7 @@
       }
       return best;
     }
-    const kmf = d => d < 10 ? d.toFixed(2) + " km" : d.toFixed(1) + " km";
+    const kmf = d => `${uNum2(d)} ${uName()}`;
     const ORS_KEY = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImFiMzg1MGNkYTczNmZlZTlmM2I3MWE5NzZkZmQwZDFhZTllMjUyMjY3ZWRiYmViNDYyN2NhMWQxIiwiaCI6Im11cm11cjY0In0=";
 
     const orsProfile = () => travelProfile === "walk" ? "foot-walking" : "driving-car";
@@ -2680,13 +2713,13 @@
         if (cfg.type === "scatter") {
           const r = gmScatterSVG(cfg);
           head = `<div><b>${isZH() ? "全部分区 — Δ 散点" : "All zones — Δ scatter"}</b> <span class="muted">${gmLevelWord(cfg.lvl)} · ${isZH() ? `${cfg.event} 年重划` : `${cfg.event} rezoning`}</span>` +
-                 `<div class="gm-metric">Δ ${T(CHORO_BY_ID[cfg.mx].label)} vs Δ ${T(CHORO_BY_ID[cfg.my].label)}</div></div>`;
+                 `<div class="gm-metric">Δ ${uThresh(T(CHORO_BY_ID[cfg.mx].label))} vs Δ ${uThresh(T(CHORO_BY_ID[cfg.my].label))}</div></div>`;
           body = r.svg + r.notes.map(n => `<div class="gm-caveat">${n}</div>`).join("");
         } else {
           const r = gmLineSVG(cfg);
           const nm = cfg.names.length > 2 ? (isZH() ? `${cfg.names[0]} 等 ${cfg.names.length} 个` : `${cfg.names[0]} +${cfg.names.length - 1} more`) : cfg.names.join(" · ");
           head = `<div><b>${nm}</b> <span class="muted">${gmLevelWord(cfg.lvl)}</span>` +
-                 `<div class="gm-metric">${T(CHORO_BY_ID[cfg.metric].label)}</div></div>`;
+                 `<div class="gm-metric">${uThresh(T(CHORO_BY_ID[cfg.metric].label))}</div></div>`;
           body = r.svg + r.notes.map(n => `<div class="gm-caveat">${n}</div>`).join("");
         }
         return `<div class="gm-tile gm-card"><div class="gm-card-head">${head}` +
@@ -2702,7 +2735,7 @@
     function gmPickerHTML(type) {
       const zh = isZH();
       const lvls = LEVELS.map(l => `<option value="${l}">${gmLevelWord(l)}</option>`).join("");
-      const mets = CHOROPLETH.map(m => `<option value="${m.id}">${T(m.label)}</option>`).join("");
+      const mets = CHOROPLETH.map(m => `<option value="${m.id}">${uThresh(T(m.label))}</option>`).join("");
       if (type === "scatter") {
         return `<div class="gm-form" data-type="scatter">` +
           `<label>${zh ? "学段" : "Level"}<select class="gm-level">${lvls}</select></label>` +
@@ -2757,8 +2790,8 @@
       if (zoneSel) zoneSel.innerHTML = gmZoneNames(lv.value).map(n => `<option>${n}</option>`).join("");
     });
 
-    /* ---- language switch: re-render every open dynamic surface in place ---- */
-    document.addEventListener("bsd-lang", () => {
+    /* ---- re-render every open dynamic surface in place (language OR unit switch) ---- */
+    function rerenderDynamic() {
       if (!DATA) return;
       document.getElementById("zone-legend-label").innerHTML = `${T(LEVEL_META[activeLevel].legend)}（${T(eraLabel())}）`;
       applyChoropleth();                                     // metric/race/nbh legend text
@@ -2775,6 +2808,19 @@
         : (isZH() ? "……或点击地图放置图钉" : "…or click the map to place a pin");
       if (routeOn) routeBtn.textContent = isZH() ? "移除路线标记" : "Remove the route markers";
       else routeBtn.textContent = isZH() ? "测量路线（两个蓝色标记）" : "Measure a route (two blue markers)";
+    }
+    document.addEventListener("bsd-lang", rerenderDynamic);
+
+    /* ---- distance-unit toggle (mi | km), shared with the changes tab via localStorage ---- */
+    document.querySelectorAll(".unit-btn").forEach(b => {
+      b.classList.toggle("on", b.dataset.unit === distUnit);
+      b.addEventListener("click", () => {
+        if (b.dataset.unit === distUnit) return;
+        distUnit = b.dataset.unit;
+        localStorage.setItem("bsd_dist_unit", distUnit);
+        document.querySelectorAll(".unit-btn").forEach(x => x.classList.toggle("on", x.dataset.unit === distUnit));
+        rerenderDynamic();
+      });
     });
 
   </script>
