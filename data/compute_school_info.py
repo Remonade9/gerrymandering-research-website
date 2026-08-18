@@ -82,12 +82,13 @@ for level in LEVELS:
         if er or ospi_cur is not None:
             if elem_ospi is not None:
                 info["enroll_current"] = elem_ospi["n"]           # elementary: OSPI is the committed enrollment (pre-K-5)
-                info["k5"] = elem_ospi.get("k5")                  # K-5 subset, used for utilization only
             else:
                 cur = er.get(CUR) if er else None                 # secondary: enrollment stays NCES
                 info["enroll_current"] = int(cur) if pd.notna(cur) else None
             if ospi_cur is not None:
-                info["ospi"] = ospi_cur   # enrolled-student demographics for the pin + rankings (all levels)
+                # enrolled-student demographics for the pin + rankings (all levels);
+                # k5 stays OUT of the ospi block (kept at info level, added with utilization below)
+                info["ospi"] = {k: v for k, v in ospi_cur.items() if k != "k5"}
             info["enroll_year"] = CUR
             # trend: NCES historical shape; OSPI override on the CUR endpoint for ELEMENTARY only,
             # so its headline (OSPI) and endpoint match. Secondary keeps NCES throughout.
@@ -104,9 +105,12 @@ for level in LEVELS:
             info["capacity"] = int(capv) if pd.notna(capv) else None
             info["role"] = str(cr.get("in_2023_consolidation")) if pd.notna(cr.get("in_2023_consolidation")) else None
             # utilization uses K-5 where available (elementary), matching the K-5 capacity; enroll_current stays pre-K-5
-            _ub = info.get("k5") if info.get("k5") is not None else info.get("enroll_current")
+            _k5v = elem_ospi.get("k5") if elem_ospi is not None else None
+            _ub = _k5v if _k5v is not None else info.get("enroll_current")
             if _ub and info.get("capacity"):
                 info["utilization"] = round(_ub / info["capacity"] * 100)
+            if _k5v is not None:
+                info["k5"] = _k5v   # K-5 subset (the utilization basis), at info level per the site's schema
         feat["properties"]["info"] = info
     json.dump(raw, open(fp, "w"))
     print(f"{level}: enriched {len(raw['features'])} schools")

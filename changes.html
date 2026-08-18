@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Boundary Changes — Bellevue School District</title>
   <meta name="description" content="Which territory switched elementary schools in Bellevue's 2018 and 2023 rezonings, and what changed for the people living there." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=145" />
-  <link rel="stylesheet" href="styles.css?v=145" />
-  <script src="vendor/maplibre-gl-csp.js?v=145"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=146" />
+  <link rel="stylesheet" href="styles.css?v=146" />
+  <script src="vendor/maplibre-gl-csp.js?v=146"></script>
 </head>
 <body class="chg-page">
   <div id="map"></div>
@@ -64,11 +64,11 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=145"></script>
+  <script src="intro.js?v=146"></script>
 
   <script>
     const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "145";
+    const DATA_VER = "146";
 
     /* ---- in-place Chinese for the dynamic panels (same pattern as the map tool) ---- */
     const isZH = () => (localStorage.getItem("bsd_lang") || "en") === "zh";
@@ -117,7 +117,7 @@
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=145");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=146");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
@@ -684,7 +684,7 @@
     }
 
     /* ---------- personal pin: your own before/after ---------- */
-    const ORS_KEY = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImFiMzg1MGNkYTczNmZlZTlmM2I3MWE5NzZkZmQwZDFhZTllMjUyMjY3ZWRiYmViNDYyN2NhMWQxIiwiaCI6Im11cm11cjY0In0=";
+    const ORS_KEY = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImNhN2RjM2VjYzkzNDAzZTRmY2NkYjUwODM2MzdjNTRkODA1ODJiY2ZhMzM0MjQ2NGQxMzliYTc2IiwiaCI6Im11cm11cjY0In0=";
     let userPin = null, pinResults = null, placingPin = false;
     const pinBtn = document.getElementById("pin-btn");
 

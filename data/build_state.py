@@ -362,13 +362,20 @@ def school_feat(nm, kind, display, type_label):
     if en is not None:
         info["enroll_current"] = en; info["enroll_year"] = yr
     if nm in _ospi:
-        info["ospi"] = _ospi[nm]   # enrolled-student demographics for the pin
+        # enrolled-student demographics for the pin; k5 stays OUT of the ospi block
+        # (kept at info level, added after utilization below)
+        info["ospi"] = {k: v for k, v in _ospi[nm].items() if k != "k5"}
     cr = cap_by.get(nm)
+    k5v = _ospi.get(nm, {}).get("k5")
     if cr is not None and pd.notna(cr.get("permanent_capacity")):
         info["capacity"] = int(cr["permanent_capacity"])
-        if info.get("enroll_current"): info["utilization"] = round(info["enroll_current"] / info["capacity"] * 100)
+        # utilization uses K-5 (matches the K-5 capacity), same basis as zone_capacity; enroll stays pre-K-5
+        basis = k5v if k5v is not None else info.get("enroll_current")
+        if basis: info["utilization"] = round(basis / info["capacity"] * 100)
     if nm in ROLE: info["role"] = ROLE[nm]
     if prog_rows_by_host.get(nm): info["programs"] = prog_rows_by_host[nm]
+    if "capacity" in info and k5v is not None:
+        info["k5"] = k5v   # K-5 subset (the utilization basis), at info level per the site's schema
     return {"type": "Feature",
             "properties": {"name": nm, "kind": kind, "display": display, "type_label": type_label, "info": info},
             "geometry": {"type": "Point", "coordinates": [round(ll[0], 6), round(ll[1], 6)]}}
