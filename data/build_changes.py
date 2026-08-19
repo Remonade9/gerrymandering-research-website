@@ -237,10 +237,10 @@ def main():
          "from_xy": xy_b["Eastgate"], "to_xy": xy_c["Spiritridge"]},
         {"label": "Jing Mei (school moved)", "from": "Jing Mei", "to": "Wilburton building",
          "from_xy": xy_b["Jing Mei"], "to_xy": xy_b["Wilburton"]},
-        # Puesta del Sol (whole-school Spanish immersion, a choice school) relocated
-        # from the Somerset zone to the Phantom Lake zone between eras B and C.
-        {"label": "Puesta del Sol (school moved)", "from": "Somerset", "to": "Phantom Lake",
-         "from_xy": xy_b["Puesta Del Sol"], "to_xy": xy_c["Puesta Del Sol"]},
+        # NOTE: Puesta del Sol also relocated between eras B and C, but that move was
+        # NOT part of the 2023 consolidation (the school moved on its own), so it is
+        # deliberately excluded from this rezoning map. It is flagged instead in the
+        # map tool's dual-language program rows and on Puesta's own pin.
     ]
     flows_out["2023"]["ghosts"] = [
         {"name": "Wilburton Elementary", "xy": xy_b["Wilburton"],

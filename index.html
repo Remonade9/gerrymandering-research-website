@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The 2023 Bellevue Elementary Rezoning</title>
   <meta name="description" content="An interactive map of how Bellevue School District's attendance-zone boundaries changed in 2023, and what changed with them." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=146" />
-  <link rel="stylesheet" href="styles.css?v=146" />
-  <script src="vendor/maplibre-gl-csp.js?v=146"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=147" />
+  <link rel="stylesheet" href="styles.css?v=147" />
+  <script src="vendor/maplibre-gl-csp.js?v=147"></script>
 </head>
 <body>
   <div id="map"></div>
 
   <!-- Deployed-version stamp. Bump on EVERY push: YYYY.MM.DD.NN (NN = nth push that day). -->
-  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.08.16.02</div>
+  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.08.16.03</div>
 
   <!-- More-tabs launcher, top-left -->
   <div class="tabs-launcher">
@@ -136,7 +136,7 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=146"></script>
+  <script src="intro.js?v=147"></script>
 
   <script>
     (function () {
@@ -161,7 +161,7 @@
 
   <script>
     const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "146";   // cache-bust the data GeoJSON when it is regenerated
+    const DATA_VER = "147";   // cache-bust the data GeoJSON when it is regenerated
 
     /* ---- in-place Chinese for all dynamic panel content ----
      * T() looks a string up in ZHD when the shared language is Chinese and
@@ -295,7 +295,7 @@
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=146");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=147");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
@@ -688,6 +688,11 @@
       if (i.programs && i.programs.length) {
         h += `<div class="sch-progs"><div class="sch-lab">${isZH() ? "设有项目" : "Programs hosted"}</div>` +
           i.programs.map(pr => `<div class="sch-prog">${T(pr.program)}${pr.note ? `<span class="prog-note">${T(pr.note)}</span>` : ""}</div>`).join("") + `</div>`;
+      }
+      if (/puesta/i.test(p.name || "")) {
+        h += `<div class="sd-note">${isZH()
+          ? "注：这所学校在各时期之间自行迁址，与 2023 年合并无关——它的位置变化不是重划造成的效应。"
+          : "Note: this school relocated between eras on its own, unrelated to the 2023 consolidation &mdash; its location change is not a redistricting effect."}</div>`;
       }
       return h + `</div>`;
     }
@@ -1396,6 +1401,19 @@
       const P = props.programs || {}; const cats = Object.keys(P).filter(c => P[c]);
       if (!cats.length) return "";
       const anyProf = cats.some(c => profOf(P[c]));
+      // Puesta del Sol (Spanish immersion) relocated between eras on its own, NOT as
+      // part of the 2023 consolidation. Flag the dual-language row for any zone where
+      // it is the nearest immersion host, so its distance change isn't misread as a
+      // rezoning effect.
+      let puestaNearest = false;
+      try {
+        const hosts = (programHosts(activeLevel) || {}).language_immersion || [];
+        const sp = mainSchools(activeLevel).find(x => x.name === props.name);
+        if (sp && hosts.length) { const b = nearestOf(hosts, sp.c); puestaNearest = !!(b && /puesta/i.test(b.name)); }
+      } catch (e) { /* schools not ready */ }
+      const puestaNote = isZH()
+        ? `这里最近的双语沉浸项目是 <b>Puesta del Sol</b>（西班牙语沉浸）。它在各时期之间<b>自行迁址</b>，并非 2023 年合并的一部分——所以这个距离的前后变化反映的是那次迁址，而不是边界变更。`
+        : `The nearest dual-language immersion here is <b>Puesta del Sol</b> (Spanish immersion), which <b>relocated between eras on its own</b> &mdash; not as part of the 2023 consolidation. So a before/after change in this distance reflects that move, not the boundary change.`;
       const rows = cats.map(c => {
         const d = P[c]; const id = "prog-" + c + "-dist";
         const px = PROG_PREFIX[c] || "";
@@ -1404,8 +1422,13 @@
         const unit = (progMode === "min" && prof) ? "min" : "km";
         const kind = prof ? (prof === d.walk ? "walk" : "road") : "air";
         const stats = accessStats(d, progMode, px ? choroBox(px + "_avg") : "", px ? choroBox(px + "_w3") : "");
+        const flag = c === "language_immersion" && puestaNearest;
+        const infoBtn = flag
+          ? `<button class="info-btn toggle-btn" data-target="prog-${c}-info" aria-expanded="false" title="${isZH() ? "关于这个距离" : "About this distance"}">i</button>`
+          : "";
         return `<div class="prog-row"><div class="section-head sub-head"><span class="prog-name">${T(PROG_LABELS[c] || c)}</span>` +
-          `<button class="toggle-btn mini" data-target="${id}" aria-expanded="false">${T("distribution")}</button></div>` +
+          `<span class="head-btns">${infoBtn}<button class="toggle-btn mini" data-target="${id}" aria-expanded="false">${T("distribution")}</button></span></div>` +
+          (flag ? `<div class="metric-defs" id="prog-${c}-info" hidden>${puestaNote}</div>` : "") +
           `<div class="stat-row">${stats}</div>` +
           `<div class="dist-box" id="${id}" hidden>${renderDist(s, unit, kind)}</div></div>`;
       }).join("");
