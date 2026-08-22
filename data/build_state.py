@@ -198,7 +198,8 @@ def rnd(o):
 # ---------- era program hosting (State B only: direct Oct-2022 documentation) ----------
 # pre-2018 slice is knowingly incomplete (2010 anchors) -> nearest-distance would overstate; omit for A.
 PROG_CATS = ["advanced_learning", "language_immersion", "special_education"]
-ROUTE_KEY = {"Jing Mei": "Jing Mei Old"}   # B-era Jing Mei = its old site (routed separately)
+ROUTE_KEY = {"Jing Mei": "Jing Mei Old",
+             "Puesta Del Sol": "Puesta Del Sol Old"}   # B-era hosts at their pre-move sites (routed separately)
 era_hosts = {}          # category -> [names]
 prog_rows_by_host = {}  # host -> [{program, category}]
 if S == "b":
