@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Boundary Changes — Bellevue School District</title>
   <meta name="description" content="Which territory switched elementary schools in Bellevue's 2018 and 2023 rezonings, and what changed for the people living there." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=148" />
-  <link rel="stylesheet" href="styles.css?v=148" />
-  <script src="vendor/maplibre-gl-csp.js?v=148"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=149" />
+  <link rel="stylesheet" href="styles.css?v=149" />
+  <script src="vendor/maplibre-gl-csp.js?v=149"></script>
 </head>
 <body class="chg-page">
   <div id="map"></div>
@@ -64,11 +64,11 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=148"></script>
+  <script src="intro.js?v=149"></script>
 
   <script>
     const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "148";
+    const DATA_VER = "149";
 
     /* ---- in-place Chinese for the dynamic panels (same pattern as the map tool) ---- */
     const isZH = () => (localStorage.getItem("bsd_lang") || "en") === "zh";
@@ -116,7 +116,7 @@
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=148");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=149");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =

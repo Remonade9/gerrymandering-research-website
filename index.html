@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The 2023 Bellevue Elementary Rezoning</title>
   <meta name="description" content="An interactive map of how Bellevue School District's attendance-zone boundaries changed in 2023, and what changed with them." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=148" />
-  <link rel="stylesheet" href="styles.css?v=148" />
-  <script src="vendor/maplibre-gl-csp.js?v=148"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=149" />
+  <link rel="stylesheet" href="styles.css?v=149" />
+  <script src="vendor/maplibre-gl-csp.js?v=149"></script>
 </head>
 <body>
   <div id="map"></div>
 
   <!-- Deployed-version stamp. Bump on EVERY push: YYYY.MM.DD.NN (NN = nth push that day). -->
-  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.08.22.01</div>
+  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.08.24.01</div>
 
   <!-- More-tabs launcher, top-left -->
   <div class="tabs-launcher">
@@ -136,7 +136,7 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=148"></script>
+  <script src="intro.js?v=149"></script>
 
   <script>
     (function () {
@@ -161,7 +161,7 @@
 
   <script>
     const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "148";   // cache-bust the data GeoJSON when it is regenerated
+    const DATA_VER = "149";   // cache-bust the data GeoJSON when it is regenerated
 
     /* ---- in-place Chinese for all dynamic panel content ----
      * T() looks a string up in ZHD when the shared language is Chinese and
@@ -280,7 +280,7 @@
       "Rezoned twice in five years: gave up territory when Wilburton opened (2018), then took much of it back when Wilburton closed (2023).":
         "五年内被重划两次：Wilburton 开办时（2018）划出土地，Wilburton 关闭时（2023）又收回大半。",
       "Rezoned in 2023: absorbed most of the closed Eastgate zone.": "2023 年被重划：吸收了被关闭的 Eastgate 分区的大部分。",
-      "Rezoned in 2023: absorbed part of the closed Eastgate zone.": "2023 年被重划：吸收了被关闭的 Eastgate 分区的一部分。",
+      "Rezoned in 2023 in name only: gained about four acres of the closed Eastgate zone, too small to contain any of the census blocks used to count population.": "2023 年仅名义上被重划：从被关闭的 Eastgate 分区获得约四英亩土地，面积过小，未包含任何用于统计人口的普查区块。",
       "Boundaries stable in 2023; gained the Advanced Learning program (moved from Spiritridge).":
         "2023 年边界未动；获得高阶学习项目（自 Spiritridge 迁来）。",
       "Considered for consolidation in the 2023 process; kept open with no boundary change.":
@@ -295,7 +295,7 @@
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=148");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=149");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
@@ -857,7 +857,7 @@
         "Clyde Hill": { hot: true, text: "Rezoned twice in five years: gave up territory when Wilburton opened (2018), then took much of it back when Wilburton closed (2023)." },
         "Enatai": { hot: true, text: "Rezoned twice in five years: gave up territory when Wilburton opened (2018), then took much of it back when Wilburton closed (2023)." },
         "Spiritridge": { hot: true, text: "Rezoned in 2023: absorbed most of the closed Eastgate zone." },
-        "Somerset": { hot: true, text: "Rezoned in 2023: absorbed part of the closed Eastgate zone." },
+        "Somerset": { hot: true, text: "Rezoned in 2023 in name only: gained about four acres of the closed Eastgate zone, too small to contain any of the census blocks used to count population." },
         "Woodridge": { hot: false, text: "Boundaries stable in 2023; gained the Advanced Learning program (moved from Spiritridge)." },
         "Ardmore": { hot: false, text: "Considered for consolidation in the 2023 process; kept open with no boundary change." },
         "_default": { hot: false, text: "No boundary changes in the 2023 consolidation." }
