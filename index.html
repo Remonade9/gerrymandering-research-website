@@ -5,19 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The 2023 Bellevue Elementary Rezoning</title>
   <meta name="description" content="An interactive map of how Bellevue School District's attendance-zone boundaries changed in 2023, and what changed with them." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=150" />
-  <link rel="stylesheet" href="styles.css?v=150" />
-  <script src="vendor/maplibre-gl-csp.js?v=150"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=151" />
+  <link rel="stylesheet" href="styles.css?v=151" />
+  <script src="vendor/maplibre-gl-csp.js?v=151"></script>
 </head>
 <body>
   <div id="map"></div>
 
   <!-- Deployed-version stamp. Bump on EVERY push: YYYY.MM.DD.NN (NN = nth push that day). -->
-  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.09.02.01</div>
+  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.09.02.02</div>
 
   <!-- More-tabs launcher, top-left -->
   <div class="tabs-launcher">
     <button class="tabs-btn" id="tabs-btn" aria-expanded="false" aria-haspopup="true"><span data-i18n="moretabs">More tabs</span> <span class="tabs-caret">&#9662;</span></button>
+    <button class="tabs-btn tabs-btn-tut" id="tut-btn" data-i18n="tut_btn">Tutorial</button>
     <div class="tabs-menu" id="tabs-menu" hidden>
       <a class="tabs-item tabs-link" href="changes.html" data-i18n="nav_changes">Boundary changes</a>
       <a class="tabs-item tabs-link" href="analysis.html" data-i18n="nav_analysis">Analysis</a>
@@ -136,7 +137,8 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=150"></script>
+  <script src="intro.js?v=151"></script>
+  <script src="tutorial.js?v=151"></script>
 
   <script>
     (function () {
@@ -159,9 +161,13 @@
     })();
   </script>
 
+  <!-- API keys live in config.js: the one place to replace them (see README) -->
+  <script src="config.js?v=151"></script>
+  <script src="keys.js?v=151"></script>
+
   <script>
-    const MAPTILER_KEY = "z7fBe8Wbh3urlylwknlf";
-    const DATA_VER = "150";   // cache-bust the data GeoJSON when it is regenerated
+    const MAPTILER_KEY = window.BSD_KEYS.maptiler;
+    const DATA_VER = "151";   // cache-bust the data GeoJSON when it is regenerated
 
     /* ---- in-place Chinese for all dynamic panel content ----
      * T() looks a string up in ZHD when the shared language is Chinese and
@@ -295,7 +301,7 @@
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=150");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=151");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
@@ -2170,7 +2176,7 @@
       return best;
     }
     const kmf = d => `${uNum2(d)} ${uName()}`;
-    const ORS_KEY = "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImNhN2RjM2VjYzkzNDAzZTRmY2NkYjUwODM2MzdjNTRkODA1ODJiY2ZhMzM0MjQ2NGQxMzliYTc2IiwiaCI6Im11cm11cjY0In0=";
+    const ORS_KEY = window.BSD_KEYS.ors;
 
     const orsProfile = () => travelProfile === "walk" ? "foot-walking" : "driving-car";
     // One ORS matrix call: pin -> every candidate school. Returns { name: {km, min} } or null.

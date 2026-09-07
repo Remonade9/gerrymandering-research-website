@@ -32,6 +32,7 @@
     nav_methods: ["Methods &amp; sources", "方法与来源"],
     nav_defs: ["Definitions &amp; references", "定义与参考"],
     moretabs: ["More tabs", "更多页面"],
+    tut_btn: ["Tutorial", "使用教程"],
     ov: ["District overview", "学区总览"],
     gm: ["Graph mode", "图表模式"],
     st_a: ["pre-2018", "2018 年前"],
@@ -212,7 +213,7 @@
   });
   document.getElementById("intro-ok").addEventListener("click", () => {
     intro.classList.add("intro-fading");
-    setTimeout(() => { intro.remove(); applyIntro = null; }, 500);
+    setTimeout(() => { intro.remove(); applyIntro = null; document.dispatchEvent(new CustomEvent("bsd-intro-done")); }, 500);
   });
 
   applyIntro();
