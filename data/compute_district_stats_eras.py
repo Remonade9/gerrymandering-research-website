@@ -67,15 +67,40 @@ def zone_rows(fc):
     return rows
 
 def district_mix_gap(fc):
-    """Child-weighted average of the per-zone mix_gap values."""
-    num = den = 0.0
+    """Mutual information M: the population-weighted mean of the per-zone mix gaps,
+    computed from the six-group counts.
+
+    Weights MUST be resident population, not kids_5_17. Each zone's mix gap is measured
+    over every resident, so weighting those gaps by child counts mixes two different
+    populations and inflates M (era b: 0.0307 the old way vs 0.0292 correct). Computing
+    from the counts rather than averaging the stored, 3-decimal-rounded per-zone mix_gap
+    values also avoids compounding that rounding. This matches the paper's equations
+    (5)-(6): shares and aggregation weights refer to the same population.
+    [FIXED 2026-09-06 - the old child-weighted version disagreed with the paper.]
+    """
+    zones = []
     for ft in fc["features"]:
-        p = ft["properties"]
-        if p.get("mix_gap") is None or not p.get("kids_5_17"):
+        seg = ft["properties"].get("seg")
+        if not seg:
             continue
-        num += p["mix_gap"] * p["kids_5_17"]
-        den += p["kids_5_17"]
-    return round(num / den, 3) if den else None
+        z = {g: seg.get(g + "_n", 0) for g in GROUPS if g != "other"}
+        z["other"] = sum(seg.get(k + "_n", 0) for k in ("other", "aian", "nhpi"))
+        zones.append(z)
+    if not zones:
+        return None
+    tot = {g: sum(z[g] for z in zones) for g in GROUPS}
+    T = sum(tot.values())
+    if not T:
+        return None
+    P = {g: tot[g] / T for g in GROUPS}
+    M = 0.0
+    for z in zones:
+        Tj = sum(z.values())
+        if not Tj:
+            continue
+        M += (Tj / T) * sum((c / Tj) * math.log((c / Tj) / P[g])
+                            for g, c in z.items() if c > 0 and P[g] > 0)
+    return round(M, 3)
 
 # ---------- per-era zone files (website copies = what the site displays) ----------
 ZONES = {
