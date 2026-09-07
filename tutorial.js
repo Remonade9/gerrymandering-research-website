@@ -36,9 +36,9 @@
       img: null,
       title: ["Pick a period and a school level", "选择时期和学段"],
       body: [
-        "<p>The card at the <b>bottom left</b> has two rows of tabs. The top row switches the <b>period</b> (pre-2018 &middot; 2018&ndash;2023 &middot; 2023&ndash;now); the row below switches the <b>school level</b> (Elementary &middot; Middle &middot; High).</p>" +
+        "<p>The <b>panel down the left side</b> holds the controls. Its top two rows are tabs: the first switches the <b>period</b> (pre-2018 &middot; 2018&ndash;2023 &middot; 2023&ndash;now), and the one below it switches the <b>school level</b> (Elementary &middot; Middle &middot; High).</p>" +
         "<p>Only elementary boundaries changed in 2018 and 2023. Middle and high school zones are identical in every period.</p>",
-        "<p><b>左下角</b>的卡片有两排选项。上面一排切换<b>时期</b>（2018 年前 &middot; 2018&ndash;2023 &middot; 2023 至今）；下面一排切换<b>学段</b>（小学 &middot; 初中 &middot; 高中）。</p>" +
+        "<p><b>左侧面板</b>是各项控件所在。最上面两排是选项卡：第一排切换<b>时期</b>（2018 年前 &middot; 2018&ndash;2023 &middot; 2023 至今），下面一排切换<b>学段</b>（小学 &middot; 初中 &middot; 高中）。</p>" +
         "<p>2018 和 2023 年只有小学边界变了。初中和高中分区在各时期完全相同。</p>"
       ]
     },
@@ -47,9 +47,9 @@
       title: ["Click any zone", "点击任意分区"],
       body: [
         "<p>Click a zone and a panel opens on the <b>right</b> with everything measured for it: enrollment and building capacity; who lives there (race, age, income, language); how far children travel to school; and the distance to the nearest Advanced Learning, dual-language, and special-education programs.</p>" +
-        "<p>The blue <b>i</b> buttons explain each measure in plain words, and <b>distribution</b> shows how the zone's individual blocks spread out on that measure.</p>",
+        "<p>The small round <span class='tut-i'>i</span> buttons open a plain-words explanation of the measure beside them. Where a measure is built up from many smaller pieces, a <b>distribution</b> button appears as well &mdash; on travel to the assigned school, and on each program distance &mdash; showing how the zone's individual blocks spread out instead of only their average.</p>",
         "<p>点击一个分区，<b>右侧</b>会打开面板，列出为它测量的全部内容：在校人数与校舍容量；居民构成（族裔、年龄、收入、语言）；孩子上学要走多远；以及到最近的高阶学习、双语沉浸和特殊教育项目的距离。</p>" +
-        "<p>蓝色 <b>i</b> 按钮用平实的语言解释每项指标；「分布」显示该分区各街区在这项指标上的分布情况。</p>"
+        "<p>圆形的 <span class='tut-i'>i</span> 按钮会用平实的语言解释旁边那项指标。当一项指标由许多小块汇总而成时，还会出现<b>分布</b>按钮 &mdash; 例如「到指定学校的通勤」和各个项目的距离 &mdash; 显示该分区各街区的分布情况，而不只是平均值。</p>"
       ]
     },
     {
@@ -66,9 +66,9 @@
       img: null,
       title: ["Color the whole map by any measure", "按任意指标给整张地图着色"],
       body: [
-        "<p>In a zone's panel, most measures have a small <b>checkbox</b> beside them. Tick one and every zone is shaded by that measure, with a legend in the bottom-left card. Tick a count (like the number of children) and the zones get sized circles instead of shading.</p>" +
+        "<p>In a zone's panel, most measures have a small <b>checkbox</b> beside them. Tick one and every zone is shaded by that measure, with a legend in the <b>left panel</b>. Tick a count (like the number of children) and the zones get sized circles instead of shading.</p>" +
         "<p>Green ramps mean <i>more of something</i>. Yellow-to-red ramps are used only for travel and distance. Two-tone brown&ndash;teal ramps show values above or below a midpoint, such as a building over or under capacity. <b>No color means good or bad.</b></p>",
-        "<p>在分区面板里，大多数指标旁有一个小<b>方框</b>。勾选后，每个分区都按该指标着色，图例显示在左下角卡片中。勾选人数类指标（如儿童数）时，各分区改用大小不同的圆圈而不是着色。</p>" +
+        "<p>在分区面板里，大多数指标旁有一个小<b>方框</b>。勾选后，每个分区都按该指标着色，图例显示在<b>左侧面板</b>中。勾选人数类指标（如儿童数）时，各分区改用大小不同的圆圈而不是着色。</p>" +
         "<p>绿色渐变表示<i>某项更多</i>；黄到红的渐变只用于通勤与距离；棕&ndash;青双色渐变表示高于或低于某个中点，例如校舍超出或未达容量。<b>颜色不代表好坏。</b></p>"
       ]
     },
@@ -76,9 +76,9 @@
       img: null,
       title: ["Layers: neighborhoods and race", "图层：社区与族裔"],
       body: [
-        "<p>Under <b>Layers</b> in the bottom-left card are two extra views. <b>Neighborhoods</b> shades each City of Bellevue neighborhood by how many attendance zones its school-age children are split across (light = kept whole). <b>Racial composition</b> colors the 2020 census blocks by their largest group.</p>" +
+        "<p>Under <b>Layers</b> in the <b>left panel</b> are two extra views. <b>Neighborhoods</b> shades each City of Bellevue neighborhood by how many attendance zones its school-age children are split across (light = kept whole). <b>Racial composition</b> colors the 2020 census blocks by their largest group.</p>" +
         "<p>While Neighborhoods is on, the school pins are hidden for a cleaner read.</p>",
-        "<p>左下角卡片的<b>图层</b>下有两个额外视图。<b>社区</b>按各社区学龄儿童被分进几个入学分区来着色（浅色 = 保持完整）；<b>族裔构成</b>把 2020 年普查街区按最大群体着色。</p>" +
+        "<p><b>左侧面板</b>的<b>图层</b>下有两个额外视图。<b>社区</b>按各社区学龄儿童被分进几个入学分区来着色（浅色 = 保持完整）；<b>族裔构成</b>把 2020 年普查街区按最大群体着色。</p>" +
         "<p>开启「社区」时，学校图钉会隐藏，方便阅读。</p>"
       ]
     },
@@ -94,12 +94,26 @@
     },
     {
       img: null,
-      title: ["Zoom out: District overview and Graph mode", "放大视野：学区总览与图表模式"],
+      title: ["Zoom out: the District overview", "放大视野：学区总览"],
       body: [
-        "<p><b>District overview</b> (top of the bottom-left card) summarizes the whole district for the selected period: how evenly groups are spread across schools, the district-wide mix gap, and rankings of schools by the makeup of their enrolled students.</p>" +
-        "<p><b>Graph mode</b> turns the same measures into simple charts, so you can follow one zone across all three periods or compare zones against each other.</p>",
-        "<p><b>学区总览</b>（左下角卡片顶部）汇总所选时期的全学区情况：各群体在各校之间分布得有多均匀、全学区的构成差距，以及按在校学生构成对学校的排名。</p>" +
-        "<p><b>图表模式</b>把同样的指标变成简单图表，让你跟踪一个分区在三个时期的变化，或比较不同分区。</p>"
+        "<p><b>District overview</b>, at the top of the <b>left panel</b>, leaves individual zones behind and summarizes the whole district for the period you have selected: how evenly groups are spread across schools, the district-wide mix gap, and rankings of the schools by the makeup of their enrolled students.</p>" +
+        "<p>Switch the period tabs while it is open and those district-wide figures change with them, which is the quickest way to see what each rezoning did overall.</p>",
+        "<p><b>学区总览</b>位于<b>左侧面板</b>顶部。它不再看单个分区，而是汇总你所选时期的全学区情况：各群体在各校之间分布得有多均匀、全学区的构成差距，以及按在校学生构成对学校的排名。</p>" +
+        "<p>打开它时切换时期选项卡，这些全学区数字会随之变化 &mdash; 这是看清每次重划整体影响最快的方式。</p>"
+      ]
+    },
+    {
+      img: null,
+      title: ["Graph mode: build your own charts", "图表模式：自己动手做图"],
+      body: [
+        "<p><b>Graph mode</b>, the button just below District overview, opens a board that starts <b>empty</b> on purpose. Nothing is charted until you add something, using the two buttons in the dashed tile.</p>" +
+        "<p><b>+ Zone chart</b> follows a single measure for the zones you choose across all three periods, so you can see whether a zone's travel time, enrollment, or demographics moved when its boundary did. You pick the school level, the zones (several can share one chart), and the measure.</p>" +
+        "<p><b>+ All-zones scatter</b> takes one rezoning and plots every zone at once, with the <i>change</i> in one measure on each axis. It answers whether two things moved together &mdash; for example, whether the zones that gained students also gained travel time.</p>" +
+        "<p>Each chart has an &times; to remove it, and your board is remembered in this browser, so the charts are still waiting when you come back.</p>",
+        "<p><b>图表模式</b>的按钮就在「学区总览」下方。它打开的面板一开始是<b>空的</b>，这是有意为之：要先用虚线方块里的两个按钮添加图表。</p>" +
+        "<p><b>+ 分区图</b>跟踪你选定的分区在三个时期里某一项指标的变化，从而看出边界变动时，该分区的通勤时间、在校人数或人口构成是否也跟着变了。可以选择学段、分区（同一张图里可以放多个）和指标。</p>" +
+        "<p><b>+ 全分区散点</b>针对某一次重划，把所有分区同时画出来，两个坐标轴分别是两项指标的<i>变化量</i>。它回答的是两件事是否同步变化 &mdash; 例如，学生增加的分区，通勤时间是否也变长了。</p>" +
+        "<p>每张图都有 &times; 可以移除；你的面板会记在这个浏览器里，下次回来图还在。</p>"
       ]
     },
     {
@@ -107,9 +121,9 @@
       title: ["Beyond the map", "地图之外"],
       body: [
         "<p>The <b>More tabs</b> menu (top left) opens the rest of the site. <b>Boundary changes</b> animates exactly which areas moved between schools in 2018 and 2023. <b>Analysis</b> walks through what was found. <b>Methods &amp; sources</b> shows how every number was computed, and <b>Definitions &amp; references</b> explains each term with a yardstick for how big is big.</p>" +
-        "<p>The <b>中文</b> button at the bottom of the left card switches the whole site to Chinese. Enjoy exploring.</p>",
+        "<p>The <b>中文</b> button at the bottom of the <b>left panel</b> switches the whole site to Chinese. Enjoy exploring.</p>",
         "<p>左上角的<b>更多页面</b>菜单通向网站的其余部分。<b>边界变更</b>动态展示 2018 和 2023 年到底哪些区域换了学校；<b>分析</b>介绍研究发现；<b>方法与来源</b>说明每个数字是怎么算出来的；<b>定义与参考</b>解释每个术语，并给出「多大算大」的参照。</p>" +
-        "<p>左侧卡片底部的 <b>English</b> 按钮可将全站切换回英文。祝你探索愉快。</p>"
+        "<p><b>左侧面板</b>底部的 <b>English</b> 按钮可将全站切换回英文。祝你探索愉快。</p>"
       ]
     }
   ];

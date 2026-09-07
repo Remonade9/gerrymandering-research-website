@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Boundary Changes — Bellevue School District</title>
   <meta name="description" content="Which territory switched elementary schools in Bellevue's 2018 and 2023 rezonings, and what changed for the people living there." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=151" />
-  <link rel="stylesheet" href="styles.css?v=151" />
-  <script src="vendor/maplibre-gl-csp.js?v=151"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=152" />
+  <link rel="stylesheet" href="styles.css?v=152" />
+  <script src="vendor/maplibre-gl-csp.js?v=152"></script>
 </head>
 <body class="chg-page">
   <div id="map"></div>
@@ -64,11 +64,11 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=151"></script>
+  <script src="intro.js?v=152"></script>
 
   <!-- API keys live in config.js: the one place to replace them (see README) -->
-  <script src="config.js?v=151"></script>
-  <script src="keys.js?v=151"></script>
+  <script src="config.js?v=152"></script>
+  <script src="keys.js?v=152"></script>
 
   <script>
     const MAPTILER_KEY = window.BSD_KEYS.maptiler;
@@ -120,7 +120,7 @@
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=151");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=152");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =

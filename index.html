@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The 2023 Bellevue Elementary Rezoning</title>
   <meta name="description" content="An interactive map of how Bellevue School District's attendance-zone boundaries changed in 2023, and what changed with them." />
-  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=151" />
-  <link rel="stylesheet" href="styles.css?v=151" />
-  <script src="vendor/maplibre-gl-csp.js?v=151"></script>
+  <link rel="stylesheet" href="vendor/maplibre-gl.css?v=152" />
+  <link rel="stylesheet" href="styles.css?v=152" />
+  <script src="vendor/maplibre-gl-csp.js?v=152"></script>
 </head>
 <body>
   <div id="map"></div>
 
   <!-- Deployed-version stamp. Bump on EVERY push: YYYY.MM.DD.NN (NN = nth push that day). -->
-  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.09.06.01</div>
+  <div id="site-version" style="position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:6;font-size:11px;color:#2c3338;opacity:0.55;pointer-events:none;white-space:nowrap;">v2026.09.07.01</div>
 
   <!-- More-tabs launcher, top-left -->
   <div class="tabs-launcher">
@@ -137,8 +137,8 @@
   </div>
 
   <!-- Entry screens + shared language state (injected; shown on fresh entry only) -->
-  <script src="intro.js?v=151"></script>
-  <script src="tutorial.js?v=151"></script>
+  <script src="intro.js?v=152"></script>
+  <script src="tutorial.js?v=152"></script>
 
   <script>
     (function () {
@@ -162,8 +162,8 @@
   </script>
 
   <!-- API keys live in config.js: the one place to replace them (see README) -->
-  <script src="config.js?v=151"></script>
-  <script src="keys.js?v=151"></script>
+  <script src="config.js?v=152"></script>
+  <script src="keys.js?v=152"></script>
 
   <script>
     const MAPTILER_KEY = window.BSD_KEYS.maptiler;
@@ -301,7 +301,7 @@
 
     if (typeof maplibregl !== "undefined") {
       // strict-CSP hosts (e.g. Railway) block blob: workers; use the same-origin worker file
-      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=151");
+      maplibregl.setWorkerUrl("vendor/maplibre-gl-csp-worker.js?v=152");
     }
     if (typeof maplibregl === "undefined") {
       document.getElementById("map").innerHTML =
