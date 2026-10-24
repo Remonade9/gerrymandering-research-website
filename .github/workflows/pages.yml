@@ -1,7 +1,7 @@
 # Backup host: publishes the site as-is to GitHub Pages on every push to main.
 # The primary host remains Railway; this gives a second URL on independent
 # infrastructure (https://remonade9.github.io/gerrymandering-research-website/).
-# One-time setup: repo Settings -> Pages -> Source: "GitHub Actions".
+# The first run enables Pages on the repository itself (enablement: true).
 name: Deploy to GitHub Pages
 
 on:
@@ -27,6 +27,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
