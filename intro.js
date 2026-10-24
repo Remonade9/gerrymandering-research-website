@@ -161,7 +161,6 @@
       <p class="intro-p" data-i18n="n1"></p>
       <p class="intro-p" data-i18n="n2"></p>
       <p class="intro-p intro-fine" data-i18n="n3"></p>
-      <p class="intro-p intro-fine" data-i18n="nAck"></p>
       <button class="intro-btn" id="intro-ok" data-i18n="ok"></button>
     </div>
     <!-- version stamp, mirrored from the homepage's #site-version (empty on other pages) -->
@@ -179,7 +178,6 @@
       n1: "<b>This tool describes; it does not judge.</b> It maps the district's attendance boundaries across three periods and reports what measurably changed with them: zone shape, enrollment and capacity, demographics, travel, and access to programs.",
       n2: "None of these numbers is a fairness score. No color on the map means good or bad, and no metric rates any school, neighborhood, or decision as right or wrong. Compactness, segregation indices, travel times, and demographic mixes are descriptive measurements; reasonable people weigh them differently, and many things that mattered in the real decision &mdash; safety, budgets, building condition, community input &mdash; are not on a map.",
       n3: "Two notes for reading the numbers: demographics in every era use the same fixed 2020 census snapshot, so differences between eras reflect boundary changes only, not population change. And the pre-2018 boundaries come from a different (federal) source and carry extra uncertainty. Full sources and methods are documented on the site.",
-      nAck: "<b>Acknowledgements.</b> This project was created under the mentorship of Prof. Bo Zhao, Humanistic GIS Laboratory, University of Washington.",
       ok: "I understand"
     },
     zh: {
@@ -192,7 +190,6 @@
       n1: "<b>本工具只做描述，不做评判。</b>它呈现学区在三个时期的入学分区边界，并报告随之可测量的变化：分区形状、招生与容量、人口构成、通勤，以及项目可达性。",
       n2: "这里没有任何数字是“公平分数”。地图上的颜色不代表好坏，任何指标都不对学校、社区或决策作出对错评价。紧凑度、隔离指数、通勤时间和人口构成都是描述性测量；不同的人对它们的权重看法不同，而真实决策中许多重要因素——安全、预算、校舍状况、社区意见——并不在地图上。",
       n3: "阅读数据的两点提示：所有时期的人口数据都使用同一份 2020 年人口普查快照，因此时期之间的差异只反映边界变化，而非人口变化；2018 年前的边界来自另一个（联邦）数据源，不确定性更高。完整的数据来源与方法在网站中另有说明。",
-      nAck: "<b>致谢。</b>本项目在华盛顿大学人文 GIS 实验室赵博（Bo Zhao）教授的指导下完成。",
       ok: "我已了解"
     }
   };

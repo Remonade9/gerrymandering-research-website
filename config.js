@@ -14,7 +14,7 @@ window.BSD_KEYS = {
    * Anywhere else, a copy still carrying these shipped keys is asked to swap in
    * its own (they would otherwise spend the original author's free allowance).
    * LEAVE EMPTY to switch that prompt off entirely. */
-  home: ["gerrymandering-research.up.railway.app"],
+  home: ["gerrymandering-research.up.railway.app", "remonade9.github.io"],
 
   maptiler: "z7fBe8Wbh3urlylwknlf",
   ors: "eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6ImNhN2RjM2VjYzkzNDAzZTRmY2NkYjUwODM2MzdjNTRkODA1ODJiY2ZhMzM0MjQ2NGQxMzliYTc2IiwiaCI6Im11cm11cjY0In0="
